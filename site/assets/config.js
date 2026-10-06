@@ -5,7 +5,7 @@ window.SITE_CONFIG = {
   EMAIL: "tauhidrana00@gmail.com",
 
   // ঐচ্ছিক: web3forms.com-এর Access Key বসালে ফর্ম FormSubmit-এর বদলে Web3Forms দিয়ে যাবে।
-  WEB3FORMS_KEY: "YOUR_ACCESS_KEY_HERE",
+  WEB3FORMS_KEY: "39bc7fb7-d775-40be-85ef-4577153cf05a",
 
   SITE_NAME: "Application Development Using Python"
 };
