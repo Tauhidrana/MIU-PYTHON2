@@ -7,3 +7,5 @@ graphify-out/.graphify_*
 .vercel/
 node_modules/
 __pycache__/
+.vercel
+.env*
