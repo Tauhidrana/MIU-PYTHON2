@@ -96,10 +96,6 @@
   // অধ্যায়ে যে ফাইলগুলো দেখানো আছে (geometry.py, school/student.py, students.txt …) — একই নামের একাধিক
   // সংস্করণ থাকলে, যে কোড চালানো হচ্ছে তার আগেরটা (না থাকলে পরেরটা) নেওয়া হয়
   var named = [];
-  document.querySelectorAll("figure.code:not(.term):not(.mini)").forEach(function (f) {
-    var fn = (f.querySelector(".fn") || {}).textContent || "";
-    if (/^[\w./-]+\.\w+$/.test(fn) && fn !== "main.py") named.push({ name: fn, fig: f });
-  });
   function filesFor(fig) {
     var pick = {};
     named.forEach(function (n) {
@@ -148,12 +144,21 @@
       panel.go();
     });
   }
-  document.querySelectorAll("figure.code").forEach(function (fig) {
-    if (fig.classList.contains("term") || fig.classList.contains("text")) return;
-    if (fig.closest(".syntax")) return;
-    if (fig.classList.contains("mini") && !fig.closest(".mk-col")) return;
-    attach(fig);
-  });
+  // root-এর ভেতরের কোডে "চালাও" বসায় — লক খোলার পর নতুন অংশের জন্যও (assets/lock.js) ডাকা হয়
+  function scan(root) {
+    root.querySelectorAll("figure.code:not(.term):not(.mini)").forEach(function (f) {
+      var fn = (f.querySelector(".fn") || {}).textContent || "";
+      if (/^[\w./-]+\.\w+$/.test(fn) && fn !== "main.py") named.push({ name: fn, fig: f });
+    });
+    root.querySelectorAll("figure.code").forEach(function (fig) {
+      if (fig.classList.contains("term") || fig.classList.contains("text")) return;
+      if (fig.closest(".syntax")) return;
+      if (fig.classList.contains("mini") && !fig.closest(".mk-col")) return;
+      attach(fig);
+    });
+  }
+  window.MIU_scanCode = scan;
+  scan(document);
 
   // ===== runner.html — নিজে লিখে চালাও =====
   var ed = document.getElementById("rx-code");

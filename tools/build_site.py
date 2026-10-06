@@ -1,4 +1,4 @@
-import json, html, re, os, shutil
+import json, html, re, os, shutil, base64, hashlib, subprocess
 SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "source")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "site")
 BN = str.maketrans("0123456789", "০১২৩৪৫৬৭৮৯")
@@ -15,6 +15,35 @@ SHORT = {1: "Python Functions", 2: "File Operation", 3: "Module, Package ও App
          9: "Unit Testing", 10: "RegEx", 11: "Application Software", 12: "বোর্ড প্রশ্ন ও সাজেশন"}
 
 YEAR = "২০২৬"
+
+# ===== অনুশীলনী ও বোর্ড প্রশ্ন লক — PDF ক্রেতারা আনলক কোড দিয়ে খুলবে =====
+# কোডটা GitHub-এ যায় না: tools/private/unlock_code.txt (gitignored) অথবা UNLOCK_CODE env থেকে আসে।
+# লক করা অংশ AES-256-CBC দিয়ে encrypt হয়ে পাতায় বসে; browser-এ assets/lock.js কোড থেকে একই key বানিয়ে খোলে।
+LOCK_SALT, LOCK_ITER = b"miu-python-book/unlock/v1", 200000   # assets/lock.js-এর SALT, ITER-এর সাথে মিল থাকতে হবে
+FB_URL = "https://www.facebook.com/kazitauhidrana"
+_code_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "private", "unlock_code.txt")
+UNLOCK_CODE = os.environ.get("UNLOCK_CODE") or (open(_code_file, encoding="utf-8").read().strip() if os.path.exists(_code_file) else "")
+if not UNLOCK_CODE: raise SystemExit("আনলক কোড নেই — tools/private/unlock_code.txt-এ কোডটা লেখো (অথবা UNLOCK_CODE env দাও)")
+LOCK_KEY = hashlib.pbkdf2_hmac("sha256", UNLOCK_CODE.encode(), LOCK_SALT, LOCK_ITER, 32)
+
+def encrypt(text):
+    iv = os.urandom(16)
+    ct = subprocess.run(["openssl", "enc", "-aes-256-cbc", "-K", LOCK_KEY.hex(), "-iv", iv.hex()],
+                        input=b"MIU1" + text.encode("utf-8"), capture_output=True, check=True).stdout
+    return base64.b64encode(iv).decode(), base64.b64encode(ct).decode()
+
+def locked_html(text, first):
+    iv, ct = encrypt(text)
+    if first:
+        card = ('<div class="lock-card" id="unlock"><p class="lock-h"><span aria-hidden="true">🔒</span> অনুশীলনী ও বোর্ড প্রশ্নের উত্তর লক করা</p>'
+                '<p>এই অংশ শুধু বইয়ের <strong>PDF ক্রেতাদের</strong> জন্য। PDF কিনলে একটা <strong>আনলক কোড</strong> পাবে — কোডটা এখানে দিলেই '
+                'পুরো বইয়ের সব অনুশীলনী আর বোর্ড প্রশ্নের উত্তর খুলে যাবে, প্রতিবার আর দিতে হবে না।</p>'
+                '<form class="lock-form"><input name="code" inputmode="numeric" autocomplete="off" placeholder="আনলক কোড" aria-label="আনলক কোড" required>'
+                '<button type="submit">খোলো</button></form><p class="lock-status" role="status"></p>'
+                f'<p class="lock-buy">PDF কিনতে Facebook-এ মেসেজ দাও: <a href="{FB_URL}" target="_blank" rel="noopener">facebook.com/kazitauhidrana ↗</a></p></div>')
+    else:
+        card = '<div class="lock-card slim"><span aria-hidden="true">🔒</span> এই অংশ লক করা — <a href="#unlock">আনলক কোড দাও</a></div>'
+    return f'<div class="locked" data-iv="{iv}" data-enc="{ct}">{card}</div>'
 
 VIDEOS = json.load(open(os.path.join(SRC, "videos.json"), encoding="utf-8")) if os.path.exists(os.path.join(SRC, "videos.json")) else {}
 MONTHS = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"]
@@ -60,11 +89,16 @@ def items_html(items):
         elif it[0] == "code": h.append(code_html(it[1], "Python", "", numbered=False, cls="mini"))
     return "".join(h)
 
+LOCK_ON, LOCK_OFF = object(), object()
 def render(B, ch):
     h, toc, last = [], [], ""
     sec_id = 0
+    # পরিশিষ্টে (ch12) heading ছাড়া সব লক; বাকি অধ্যায়ে "অনুশীলনী" heading-এর পরের সব লক
+    locking = False
     for b in B:
         t = b["t"]
+        if t == "h2" and b["text"].startswith("অনুশীলনী"): locking = True
+        h.append(LOCK_ON if (locking and t != "h2") or (ch == 12 and t not in ("chapter", "h2")) else LOCK_OFF)
         if t == "chapter":
             h.append(f'<header class="chap-head"><p class="chap-num">{esc(b["num"])}</p><h1>{esc(b["title"])}</h1>'
                      + "".join(f'<p class="lead">{inline(x)}</p>' for x in b["intro"]) + "</header>" + video_html(f"{ch}:chapter", True))
@@ -133,7 +167,14 @@ def render(B, ch):
                      + f'<p class="pmeta"><span>{esc(b["left"])}</span><span>{esc(b["right"])}</span></p><p class="pinst">{esc(b["instr"])}</p></div>')
         elif t == "pagebreak": pass
         else: raise ValueError(t)
-    return "\n".join(h), toc
+    out, buf, first = [], [], True
+    for x in h + [LOCK_OFF]:
+        if x is LOCK_ON or x is LOCK_OFF:
+            if x is LOCK_OFF and buf: out.append(locked_html("\n".join(buf), first)); buf, first = [], False
+            on = x is LOCK_ON
+        elif on: buf.append(x)
+        else: out.append(x)
+    return "\n".join(out), toc
 
 HEAD = '''<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#FBFCFE"><meta name="format-detection" content="telephone=no">
 <title>{title}</title><meta name="description" content="Application Development Using Python — Polytechnic ছাত্রদের জন্য বাংলায় সম্পূর্ণ বই, বোর্ড প্রশ্নের উত্তরসহ।">
@@ -144,7 +185,7 @@ TOPBAR = '''<header class="topbar"><a class="brand" href="{root}index.html"><img
 <nav class="topnav"><a href="{root}index.html#chapters">অধ্যায়</a><a href="{root}runner.html">কোড রানার</a><a href="{root}feedback.html">রিভিউ ও মতামত</a>
 <button class="theme" type="button" aria-label="ডার্ক মোড">◐</button></nav></header>'''
 FOOT = '''<footer class="foot"><p><strong>Application Development Using Python</strong> · লেখক: Kazi Tauhid Rana, Computer Science and Technology, Rajshahi Polytechnic Institute</p><p class="copy-note">© {year} Kazi Tauhid Rana · সর্বস্বত্ব সংরক্ষিত · <a href="{root}copyright.html">কপিরাইট নোটিশ</a> · <a href="{root}pdf.html">বইয়ের PDF</a></p><p>MIU Platform · Learn Grow Succeed</p></footer>
-<script src="{root}assets/config.js"></script><script src="{root}assets/app.js"></script><script src="{root}assets/runner.js"></script></body></html>'''
+<script src="{root}assets/config.js"></script><script src="{root}assets/app.js"></script><script src="{root}assets/runner.js"></script><script src="{root}assets/lock.js"></script></body></html>'''
 
 ICON = {
     "home": '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
@@ -279,6 +320,8 @@ def page_pdf():
     return (HEAD.format(title="বইয়ের PDF — আগ্রহ ও দাম — Python বই", root="") + '<body class="formpage">' + TOPBAR.format(root="") + f'''
 <main class="fb-wrap pdf-wrap"><p class="pdf-tag">শীঘ্রই আসছে</p><h1>বইয়ের PDF</h1>
 <p class="lead">পুরো বইটার PDF সংস্করণ তৈরি হচ্ছে — অফলাইনে, মোবাইল বা কম্পিউটারে যেকোনো জায়গায় পড়ার জন্য। কতজন নিতে চাও আর কত দাম তোমাদের কাছে ঠিক মনে হয়, সেটা জেনেই দাম ঠিক করা হবে।</p>
+<div class="pdf-buy"><p><strong>PDF নিতে চাইলে Facebook-এ মেসেজ দাও:</strong> <a href="{FB_URL}" target="_blank" rel="noopener">facebook.com/kazitauhidrana ↗</a></p>
+<p>PDF কিনলে সাথে একটা <strong>আনলক কোড</strong> পাবে — সেটা দিয়ে এই website-এ সব অধ্যায়ের অনুশীলনী আর বোর্ড প্রশ্নের উত্তর খুলে যাবে।</p></div>
 <ul class="pdf-pts"><li>এই website-এর পুরো বই — ১১টা অধ্যায় আর বোর্ড প্রশ্নের পরিশিষ্ট</li><li>তৈরি হলেই তোমার মোবাইল নম্বরে বা email-এ জানানো হবে</li><li>এখন কোনো টাকা দিতে হবে না — এটা শুধু আগ্রহ আর মতামত জানানোর ফর্ম</li></ul>
 
 <form class="fb-form pdf-form" data-kind="PDF আগ্রহ ও দাম">

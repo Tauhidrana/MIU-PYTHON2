@@ -39,8 +39,10 @@
   }
 
   // টপিকের ভিডিও: চাপলে তবেই YouTube player লোড হয়
-  document.querySelectorAll(".yt-play").forEach(function (b) {
-    b.addEventListener("click", function () {
+  // (document-এ শোনা হয়, তাই লক খোলার পর আসা ভিডিওতেও কাজ করে)
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(".yt-play");
+    if (b) {
       var box = b.closest(".yt"), id = box.dataset.id;
       var f = document.createElement("iframe");
       f.src = "https://www.youtube-nocookie.com/embed/" + id + "?autoplay=1&rel=0&modestbranding=1&playsinline=1";
@@ -50,7 +52,7 @@
       f.referrerPolicy = "strict-origin-when-cross-origin";
       var wrap = document.createElement("div"); wrap.className = "yt-frame"; wrap.appendChild(f);
       b.replaceWith(wrap); box.classList.add("playing");
-    });
+    }
   });
 
   var toggle = document.querySelector(".side-toggle");
