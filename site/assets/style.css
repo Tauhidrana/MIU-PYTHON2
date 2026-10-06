@@ -421,3 +421,16 @@ a,button,summary,label{-webkit-tap-highlight-color:transparent}
   .chip.wide{flex:1 1 100%}
   .other-price{max-width:none}
 }
+
+/* ===== ফোকাস মোড (ফোন/ট্যাবলেট) — মাঝের অংশ পরিষ্কার, বাকি ঝাপসা ===== */
+.focus-veil{position:fixed;inset:0;z-index:15;pointer-events:none;
+  --band:max(17%,110px);
+  background:color-mix(in srgb,var(--paper) 45%,transparent);
+  -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);
+  -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 calc(50% - var(--band) - 28px),transparent calc(50% - var(--band)),transparent calc(50% + var(--band)),#000 calc(50% + var(--band) + 28px),#000 100%);
+  mask-image:linear-gradient(to bottom,#000 0,#000 calc(50% - var(--band) - 28px),transparent calc(50% - var(--band)),transparent calc(50% + var(--band)),#000 calc(50% + var(--band) + 28px),#000 100%)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .focus-veil{background:color-mix(in srgb,var(--paper) 94%,transparent)}
+}
+.focus-mode .watermark{opacity:.13}
+:root[data-theme="dark"].focus-mode .watermark{opacity:.16}

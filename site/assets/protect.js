@@ -117,12 +117,35 @@
 
   // প্রতিটা পাতায় হালকা copyright watermark — screenshot নিলেও লেখকের নাম থাকবে
   document.addEventListener("DOMContentLoaded", function () {
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="420" height="260"><text x="40" y="160" transform="rotate(-24 210 130)" '
-      + 'font-family="Hind Siliguri, sans-serif" font-size="17" font-weight="600" fill="#5B6478">© Kazi Tauhid Rana · Python বই</text></svg>';
+    // ফোনে watermark-এ দেখার তারিখ-সময়ও থাকে — screenshot কবে নেওয়া, সেটাও বোঝা যায়
+    var mark = "© Kazi Tauhid Rana · Python বই", when = "";
+    if (TOUCH) {
+      var d = new Date(), BN = "০১২৩৪৫৬৭৮৯", bn = function (n) { return String(n).padStart(2, "0").replace(/\d/g, function (c) { return BN[c]; }); };
+      when = bn(d.getDate()) + "/" + bn(d.getMonth() + 1) + "/" + bn(d.getFullYear()) + " · " + bn(d.getHours()) + ":" + bn(d.getMinutes());
+    }
+    var svg = TOUCH
+      ? '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="220"><g transform="rotate(-24 150 110)" font-family="Hind Siliguri, sans-serif" font-weight="700" fill="#5B6478" text-anchor="middle">'
+        + '<text x="150" y="104" font-size="17">' + mark + '</text><text x="150" y="128" font-size="14">' + when + '</text></g></svg>'
+      : '<svg xmlns="http://www.w3.org/2000/svg" width="420" height="260"><text x="40" y="160" transform="rotate(-24 210 130)" '
+        + 'font-family="Hind Siliguri, sans-serif" font-size="17" font-weight="600" fill="#5B6478">' + mark + '</text></svg>';
     var wm = document.createElement("div");
     wm.className = "watermark"; wm.setAttribute("aria-hidden", "true");
     wm.style.backgroundImage = 'url("data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) + '")';
     document.body.appendChild(wm);
+    // ফোকাস মোড (ফোন/ট্যাবলেটে বইয়ের পাতায়): শুধু মাঝের অংশ পরিষ্কার, বাকিটা ঝাপসা —
+    // ফোনের screenshot website আটকাতে পারে না, তাই একটা screenshot-এ মাত্র কয়েক লাইন আসে
+    if (TOUCH && document.body.classList.contains("reader")) {
+      var veil = document.createElement("div");
+      veil.className = "focus-veil"; veil.setAttribute("aria-hidden", "true");
+      document.body.appendChild(veil);
+      root.classList.add("focus-mode");
+      try {
+        if (!sessionStorage.getItem("focus-hint")) {
+          sessionStorage.setItem("focus-hint", "1");
+          setTimeout(function () { toast("ফোকাস মোড: মাঝের অংশটা পরিষ্কার — স্ক্রল করে পড়ো"); }, 900);
+        }
+      } catch (e) {}
+    }
     var cover = document.createElement("div");
     cover.className = "shield-msg"; cover.setAttribute("aria-hidden", "true");
     cover.innerHTML = "<p><strong>© কপিরাইট সংরক্ষিত</strong><br>Screenshot নেওয়া নিষেধ।<br><small>" + (TOUCH ? "পড়া চালিয়ে যেতে স্ক্রিনে একবার ছোঁও।" : "পড়া চালিয়ে যেতে mouse নাড়াও বা পাতায় ক্লিক করো।") + "</small></p>";
