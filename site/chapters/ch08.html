@@ -1,0 +1,325 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#FBFCFE"><meta name="format-detection" content="telephone=no">
+<title>অধ্যায় ৮: Logging in Python — Python বই</title><meta name="description" content="Application Development Using Python — Polytechnic ছাত্রদের জন্য বাংলায় সম্পূর্ণ বই, বোর্ড প্রশ্নের উত্তরসহ।">
+<link rel="icon" href="../img/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta name="robots" content="noarchive"><link rel="stylesheet" href="../assets/style.css"><script src="../assets/protect.js"></script><script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script></head><body class="reader"><header class="topbar"><a class="brand" href="../index.html"><img src="../img/logo.png" alt="MIU"><span>Python বই</span></a>
+<nav class="topnav"><a href="../index.html#chapters">অধ্যায়</a><a href="../runner.html">কোড রানার</a><a href="../feedback.html">রিভিউ ও মতামত</a>
+<button class="theme" type="button" aria-label="ডার্ক মোড">◐</button></nav></header><div class="progress"><span></span></div><div class="layout"><nav class="side" aria-label="অধ্যায়ের তালিকা"><button class="side-toggle" type="button">অধ্যায়ের তালিকা</button><ol><li><a class="" href="ch01.html"><span class="u">১</span>Python Functions</a></li><li><a class="" href="ch02.html"><span class="u">২</span>File Operation</a></li><li><a class="" href="ch03.html"><span class="u">৩</span>Module, Package ও Application Software</a></li><li><a class="" href="ch04.html"><span class="u">৪</span>Basics of OOP</a></li><li><a class="" href="ch05.html"><span class="u">৫</span>Four Pillars of OOP</a></li><li><a class="" href="ch06.html"><span class="u">৬</span>Iterator, Generator ও Decorator</a></li><li><a class="" href="ch07.html"><span class="u">৭</span>Exception ও Error Handling</a></li><li><a class="cur" href="ch08.html"><span class="u">৮</span>Logging</a></li><li><a class="" href="ch09.html"><span class="u">৯</span>Unit Testing</a></li><li><a class="" href="ch10.html"><span class="u">১০</span>RegEx</a></li><li><a class="" href="ch11.html"><span class="u">১১</span>Application Software</a></li><li><a class="" href="ch12.html"><span class="u">পরি</span>বোর্ড প্রশ্ন ও সাজেশন</a></li></ol></nav><main class="content"><header class="chap-head"><p class="chap-num">অধ্যায় ৮</p><h1>Logging in Python</h1><p class="lead">ধরো তোমার বানানো result management software একটা কলেজে চলছে। এক সপ্তাহ পর অভিযোগ এল: "মঙ্গলবার দুপুরে একজন ছাত্রের ফলাফল ভুল দেখিয়েছিল।" তুমি তো তখন সেখানে ছিলে না, screen-এ কী print হয়েছিল তাও দেখোনি। এখন কীভাবে খুঁজবে কী ঘটেছিল?</p><p class="lead">উত্তর হলো <strong>logging</strong> — program চলার সময় কী কী ঘটছে তার একটা স্থায়ী, সময়সহ রেকর্ড রাখা। এই অধ্যায়ে শিখব logging কী, কখন দরকার, logging-এর level, logging ভেতরে কীভাবে কাজ করে, আর কীভাবে log-এর গন্তব্য ও চেহারা ঠিক করতে হয়।</p></header>
+<h2 id="s1">8.1 Logging কী?</h2><div class="yt" data-id="gz9CgnGlrpM"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Day 19: Python Logging: How to make a log file for your python project"><img src="https://i.ytimg.com/vi/gz9CgnGlrpM/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · মার্চ ২০২৫</p><p class="yt-t">Day 19: Python Logging: How to make a log file for your python project</p><p class="yt-c">Inception BD · <a href="https://www.youtube.com/watch?v=gz9CgnGlrpM" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<aside class="box definition"><p class="box-title">সংজ্ঞা (পরীক্ষার জন্য)</p><p><strong>Logging</strong> হলো program চলার সময় ঘটা গুরুত্বপূর্ণ ঘটনা (event), তথ্য, সতর্কবার্তা ও error একটি নির্দিষ্ট format-এ রেকর্ড করার প্রক্রিয়া। প্রতিটি রেকর্ডে সাধারণত সময়, গুরুত্বের মাত্রা (level), উৎস এবং বার্তা থাকে। Python-এ এর জন্য built-in <strong>logging</strong> module আছে।</p></aside>
+<aside class="box analogy"><p class="box-title">বাস্তব উদাহরণ</p><p>বড় অফিসের গেটে দারোয়ানের একটা রেজিস্টার খাতা থাকে: কে, কখন ঢুকল, কখন বের হলো, কোনো সমস্যা হলো কিনা — সব লেখা থাকে। কিছু হারালে ওই খাতা দেখেই বোঝা যায় কী ঘটেছিল। বিমানের "black box"-ও একই কাজ করে — দুর্ঘটনার পর রেকর্ড দেখে কারণ বের করা হয়। Logging হলো তোমার program-এর রেজিস্টার খাতা।</p></aside>
+<h3>print() থাকতে logging কেন?</h3>
+<div class="tbl"><table><thead><tr><th>বিষয়</th><th>print()</th><th>logging</th></tr></thead><tbody><tr><td class="">গন্তব্য</td><td class="">শুধু screen</td><td class="">screen, file, বা একসাথে দুটোই</td></tr><tr><td class="">গুরুত্বের মাত্রা</td><td class="">নেই — সব বার্তা সমান</td><td class="">DEBUG থেকে CRITICAL পর্যন্ত level</td></tr><tr><td class="">বন্ধ/চালু করা</td><td class="">প্রতিটা print মুছতে হয়</td><td class="">এক লাইনে level বদলে নিয়ন্ত্রণ</td></tr><tr><td class="">সময় ও উৎস</td><td class="">নিজে লিখতে হয়</td><td class="">স্বয়ংক্রিয়ভাবে যোগ করা যায়</td></tr><tr><td class="">স্থায়িত্ব</td><td class="">program বন্ধ হলে হারিয়ে যায়</td><td class="">file-এ স্থায়ীভাবে থাকে</td></tr></tbody></table></div>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 8.1</span>প্রথম Log</p><p class="problem"><strong>সমস্যা:</strong> logging module দিয়ে তিনটা ভিন্ন গুরুত্বের বার্তা দাও।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import logging
+<span class="ln">2</span> 
+<span class="ln">3</span>logging.info("Program started")
+<span class="ln">4</span>logging.warning("Disk space is low")
+<span class="ln">5</span>logging.error("Could not open result.txt")
+<span class="ln">6</span>print("Program finished")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>WARNING:root:Disk space is low
+ERROR:root:Could not open result.txt
+Program finished</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1</td><td class="snip"><pre>import logging</pre></td><td>logging একটা built-in module, install লাগে না।</td></tr><tr><td class="lab">3</td><td class="snip"><pre>logging.info("Program started")</pre></td><td>info বার্তা দেখা যায়নি! কারণ default-ভাবে logging শুধু WARNING বা তার চেয়ে গুরুত্বপূর্ণ বার্তা দেখায় (8.3-এ বিস্তারিত)।</td></tr><tr><td class="lab">4–5</td><td class="snip"><pre>logging.warning("Disk space is low")
+logging.error("Could not open result.txt")</pre></td><td>default format: <code>LEVEL:logger_name:message</code>। root হলো default logger-এর নাম।</td></tr></tbody></table></div></details>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Logging কাকে বলে? (2 নম্বর)</li><li>print() ও logging-এর পার্থক্য লেখো।</li></ul></aside>
+<h2 id="s2">8.2 কখন Logging দরকার</h2><div class="yt" data-id="xZRjeX2NlHc"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Python Logging Tutorial in Bangla (পাইথন লগ করা বাংলাতে )"><img src="https://i.ytimg.com/vi/xZRjeX2NlHc/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · সেপ্টেম্বর ২০২২</p><p class="yt-t">Python Logging Tutorial in Bangla (পাইথন লগ করা বাংলাতে )</p><p class="yt-c">jobkhuzi · <a href="https://www.youtube.com/watch?v=xZRjeX2NlHc" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p>ছোট practice program-এ logging লাগে না। কিন্তু নিচের পরিস্থিতিগুলোতে logging প্রায় বাধ্যতামূলক:</p>
+<div class="tbl"><table><thead><tr><th>পরিস্থিতি</th><th>কেন logging</th><th>উদাহরণ বার্তা</th></tr></thead><tbody><tr><td class="">Debugging</td><td class="">ভুলের উৎস খুঁজতে variable-এর মান ও প্রবাহ দেখা</td><td class="m">DEBUG: average=72.5 for roll 101</td></tr><tr><td class="">চলমান program পর্যবেক্ষণ</td><td class="">server বা দীর্ঘক্ষণ চলা program-এ কী হচ্ছে জানা</td><td class="m">INFO: 150 results processed</td></tr><tr><td class="">Error খোঁজা</td><td class="">কখন, কোথায়, কেন error হলো তার রেকর্ড</td><td class="m">ERROR: result.txt not found</td></tr><tr><td class="">Audit ও নিরাপত্তা</td><td class="">কে কখন কী করল তার প্রমাণ</td><td class="m">WARNING: 3 failed logins for admin</td></tr><tr><td class="">Performance</td><td class="">কোন কাজে কত সময় লাগছে</td><td class="m">INFO: report generated in 2.4s</td></tr><tr><td class="">ব্যবহারকারীর অভিযোগ যাচাই</td><td class="">অতীতের ঘটনা পুনর্গঠন</td><td class="m">INFO: roll 101 result viewed</td></tr></tbody></table></div>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 8.2</span>Login System-এ Logging</p><p class="problem"><strong>সমস্যা:</strong> একটা ছোট login function-এ সফল login, ভুল password আর অজানা ব্যবহারকারী — তিন পরিস্থিতিই log করো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import logging
+<span class="ln">2</span>logging.basicConfig(level=logging.INFO, format="%(levelname)-8s %(message)s")
+<span class="ln">3</span> 
+<span class="ln">4</span>users = {"rahim": "1234", "admin": "secure99"}
+<span class="ln">5</span> 
+<span class="ln">6</span>def login(username, password):
+<span class="ln">7</span>    if username not in users:
+<span class="ln">8</span>        logging.warning("Unknown user tried to log in: %s", username)
+<span class="ln">9</span>        return False
+<span class="ln">10</span>    if users[username] != password:
+<span class="ln">11</span>        logging.error("Wrong password for %s", username)
+<span class="ln">12</span>        return False
+<span class="ln">13</span>    logging.info("%s logged in successfully", username)
+<span class="ln">14</span>    return True
+<span class="ln">15</span> 
+<span class="ln">16</span>login("rahim", "1234")
+<span class="ln">17</span>login("admin", "guess")
+<span class="ln">18</span>login("hacker", "0000")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>INFO     rahim logged in successfully
+ERROR    Wrong password for admin
+WARNING  Unknown user tried to log in: hacker</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">2</td><td class="snip"><pre>logging.basicConfig(level=logging.INFO, format="%(levelname)-8s %(message)s")</pre></td><td>basicConfig দিয়ে level INFO করলাম যাতে info বার্তাও দেখা যায়, আর format ঠিক করলাম। <code>%(levelname)-8s</code> মানে level-এর নাম 8 ঘর জায়গা নেবে, ফলে বার্তাগুলো সোজা থাকে (8.5-এ বিস্তারিত)।</td></tr><tr><td class="lab">8</td><td class="snip"><pre>        logging.warning("Unknown user tried to log in: %s", username)</pre></td><td>logging-এ বার্তার মধ্যে মান বসাতে <code>%s</code> আর পরে argument দেওয়া প্রচলিত — f-string-ও চলে, কিন্তু এই পদ্ধতিতে বার্তা যদি দেখানো না-ই হয় তাহলে string তৈরির খরচটাও বাঁচে।</td></tr><tr><td class="lab">16–18</td><td class="snip"><pre>login("rahim", "1234")
+login("admin", "guess")
+login("hacker", "0000")</pre></td><td>তিন পরিস্থিতির তিন রকম log। এই রেকর্ড file-এ রাখলে পরে বোঝা যাবে কেউ admin-এর password আন্দাজ করার চেষ্টা করেছিল কিনা।</td></tr></tbody></table></div></details>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>কোন কোন পরিস্থিতিতে logging ব্যবহার করা হয়? উদাহরণসহ দেখাও। (4 নম্বর)</li></ul><p>"Illustrate" প্রশ্ন: পরিস্থিতিগুলোর তালিকার সাথে login-এর মতো একটা ছোট program ও তার log output দেখাও।</p></aside>
+<h2 id="s3">8.3 Logging-এর Level</h2><div class="yt" data-id="D9IsE24QUoA"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: What is Logging in Python | Logging in Python | Advanced Python Tutorial"><img src="https://i.ytimg.com/vi/D9IsE24QUoA/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang hi">হিন্দি</span>এই টপিকের ভিডিও · ডিসেম্বর ২০২২</p><p class="yt-t">What is Logging in Python | Logging in Python | Advanced Python Tutorial</p><p class="yt-c">Code-yug · <a href="https://www.youtube.com/watch?v=D9IsE24QUoA" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p>সব বার্তা সমান গুরুত্বপূর্ণ নয়। "function শুরু হলো" আর "database নষ্ট হয়ে গেছে" — দুটো এক জিনিস না। তাই logging-এ পাঁচটা level আছে, প্রতিটার একটা সংখ্যামান:</p>
+<div class="tbl"><table><thead><tr><th>Level</th><th>মান</th><th>কখন ব্যবহার</th><th>উদাহরণ</th></tr></thead><tbody><tr><td class="m">DEBUG</td><td class="m">10</td><td class="">খুঁটিনাটি তথ্য, শুধু ভুল খোঁজার সময় দরকার</td><td class="">loop-এ i=3, total=210</td></tr><tr><td class="m">INFO</td><td class="m">20</td><td class="">সবকিছু স্বাভাবিকভাবে চলছে তার নিশ্চয়তা</td><td class="">Report saved</td></tr><tr><td class="m">WARNING</td><td class="m">30</td><td class="">অপ্রত্যাশিত কিছু, তবে program চলছে (default level)</td><td class="">Disk 90% full</td></tr><tr><td class="m">ERROR</td><td class="m">40</td><td class="">একটা কাজ ব্যর্থ হয়েছে</td><td class="">File not found</td></tr><tr><td class="m">CRITICAL</td><td class="m">50</td><td class="">গুরুতর সমস্যা, program আর চলতে পারবে না</td><td class="">Database unreachable</td></tr></tbody></table></div>
+<p>নিয়ম সহজ: <strong>নির্ধারিত level-এর সমান বা তার বেশি মানের বার্তাই দেখানো হয়।</strong> Default level WARNING (30), তাই DEBUG (10) আর INFO (20) বাদ পড়ে।</p>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 8.3</span>Level বদলে দেখা</p><p class="problem"><strong>সমস্যা:</strong> level DEBUG করে পাঁচটা level-এরই বার্তা দাও, তারপর level বদলালে কী হয় দেখো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import logging
+<span class="ln">2</span>logging.basicConfig(level=logging.DEBUG, format="%(levelname)s (%(levelno)s): %(message)s")
+<span class="ln">3</span> 
+<span class="ln">4</span>logging.debug("Variable x = 42")
+<span class="ln">5</span>logging.info("Saving results")
+<span class="ln">6</span>logging.warning("Marks missing for roll 104")
+<span class="ln">7</span>logging.error("Cannot open marks.csv")
+<span class="ln">8</span>logging.critical("Out of memory, shutting down")
+<span class="ln">9</span> 
+<span class="ln">10</span>logging.getLogger().setLevel(logging.ERROR)
+<span class="ln">11</span>logging.warning("This warning is now hidden")
+<span class="ln">12</span>logging.error("Only ERROR and above appear now")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>DEBUG (10): Variable x = 42
+INFO (20): Saving results
+WARNING (30): Marks missing for roll 104
+ERROR (40): Cannot open marks.csv
+CRITICAL (50): Out of memory, shutting down
+ERROR (40): Only ERROR and above appear now</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">2</td><td class="snip"><pre>logging.basicConfig(level=logging.DEBUG, format="%(levelname)s (%(levelno)s): %(message)s")</pre></td><td>level=DEBUG মানে সবচেয়ে নিচের level থেকেই সব দেখাও। <code>%(levelno)s</code> level-এর সংখ্যামান দেখায়।</td></tr><tr><td class="lab">4–8</td><td class="snip"><pre>logging.debug("Variable x = 42")
+logging.info("Saving results")
+logging.warning("Marks missing for roll 104")
+logging.error("Cannot open marks.csv")
+logging.critical("Out of memory, shutting down")</pre></td><td>পাঁচটা level-এর জন্য পাঁচটা function।</td></tr><tr><td class="lab">10</td><td class="snip"><pre>logging.getLogger().setLevel(logging.ERROR)</pre></td><td>program চলার মাঝেই level ERROR করা হলো।</td></tr><tr><td class="lab">11–12</td><td class="snip"><pre>logging.warning("This warning is now hidden")
+logging.error("Only ERROR and above appear now")</pre></td><td>এখন WARNING (30) &lt; ERROR (40), তাই warning বাদ; error দেখাচ্ছে। বাস্তবে development-এর সময় DEBUG রাখা হয়, আর ব্যবহারকারীর কাছে দেওয়ার সময় WARNING বা ERROR — কোডের একটা লাইনও না মুছে।</td></tr></tbody></table></div></details>
+<aside class="box mistake"><p class="box-title">সাধারণ ভুল</p><div class="mk"><div class="mk-col bad"><p class="mk-h">ভুল</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>import logging
+logging.info("Server started")
+</code></pre></figure></div><div class="mk-col good"><p class="mk-h">সঠিক</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>import logging
+logging.basicConfig(level=logging.INFO)
+logging.info("Server started")
+</code></pre></figure></div><p class="why">Error আসে না, কিন্তু কিছুই দেখা যায় না — default level WARNING হওয়ায় info চুপচাপ বাদ পড়ে। নতুনরা প্রায়ই ভাবে logging কাজ করছে না।</p></div></aside>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Logging-এর level-গুলো উল্লেখ করো। (3 নম্বর)</li></ul><p>পাঁচটা level ক্রমানুসারে সংখ্যামান ও এক লাইনের ব্যবহারসহ টেবিলে লেখো, আর default level যে WARNING সেটা উল্লেখ করো।</p></aside>
+<h2 id="s4">8.4 Logging-এর কার্যপদ্ধতি</h2><div class="yt" data-id="RVIKohClum8"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: পাইথনে Log in  -এর Configuration এর বর্ণনা।"><img src="https://i.ytimg.com/vi/RVIKohClum8/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · জুলাই ২০২৬</p><p class="yt-t">পাইথনে Log in  -এর Configuration এর বর্ণনা।</p><p class="yt-c">Tech Samir · <a href="https://www.youtube.com/watch?v=RVIKohClum8" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p><code>logging.warning("...")</code> লিখলে ভেতরে চারটা অংশ মিলে কাজ করে:</p>
+<figure class="pic"><img src="../img/logflow.png" alt="চিত্র 8.1: একটি log বার্তা কীভাবে গন্তব্যে পৌঁছায়" loading="lazy"><figcaption>চিত্র 8.1: একটি log বার্তা কীভাবে গন্তব্যে পৌঁছায়</figcaption></figure>
+<div class="tbl"><table><thead><tr><th>অংশ</th><th>কাজ</th></tr></thead><tbody><tr><td class="">Logger</td><td class="">যে object-এর মাধ্যমে বার্তা পাঠানো হয়। নিজের level-এর কম গুরুত্বের বার্তা এখানেই বাদ পড়ে। <code>logging.getLogger(name)</code> দিয়ে পাওয়া যায়।</td></tr><tr><td class="">LogRecord</td><td class="">প্রতিটা বার্তার জন্য তৈরি object — এতে সময়, level, logger-এর নাম, file, লাইন নম্বর, বার্তা সব থাকে।</td></tr><tr><td class="">Handler</td><td class="">বার্তা কোথায় যাবে ঠিক করে: StreamHandler (console), FileHandler (file)। প্রতিটা handler-এর নিজস্ব level থাকতে পারে।</td></tr><tr><td class="">Formatter</td><td class="">বার্তাটা দেখতে কেমন হবে ঠিক করে — কোন তথ্য, কোন ক্রমে।</td></tr></tbody></table></div>
+<p>ধাপগুলো: (১) কোড logger-কে বার্তা দেয় → (২) logger নিজের level যাচাই করে, কম হলে বাদ → (৩) LogRecord তৈরি হয় → (৪) logger-এর প্রতিটা handler record পায়, নিজের level যাচাই করে → (৫) handler-এর formatter record-কে লেখায় পরিণত করে → (৬) handler সেটা গন্তব্যে (console/file) লেখে।</p>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 8.4</span>Logger, Handler ও Formatter নিজে তৈরি</p><p class="problem"><strong>সমস্যা:</strong> একটা logger বানাও যার দুটো handler: console-এ শুধু WARNING বা বেশি, আর file-এ DEBUG থেকে সব।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import logging
+<span class="ln">2</span> 
+<span class="ln">3</span>logger = logging.getLogger("result_app")
+<span class="ln">4</span>logger.setLevel(logging.DEBUG)
+<span class="ln">5</span> 
+<span class="ln">6</span>console = logging.StreamHandler()
+<span class="ln">7</span>console.setLevel(logging.WARNING)
+<span class="ln">8</span>console.setFormatter(logging.Formatter("CONSOLE | %(levelname)s | %(message)s"))
+<span class="ln">9</span> 
+<span class="ln">10</span>file = logging.FileHandler("app.log", mode="w")
+<span class="ln">11</span>file.setLevel(logging.DEBUG)
+<span class="ln">12</span>file.setFormatter(logging.Formatter("%(name)s - %(levelname)s - %(message)s"))
+<span class="ln">13</span> 
+<span class="ln">14</span>logger.addHandler(console)
+<span class="ln">15</span>logger.addHandler(file)
+<span class="ln">16</span> 
+<span class="ln">17</span>logger.debug("Reading marks for roll 101")
+<span class="ln">18</span>logger.info("Average calculated: 75.0")
+<span class="ln">19</span>logger.warning("Roll 103 failed in Physics")
+<span class="ln">20</span> 
+<span class="ln">21</span>print("--- app.log contains ---")
+<span class="ln">22</span>print(open("app.log").read())
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>CONSOLE | WARNING | Roll 103 failed in Physics
+--- app.log contains ---
+result_app - DEBUG - Reading marks for roll 101
+result_app - INFO - Average calculated: 75.0
+result_app - WARNING - Roll 103 failed in Physics</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">3–4</td><td class="snip"><pre>logger = logging.getLogger("result_app")
+logger.setLevel(logging.DEBUG)</pre></td><td>"result_app" নামে logger, level DEBUG — logger নিজে কিছুই বাদ দেবে না।</td></tr><tr><td class="lab">6–8</td><td class="snip"><pre>console = logging.StreamHandler()
+console.setLevel(logging.WARNING)
+console.setFormatter(logging.Formatter("CONSOLE | %(levelname)s | %(message)s"))</pre></td><td>Console handler: level WARNING, নিজস্ব format।</td></tr><tr><td class="lab">10–12</td><td class="snip"><pre>file = logging.FileHandler("app.log", mode="w")
+file.setLevel(logging.DEBUG)
+file.setFormatter(logging.Formatter("%(name)s - %(levelname)s - %(message)s"))</pre></td><td>File handler: app.log-এ লিখবে, level DEBUG, আলাদা format। mode="w" মানে প্রতিবার নতুন file।</td></tr><tr><td class="lab">14–15</td><td class="snip"><pre>logger.addHandler(console)
+logger.addHandler(file)</pre></td><td>দুটো handler logger-এর সাথে যুক্ত হলো।</td></tr><tr><td class="lab">17–19</td><td class="snip"><pre>logger.debug("Reading marks for roll 101")
+logger.info("Average calculated: 75.0")
+logger.warning("Roll 103 failed in Physics")</pre></td><td>তিনটা বার্তা। console-এ শুধু warning দেখা গেল, কিন্তু file-এ তিনটাই — একই বার্তা, দুই handler, দুই ফল।</td></tr></tbody></table></div></details>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Logging-এর কার্যপদ্ধতি বর্ণনা করো। (4-5 নম্বর)</li><li>Logger, handler ও formatter-এর কাজ লেখো।</li></ul><p>চিত্র 8.1-এর মতো প্রবাহচিত্র আঁকো, তারপর চারটা অংশের কাজ এক-দুই লাইনে লেখো।</p></aside>
+<h2 id="s5">8.5 Configuration ও Output Formatting</h2><div class="yt" data-id="JkRyIsYRRNI"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: লগইন আউটপুট ফরমেটিং কনফিগারেশন | Diploma in Engineering | Application Development Using Python"><img src="https://i.ytimg.com/vi/JkRyIsYRRNI/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · জুলাই ২০২৫</p><p class="yt-t">লগইন আউটপুট ফরমেটিং কনফিগারেশন | Diploma in Engineering | Application Development Using Python</p><p class="yt-c">Python Lover · <a href="https://www.youtube.com/watch?v=JkRyIsYRRNI" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p>ছোট ও মাঝারি program-এর জন্য সবচেয়ে সহজ configuration হলো <code>logging.basicConfig()</code> — এক লাইনেই level, format, গন্তব্য সব ঠিক করা যায়।</p>
+<div class="tbl"><table><thead><tr><th>Parameter</th><th>কাজ</th><th>উদাহরণ</th></tr></thead><tbody><tr><td class="m">level</td><td class="">সর্বনিম্ন level</td><td class="m">level=logging.INFO</td></tr><tr><td class="m">format</td><td class="">প্রতিটা লাইনের চেহারা</td><td class="m">format="%(levelname)s: %(message)s"</td></tr><tr><td class="m">datefmt</td><td class="">asctime-এর তারিখ-সময়ের ধরন</td><td class="m">datefmt="%d-%m-%Y %H:%M"</td></tr><tr><td class="m">filename</td><td class="">console-এর বদলে file-এ লেখা</td><td class="m">filename="app.log"</td></tr><tr><td class="m">filemode</td><td class="">file-এর mode (default "a")</td><td class="m">filemode="w"</td></tr></tbody></table></div>
+<h3>Format-এ ব্যবহৃত Attribute</h3>
+<div class="tbl"><table><thead><tr><th>Attribute</th><th>কী দেখায়</th></tr></thead><tbody><tr><td class="m">%(asctime)s</td><td class="">বার্তার সময়</td></tr><tr><td class="m">%(levelname)s</td><td class="">level-এর নাম (INFO, ERROR …)</td></tr><tr><td class="m">%(message)s</td><td class="">আসল বার্তা</td></tr><tr><td class="m">%(name)s</td><td class="">logger-এর নাম</td></tr><tr><td class="m">%(filename)s</td><td class="">যে file থেকে log হয়েছে</td></tr><tr><td class="m">%(funcName)s</td><td class="">যে function থেকে log হয়েছে</td></tr><tr><td class="m">%(lineno)d</td><td class="">লাইন নম্বর</td></tr></tbody></table></div>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 8.5</span>পূর্ণ Configuration: File-এ সময়সহ Log</p><p class="problem"><strong>সমস্যা:</strong> basicConfig দিয়ে সময়, level, function-এর নাম আর লাইন নম্বরসহ log একটা file-এ লেখো, তারপর file পড়ে দেখাও।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import logging
+<span class="ln">2</span> 
+<span class="ln">3</span>logging.basicConfig(
+<span class="ln">4</span>    filename="result.log",
+<span class="ln">5</span>    filemode="w",
+<span class="ln">6</span>    level=logging.DEBUG,
+<span class="ln">7</span>    format="%(asctime)s | %(levelname)-7s | %(funcName)s:%(lineno)d | %(message)s",
+<span class="ln">8</span>    datefmt="%d-%m-%Y %H:%M:%S",
+<span class="ln">9</span>)
+<span class="ln">10</span> 
+<span class="ln">11</span>def calculate(marks):
+<span class="ln">12</span>    logging.debug("Received marks %s", marks)
+<span class="ln">13</span>    if not marks:
+<span class="ln">14</span>        logging.error("Empty marks list")
+<span class="ln">15</span>        return None
+<span class="ln">16</span>    avg = sum(marks) / len(marks)
+<span class="ln">17</span>    logging.info("Average = %.2f", avg)
+<span class="ln">18</span>    return avg
+<span class="ln">19</span> 
+<span class="ln">20</span>calculate([78, 85, 62])
+<span class="ln">21</span>calculate([])
+<span class="ln">22</span> 
+<span class="ln">23</span>with open("result.log") as f:
+<span class="ln">24</span>    print(f.read())
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>05-10-2026 09:36:23 | DEBUG   | calculate:12 | Received marks [78, 85, 62]
+05-10-2026 09:36:23 | INFO    | calculate:17 | Average = 75.00
+05-10-2026 09:36:23 | DEBUG   | calculate:12 | Received marks []
+05-10-2026 09:36:23 | ERROR   | calculate:14 | Empty marks list</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">3–9</td><td class="snip"><pre>logging.basicConfig(
+    filename="result.log",
+    filemode="w",
+    level=logging.DEBUG,
+    format="%(asctime)s | %(levelname)-7s | %(funcName)s:%(lineno)d | %(message)s",
+    datefmt="%d-%m-%Y %H:%M:%S",
+)</pre></td><td>filename দেওয়ায় console-এ কিছু যায়নি, সব result.log-এ। format-এ পাঁচটা attribute; <code>%(levelname)-7s</code> level-কে 7 ঘরে বাঁ দিকে বসায়।</td></tr><tr><td class="lab">12–17</td><td class="snip"><pre>    logging.debug("Received marks %s", marks)
+    if not marks:
+        logging.error("Empty marks list")
+        return None
+    avg = sum(marks) / len(marks)
+    logging.info("Average = %.2f", avg)</pre></td><td>প্রতিটা log-এর সাথে function-এর নাম (calculate) আর লাইন নম্বর স্বয়ংক্রিয়ভাবে যুক্ত হয়েছে — কোডের ঠিক কোথা থেকে বার্তা এল বোঝা যায়।</td></tr><tr><td class="lab">23–24</td><td class="snip"><pre>with open("result.log") as f:
+    print(f.read())</pre></td><td>file পড়ে দেখানো। সময়ের অংশ তুমি যখন চালাবে তখনকার সময় দেখাবে।</td></tr></tbody></table></div></details>
+<aside class="box mistake"><p class="box-title">সাধারণ ভুল</p><div class="mk"><div class="mk-col bad"><p class="mk-h">ভুল</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>import logging
+logging.warning("Starting")
+logging.basicConfig(level=logging.INFO,
+                    format="%(levelname)s: %(message)s")
+logging.info("Ready")
+</code></pre></figure><p class="err">ফল: <code>WARNING:root:Starting</code></p></div><div class="mk-col good"><p class="mk-h">সঠিক</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>import logging
+logging.basicConfig(level=logging.INFO,
+                    format="%(levelname)s: %(message)s")
+logging.warning("Starting")
+logging.info("Ready")
+</code></pre></figure></div><p class="why">basicConfig কাজ করে শুধু প্রথম log-এর আগে ডাকলে। প্রথম warning() ডাকার সময় Python নিজেই default configuration বসিয়ে দিয়েছে, তাই পরের basicConfig নীরবে উপেক্ষিত। সবসময় program-এর একদম শুরুতে basicConfig।</p></div></aside>
+<aside class="box tip"><p class="box-title">Exam Tip</p><p>Configuration প্রশ্নে basicConfig-এর পাঁচটা parameter আর format-এর অন্তত পাঁচটা attribute টেবিলে লেখো, তারপর filename ও format সহ একটা ছোট program আর log file-এর output দেখাও।</p></aside>
+<aside class="box practice"><p class="box-title">অনুশীলন</p><p>একটা program লেখো যেটা একটা list-এর প্রতিটা সংখ্যার বর্গমূল বের করবে। ঋণাত্মক সংখ্যা পেলে ERROR log, প্রতিটা সফল হিসাবে DEBUG log, আর শেষে INFO log-এ মোট কয়টা হিসাব হলো — সব calc.log file-এ সময় ও লাইন নম্বরসহ।</p></aside>
+<h2 id="s6">অধ্যায়ের সারসংক্ষেপ</h2>
+<div class="tbl"><table><thead><tr><th>বিষয়</th><th>মূল কথা</th></tr></thead><tbody><tr><td class="">Logging</td><td class="">program চলার সময়ের ঘটনার সময়সহ স্থায়ী রেকর্ড; built-in logging module।</td></tr><tr><td class="">কখন</td><td class="">Debugging, পর্যবেক্ষণ, error খোঁজা, audit/নিরাপত্তা, performance মাপা।</td></tr><tr><td class="">Level</td><td class="">DEBUG 10, INFO 20, WARNING 30 (default), ERROR 40, CRITICAL 50; নির্ধারিত level বা বেশি দেখায়।</td></tr><tr><td class="">কার্যপদ্ধতি</td><td class="">Logger → LogRecord → Handler → Formatter → গন্তব্য (console/file)।</td></tr><tr><td class="">Configuration</td><td class="">basicConfig(level, format, datefmt, filename, filemode); শুরুতেই ডাকতে হয়।</td></tr></tbody></table></div>
+<h2 id="s7">অনুশীলনী · অধ্যায় ৮ (বোর্ড প্রশ্ন ও উত্তর)</h2>
+<p>এই অনুশীলনীতে অধ্যায় ৮ থেকে বিগত বছরগুলোতে বোর্ডে আসা সব প্রশ্ন, পরীক্ষার খাতায় লেখার উপযোগী উত্তরসহ দেওয়া হলো। শেষে আছে বোর্ডে এখনো সরাসরি না আসা একটি গুরুত্বপূর্ণ প্রশ্ন।</p>
+<p>উত্তরগুলো নম্বর অনুযায়ী মাপা: ১ নম্বরের প্রশ্নে দুই-তিন লাইন, ২ নম্বরে মূল পয়েন্টসহ সংক্ষিপ্ত উত্তর, আর ৬ নম্বরে সংজ্ঞা, ব্যাখ্যা, program ও output — পূর্ণ উত্তর। Program-গুলোর output কোড চালিয়ে যাচাই করা; শুধু সময়ের অংশ (asctime) তুমি যখন চালাবে তখনকার সময় দেখাবে।</p>
+<h3>ক. অতি সংক্ষিপ্ত প্রশ্ন (মান: ১)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>পাইথন লগিং কী?</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৪, ২০২৫ · বই: 8.1</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>Program চলার সময় ঘটা গুরুত্বপূর্ণ ঘটনা, তথ্য, সতর্কবার্তা ও error সময়সহ একটি নির্দিষ্ট format-এ রেকর্ড করে রাখার প্রক্রিয়াকে logging বলে। Python-এ এর জন্য built-in <strong>logging</strong> module আছে; রেকর্ড screen বা file-এ রাখা যায়, যা পরে ভুল খুঁজতে ও কী ঘটেছিল জানতে কাজে লাগে।</p></aside>
+<div class="q"><span class="qn">২</span><div class="qt"><strong>লগিং-এর Level-গুলোর নাম লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৩, ২০২৫ (পরি) · বই: 8.3</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>লগিং-এর পাঁচটি level (কম থেকে বেশি গুরুত্ব অনুযায়ী): <strong>DEBUG (10), INFO (20), WARNING (30), ERROR (40), CRITICAL (50)</strong>। এদের জন্য function: <code>logging.debug()</code>, <code>info()</code>, <code>warning()</code>, <code>error()</code>, <code>critical()</code>।</p></aside>
+<h3>খ. সংক্ষিপ্ত প্রশ্ন (মান: ২)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>লগিং-এর বিভিন্ন Level উল্লেখ কর।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২২, ২০২৩ (পরি), ২০২৪ (পরি) · বই: 8.3</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<div class="tbl"><table><thead><tr><th>Level</th><th>মান</th><th>কখন ব্যবহার</th></tr></thead><tbody><tr><td class="m">DEBUG</td><td class="m">10</td><td class="">খুঁটিনাটি তথ্য — শুধু ভুল খোঁজার (debugging) সময় দরকার</td></tr><tr><td class="m">INFO</td><td class="m">20</td><td class="">সবকিছু স্বাভাবিকভাবে চলছে তার নিশ্চয়তা (যেমন: Report saved)</td></tr><tr><td class="m">WARNING</td><td class="m">30</td><td class="">অপ্রত্যাশিত কিছু ঘটেছে, তবে program চলছে — default level</td></tr><tr><td class="m">ERROR</td><td class="m">40</td><td class="">গুরুতর সমস্যা; একটি কাজ সম্পন্ন করা যায়নি</td></tr><tr><td class="m">CRITICAL</td><td class="m">50</td><td class="">খুব গুরুতর সমস্যা; program আর চলতে না-ও পারে</td></tr></tbody></table></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>নিয়ম: নির্ধারিত level-এর সমান বা বেশি মানের বার্তাই দেখানো হয়। default level WARNING হওয়ায় DEBUG ও INFO বার্তা দেখাতে <code>basicConfig(level=logging.DEBUG)</code> দিতে হয়।</p></aside>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import logging
+<span class="ln">2</span>logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
+<span class="ln">3</span> 
+<span class="ln">4</span>logging.debug("x = 42")
+<span class="ln">5</span>logging.info("Saving results")
+<span class="ln">6</span>logging.warning("Marks missing for roll 104")
+<span class="ln">7</span>logging.error("Cannot open marks.csv")
+<span class="ln">8</span>logging.critical("Database unreachable")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>DEBUG: x = 42
+INFO: Saving results
+WARNING: Marks missing for roll 104
+ERROR: Cannot open marks.csv
+CRITICAL: Database unreachable</pre></figure>
+<h3>গ. রচনামূলক প্রশ্ন (মান: ৬)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>লগিং-এর আউটপুট ফরমেটিং এবং কনফিগারেশন বর্ণনা কর। (Logging-এর Configuration বর্ণনা কর।)</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২২, ২০২৪ · বই: 8.5</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p><strong>Configuration:</strong> কোন level থেকে বার্তা রেকর্ড হবে, কোথায় যাবে (screen নাকি file) এবং দেখতে কেমন হবে — এসব নির্ধারণ করাকে logging configuration বলে। সবচেয়ে সহজ উপায় <code>logging.basicConfig()</code>; এটি program-এর শুরুতে, প্রথম log-এর আগে ডাকতে হয়।</p></aside>
+<div class="tbl"><table><thead><tr><th>Parameter</th><th>কাজ</th><th>উদাহরণ</th></tr></thead><tbody><tr><td class="m">level</td><td class="">সর্বনিম্ন level নির্ধারণ</td><td class="m">level=logging.INFO</td></tr><tr><td class="m">format</td><td class="">প্রতিটি log লাইনের চেহারা</td><td class="m">format="%(levelname)s: %(message)s"</td></tr><tr><td class="m">datefmt</td><td class="">asctime-এর তারিখ-সময়ের ধরন</td><td class="m">datefmt="%d-%m-%Y %H:%M:%S"</td></tr><tr><td class="m">filename</td><td class="">screen-এর বদলে file-এ log লেখা</td><td class="m">filename="app.log"</td></tr><tr><td class="m">filemode</td><td class="">file-এর mode — "a" (default) বা "w"</td><td class="m">filemode="w"</td></tr></tbody></table></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p><strong>Output Formatting:</strong> <code>format</code> parameter-এ বিভিন্ন attribute বসিয়ে log-এর চেহারা ঠিক করা হয়:</p></aside>
+<div class="tbl"><table><thead><tr><th>Attribute</th><th>কী দেখায়</th></tr></thead><tbody><tr><td class="m">%(asctime)s</td><td class="">log-এর সময়</td></tr><tr><td class="m">%(levelname)s</td><td class="">level-এর নাম</td></tr><tr><td class="m">%(message)s</td><td class="">আসল বার্তা</td></tr><tr><td class="m">%(name)s</td><td class="">logger-এর নাম</td></tr><tr><td class="m">%(filename)s</td><td class="">file-এর নাম</td></tr><tr><td class="m">%(funcName)s</td><td class="">function-এর নাম</td></tr><tr><td class="m">%(lineno)d</td><td class="">লাইন নম্বর</td></tr></tbody></table></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import logging
+<span class="ln">2</span> 
+<span class="ln">3</span>logging.basicConfig(
+<span class="ln">4</span>    filename="result.log",
+<span class="ln">5</span>    filemode="w",
+<span class="ln">6</span>    level=logging.DEBUG,
+<span class="ln">7</span>    format="%(asctime)s | %(levelname)-7s | %(funcName)s:%(lineno)d | %(message)s",
+<span class="ln">8</span>    datefmt="%d-%m-%Y %H:%M:%S",
+<span class="ln">9</span>)
+<span class="ln">10</span> 
+<span class="ln">11</span>def average(marks):
+<span class="ln">12</span>    logging.debug("Received marks %s", marks)
+<span class="ln">13</span>    if not marks:
+<span class="ln">14</span>        logging.error("Empty marks list")
+<span class="ln">15</span>        return None
+<span class="ln">16</span>    avg = sum(marks) / len(marks)
+<span class="ln">17</span>    logging.info("Average = %.2f", avg)
+<span class="ln">18</span>    return avg
+<span class="ln">19</span> 
+<span class="ln">20</span>average([78, 85, 62])
+<span class="ln">21</span>average([])
+<span class="ln">22</span> 
+<span class="ln">23</span>with open("result.log") as f:
+<span class="ln">24</span>    print(f.read())
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>06-10-2026 01:07:39 | DEBUG   | average:12 | Received marks [78, 85, 62]
+06-10-2026 01:07:39 | INFO    | average:17 | Average = 75.00
+06-10-2026 01:07:39 | DEBUG   | average:12 | Received marks []
+06-10-2026 01:07:39 | ERROR   | average:14 | Empty marks list</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">3–9</td><td class="snip"><pre>logging.basicConfig(
+    filename="result.log",
+    filemode="w",
+    level=logging.DEBUG,
+    format="%(asctime)s | %(levelname)-7s | %(funcName)s:%(lineno)d | %(message)s",
+    datefmt="%d-%m-%Y %H:%M:%S",
+)</pre></td><td>basicConfig-এ পাঁচটি parameter: log যাবে result.log file-এ, প্রতিবার নতুন করে ("w"), DEBUG থেকে সব level, নির্দিষ্ট format ও তারিখের ধরনে।</td></tr><tr><td class="lab">11–18</td><td class="snip"><pre>def average(marks):
+    logging.debug("Received marks %s", marks)
+    if not marks:
+        logging.error("Empty marks list")
+        return None
+    avg = sum(marks) / len(marks)
+    logging.info("Average = %.2f", avg)
+    return avg</pre></td><td>function-এর ভেতরে তিন level-এর log; প্রতিটির সাথে function-এর নাম ও লাইন নম্বর নিজে থেকে যুক্ত হয়।</td></tr><tr><td class="lab">23–24</td><td class="snip"><pre>with open("result.log") as f:
+    print(f.read())</pre></td><td>file পড়ে log দেখানো। সময়ের অংশ চালানোর সময় অনুযায়ী আলাদা হবে।</td></tr></tbody></table></div></details>
+<div class="q"><span class="qn">২</span><div class="qt"><strong>লগিং-এর প্রসিডিউরের কার্যনীতি বর্ণনা কর।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৫ · বই: 8.4</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p><code>logging.warning("...")</code> বা <code>logger.error("...")</code> লিখলে ভেতরে চারটি অংশ মিলে কাজ করে:</p><ul><li><strong>Logger:</strong> যার মাধ্যমে বার্তা পাঠানো হয়; <code>logging.getLogger(name)</code> দিয়ে পাওয়া যায়। নিজের level-এর কম গুরুত্বের বার্তা এখানেই বাদ পড়ে।</li><li><strong>LogRecord:</strong> প্রতিটি বার্তার জন্য তৈরি object — সময়, level, logger-এর নাম, file, লাইন নম্বর ও বার্তা থাকে।</li><li><strong>Handler:</strong> বার্তা কোথায় যাবে ঠিক করে — StreamHandler (screen), FileHandler (file)। প্রতিটি handler-এর নিজস্ব level থাকতে পারে।</li><li><strong>Formatter:</strong> বার্তাটি দেখতে কেমন হবে ঠিক করে।</li></ul><p><strong>ধাপসমূহ:</strong> (১) কোড logger-কে বার্তা দেয় → (২) logger level যাচাই করে → (৩) LogRecord তৈরি হয় → (৪) প্রতিটি handler নিজের level যাচাই করে → (৫) formatter লেখা তৈরি করে → (৬) handler গন্তব্যে (screen/file) লেখে।</p></aside>
+<figure class="pic"><img src="../img/logflow.png" alt="চিত্র: একটি log বার্তা কীভাবে গন্তব্যে পৌঁছায়" loading="lazy"><figcaption>চিত্র: একটি log বার্তা কীভাবে গন্তব্যে পৌঁছায়</figcaption></figure>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import logging
+<span class="ln">2</span> 
+<span class="ln">3</span>logger = logging.getLogger("result_app")
+<span class="ln">4</span>logger.setLevel(logging.DEBUG)
+<span class="ln">5</span> 
+<span class="ln">6</span>console = logging.StreamHandler()
+<span class="ln">7</span>console.setLevel(logging.WARNING)
+<span class="ln">8</span>console.setFormatter(logging.Formatter("CONSOLE | %(levelname)s | %(message)s"))
+<span class="ln">9</span> 
+<span class="ln">10</span>file = logging.FileHandler("app.log", mode="w")
+<span class="ln">11</span>file.setLevel(logging.DEBUG)
+<span class="ln">12</span>file.setFormatter(logging.Formatter("%(name)s - %(levelname)s - %(message)s"))
+<span class="ln">13</span> 
+<span class="ln">14</span>logger.addHandler(console)
+<span class="ln">15</span>logger.addHandler(file)
+<span class="ln">16</span> 
+<span class="ln">17</span>logger.debug("Reading marks for roll 101")
+<span class="ln">18</span>logger.info("Average calculated: 75.0")
+<span class="ln">19</span>logger.warning("Roll 103 failed in Physics")
+<span class="ln">20</span> 
+<span class="ln">21</span>print("--- app.log ---")
+<span class="ln">22</span>print(open("app.log").read())
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>CONSOLE | WARNING | Roll 103 failed in Physics
+--- app.log ---
+result_app - DEBUG - Reading marks for roll 101
+result_app - INFO - Average calculated: 75.0
+result_app - WARNING - Roll 103 failed in Physics</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">3–4</td><td class="snip"><pre>logger = logging.getLogger("result_app")
+logger.setLevel(logging.DEBUG)</pre></td><td>"result_app" নামে logger, level DEBUG — logger নিজে কিছু বাদ দেবে না।</td></tr><tr><td class="lab">6–8</td><td class="snip"><pre>console = logging.StreamHandler()
+console.setLevel(logging.WARNING)
+console.setFormatter(logging.Formatter("CONSOLE | %(levelname)s | %(message)s"))</pre></td><td>Console handler: শুধু WARNING বা বেশি, নিজস্ব format।</td></tr><tr><td class="lab">10–12</td><td class="snip"><pre>file = logging.FileHandler("app.log", mode="w")
+file.setLevel(logging.DEBUG)
+file.setFormatter(logging.Formatter("%(name)s - %(levelname)s - %(message)s"))</pre></td><td>File handler: DEBUG থেকে সব, app.log-এ, আলাদা format।</td></tr><tr><td class="lab">14–15</td><td class="snip"><pre>logger.addHandler(console)
+logger.addHandler(file)</pre></td><td>দুটি handler logger-এর সাথে যুক্ত।</td></tr><tr><td class="lab">17–19</td><td class="snip"><pre>logger.debug("Reading marks for roll 101")
+logger.info("Average calculated: 75.0")
+logger.warning("Roll 103 failed in Physics")</pre></td><td>তিনটি বার্তা: console-এ শুধু warning, কিন্তু file-এ তিনটিই — একই বার্তা, দুই handler, দুই ফল।</td></tr></tbody></table></div></details>
+<h3>ঘ. অতিরিক্ত গুরুত্বপূর্ণ প্রশ্ন</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>লগিং-এর পরিস্থিতি চিত্রিত কর। (কোন কোন পরিস্থিতিতে লগিং ব্যবহার করা হয়?)</strong></div><span class="qr"><span class="qref">বই: 8.2</span></span><span class="stars s2" title="গুরুত্ব 2/3" aria-label="গুরুত্ব 2 তারকা">★★☆</span></div>
+<div class="tbl"><table><thead><tr><th>পরিস্থিতি</th><th>কেন logging</th><th>উদাহরণ বার্তা</th></tr></thead><tbody><tr><td class="">Debugging</td><td class="">ভুলের উৎস খুঁজতে variable-এর মান দেখা</td><td class="m">DEBUG: average=72.5</td></tr><tr><td class="">স্বাভাবিক কাজের রেকর্ড</td><td class="">program ঠিকঠাক চলছে তার প্রমাণ</td><td class="m">INFO: 150 results processed</td></tr><tr><td class="">Error খোঁজা</td><td class="">কখন, কোথায়, কেন error হলো</td><td class="m">ERROR: result.txt not found</td></tr><tr><td class="">নিরাপত্তা ও audit</td><td class="">কে কখন কী করল</td><td class="m">WARNING: 3 failed logins for admin</td></tr><tr><td class="">Performance</td><td class="">কোন কাজে কত সময় লাগছে</td><td class="m">INFO: report generated in 2.4s</td></tr><tr><td class="">গুরুতর বিপর্যয়</td><td class="">program বন্ধ হওয়ার আগের রেকর্ড</td><td class="m">CRITICAL: database unreachable</td></tr></tbody></table></div><section class="quick" id="quick"><h2>এই অধ্যায় কেমন লাগল?</h2><p>তোমার মতামত সরাসরি লেখকের কাছে যাবে। ভুল পেলে কোন section-এ, সেটাও লিখে দিও।</p>
+<form class="fb-form" data-kind="অধ্যায়ের মতামত"><input type="hidden" name="chapter" value="অধ্যায় ৮ — Logging in Python">
+<div class="rate" role="radiogroup" aria-label="রেটিং"><label><input type="radio" name="rating" value="1" required><span>★</span><em>1</em></label><label><input type="radio" name="rating" value="2" ><span>★</span><em>2</em></label><label><input type="radio" name="rating" value="3" ><span>★</span><em>3</em></label><label><input type="radio" name="rating" value="4" ><span>★</span><em>4</em></label><label><input type="radio" name="rating" value="5" ><span>★</span><em>5</em></label></div>
+<label class="fld"><span>তোমার নাম (ঐচ্ছিক)</span><input name="name" autocomplete="name"></label>
+<label class="fld"><span>মতামত বা যে ভুল পেয়েছ</span><textarea name="message" rows="4" required placeholder="যেমন: 4.5-এর উদাহরণটা বুঝতে কষ্ট হয়েছে, কারণ…"></textarea></label>
+<input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off"><button type="submit">মতামত পাঠাও</button><p class="status" role="status"></p></form></section><nav class="pager"><a class="pn prev" href="ch07.html"><small>আগের অধ্যায়</small>Exception ও Error Handling</a><a class="pn next" href="ch09.html"><small>পরের অধ্যায়</small>Unit Testing</a></nav></main><aside class="mini"><p>এই অধ্যায়ে</p><ol><li><a href="#s1">8.1 Logging কী?</a></li><li><a href="#s2">8.2 কখন Logging দরকার</a></li><li><a href="#s3">8.3 Logging-এর Level</a></li><li><a href="#s4">8.4 Logging-এর কার্যপদ্ধতি</a></li><li><a href="#s5">8.5 Configuration ও Output Formatting</a></li><li><a href="#s6">অধ্যায়ের সারসংক্ষেপ</a></li><li><a href="#s7">অনুশীলনী · অধ্যায় ৮ (বোর্ড প্রশ্ন ও উত্তর)</a></li></ol><a class="report" href="#quick">ভুল পেয়েছ? জানাও</a></aside></div><nav class="bnav" aria-label="মোবাইল মেনু"><a href="../index.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>হোম</span></a><button type="button" class="bn-toc on" aria-expanded="false" aria-controls="sheet"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5zM4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3"/><path d="M8 7h7M8 10.5h5"/></svg><span>অধ্যায়</span></button><a href="../runner.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m8 9 3 3-3 3M13 15h3"/></svg><span>কোড রানার</span></a><a href="../feedback.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4.5"/></svg><span>মতামত</span></a></nav><div class="sheet" id="sheet" hidden><div class="sheet-backdrop" data-close></div><div class="sheet-panel" role="dialog" aria-modal="true" aria-label="বিষয়সূচি"><div class="sheet-grip" data-close></div><div class="sheet-head"><strong>বিষয়সূচি</strong><button type="button" data-close aria-label="বন্ধ করো">✕</button></div><div class="sheet-body"><p class="sheet-h">এই অধ্যায়ে</p><ol class="sheet-sec"><li><a href="#s1">8.1 Logging কী?</a></li><li><a href="#s2">8.2 কখন Logging দরকার</a></li><li><a href="#s3">8.3 Logging-এর Level</a></li><li><a href="#s4">8.4 Logging-এর কার্যপদ্ধতি</a></li><li><a href="#s5">8.5 Configuration ও Output Formatting</a></li><li><a href="#s6">অধ্যায়ের সারসংক্ষেপ</a></li><li><a href="#s7">অনুশীলনী · অধ্যায় ৮ (বোর্ড প্রশ্ন ও উত্তর)</a></li></ol><p class="sheet-h">সব অধ্যায়</p><ol class="sheet-ch"><li><a href="../chapters/ch01.html"><span class="u">১</span>Python Functions</a></li><li><a href="../chapters/ch02.html"><span class="u">২</span>File Operation</a></li><li><a href="../chapters/ch03.html"><span class="u">৩</span>Module, Package ও Application Software</a></li><li><a href="../chapters/ch04.html"><span class="u">৪</span>Basics of OOP</a></li><li><a href="../chapters/ch05.html"><span class="u">৫</span>Four Pillars of OOP</a></li><li><a href="../chapters/ch06.html"><span class="u">৬</span>Iterator, Generator ও Decorator</a></li><li><a href="../chapters/ch07.html"><span class="u">৭</span>Exception ও Error Handling</a></li><li><a href="../chapters/ch08.html" class=on aria-current=page><span class="u">৮</span>Logging</a></li><li><a href="../chapters/ch09.html"><span class="u">৯</span>Unit Testing</a></li><li><a href="../chapters/ch10.html"><span class="u">১০</span>RegEx</a></li><li><a href="../chapters/ch11.html"><span class="u">১১</span>Application Software</a></li><li><a href="../chapters/ch12.html"><span class="u">পরি</span>বোর্ড প্রশ্ন ও সাজেশন</a></li></ol></div></div></div><footer class="foot"><p><strong>Application Development Using Python</strong> · লেখক: Kazi Tauhid Rana, Computer Science and Technology, Rajshahi Polytechnic Institute</p><p class="copy-note">© ২০২৬ Kazi Tauhid Rana · সর্বস্বত্ব সংরক্ষিত · <a href="../copyright.html">কপিরাইট নোটিশ</a> · <a href="../pdf.html">বইয়ের PDF</a></p><p>MIU Platform · Learn Grow Succeed</p></footer>
+<script src="../assets/config.js"></script><script src="../assets/app.js"></script><script src="../assets/runner.js"></script></body></html>

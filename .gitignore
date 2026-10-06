@@ -1,0 +1,9 @@
+# বইয়ের PDF — বিক্রির জন্য, কখনো GitHub-এ যাবে না
+tools/private/
+# graphify-এর cache ও এই কম্পিউটারের নিজস্ব ফাইল
+graphify-out/cache/
+graphify-out/.graphify_*
+.DS_Store
+.vercel/
+node_modules/
+__pycache__/

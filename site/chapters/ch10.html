@@ -1,0 +1,344 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#FBFCFE"><meta name="format-detection" content="telephone=no">
+<title>অধ্যায় ১০: Python RegEx (Regular Expression) — Python বই</title><meta name="description" content="Application Development Using Python — Polytechnic ছাত্রদের জন্য বাংলায় সম্পূর্ণ বই, বোর্ড প্রশ্নের উত্তরসহ।">
+<link rel="icon" href="../img/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta name="robots" content="noarchive"><link rel="stylesheet" href="../assets/style.css"><script src="../assets/protect.js"></script><script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script></head><body class="reader"><header class="topbar"><a class="brand" href="../index.html"><img src="../img/logo.png" alt="MIU"><span>Python বই</span></a>
+<nav class="topnav"><a href="../index.html#chapters">অধ্যায়</a><a href="../runner.html">কোড রানার</a><a href="../feedback.html">রিভিউ ও মতামত</a>
+<button class="theme" type="button" aria-label="ডার্ক মোড">◐</button></nav></header><div class="progress"><span></span></div><div class="layout"><nav class="side" aria-label="অধ্যায়ের তালিকা"><button class="side-toggle" type="button">অধ্যায়ের তালিকা</button><ol><li><a class="" href="ch01.html"><span class="u">১</span>Python Functions</a></li><li><a class="" href="ch02.html"><span class="u">২</span>File Operation</a></li><li><a class="" href="ch03.html"><span class="u">৩</span>Module, Package ও Application Software</a></li><li><a class="" href="ch04.html"><span class="u">৪</span>Basics of OOP</a></li><li><a class="" href="ch05.html"><span class="u">৫</span>Four Pillars of OOP</a></li><li><a class="" href="ch06.html"><span class="u">৬</span>Iterator, Generator ও Decorator</a></li><li><a class="" href="ch07.html"><span class="u">৭</span>Exception ও Error Handling</a></li><li><a class="" href="ch08.html"><span class="u">৮</span>Logging</a></li><li><a class="" href="ch09.html"><span class="u">৯</span>Unit Testing</a></li><li><a class="cur" href="ch10.html"><span class="u">১০</span>RegEx</a></li><li><a class="" href="ch11.html"><span class="u">১১</span>Application Software</a></li><li><a class="" href="ch12.html"><span class="u">পরি</span>বোর্ড প্রশ্ন ও সাজেশন</a></li></ol></nav><main class="content"><header class="chap-head"><p class="chap-num">অধ্যায় ১০</p><h1>Python RegEx (Regular Expression)</h1><p class="lead">ধরো একটা বড় file-এ হাজারখানেক লেখার ভেতর থেকে সব মোবাইল নম্বর বের করতে হবে। নম্বরগুলো আলাদা আলাদা — কিন্তু সবার একটা ধরন (pattern) আছে: 01 দিয়ে শুরু, তারপর 3 থেকে 9-এর একটা অঙ্ক, তারপর আরও আটটা অঙ্ক। শুধু string method (find, replace) দিয়ে এই কাজ প্রায় অসম্ভব, কারণ ওগুলো নির্দিষ্ট লেখা খোঁজে, ধরন খোঁজে না।</p><p class="lead"><strong>Regular Expression</strong> বা সংক্ষেপে <strong>RegEx</strong> ঠিক এই কাজের জন্য: লেখার ধরন বর্ণনা করার একটা ছোট্ট ভাষা। এই অধ্যায়ে শিখব RegEx কী, Python-এর re module-এর method-গুলো, metacharacter আর special sequence, RegEx ভেতরে কীভাবে কাজ করে, আর শেষে লেখার ভেতরে নির্দিষ্ট শব্দ খোঁজার program।</p></header>
+<h2 id="s1">10.1 RegEx কী?</h2><div class="yt" data-id="YJVWpp-kg1U"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Regular Expression in Python Bangla | Regex Tutorial | Complete Explanation"><img src="https://i.ytimg.com/vi/YJVWpp-kg1U/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · আগস্ট ২০২৬</p><p class="yt-t">Regular Expression in Python Bangla | Regex Tutorial | Complete Explanation</p><p class="yt-c">COMPUTER SCIENCE WITH BHASKAR SIR · <a href="https://www.youtube.com/watch?v=YJVWpp-kg1U" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<aside class="box definition"><p class="box-title">সংজ্ঞা (পরীক্ষার জন্য)</p><p><strong>Regular Expression (RegEx)</strong> হলো character-এর একটি বিশেষ ক্রম (sequence), যা একটি <strong>search pattern</strong> বা খোঁজার ধরন নির্দেশ করে। এই pattern ব্যবহার করে কোনো string-এ নির্দিষ্ট ধরনের লেখা খোঁজা, যাচাই করা, বের করা বা প্রতিস্থাপন করা যায়। Python-এ RegEx-এর জন্য built-in <strong>re</strong> module ব্যবহার করা হয়।</p></aside>
+<aside class="box analogy"><p class="box-title">বাস্তব উদাহরণ</p><p>পুলিশ যখন কাউকে খোঁজে, সবসময় নাম জানে না — জানে বর্ণনা: "লম্বা, কালো চশমা, নীল শার্ট"। এই বর্ণনা মিলিয়ে ভিড়ের মধ্যে থেকে লোক খোঁজা হয়। RegEx হলো লেখার জন্য এমন একটা বর্ণনা: "01 দিয়ে শুরু, তারপর ৯টা অঙ্ক" — নম্বরটা জানা নেই, শুধু ধরনটা জানা।</p></aside>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 10.1</span>প্রথম RegEx</p><p class="problem"><strong>সমস্যা:</strong> একটা লেখা থেকে সব বাংলাদেশি মোবাইল নম্বর বের করো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import re
+<span class="ln">2</span> 
+<span class="ln">3</span>text = "Rahim: 01711223344, office 02-9551234, Karim: 01998877665"
+<span class="ln">4</span>pattern = r"01[3-9]\d{8}"
+<span class="ln">5</span>numbers = re.findall(pattern, text)
+<span class="ln">6</span>print(numbers)
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>['01711223344', '01998877665']</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1</td><td class="snip"><pre>import re</pre></td><td>RegEx-এর জন্য re module import।</td></tr><tr><td class="lab">4</td><td class="snip"><pre>pattern = r"01[3-9]\d{8}"</pre></td><td>pattern-এর মানে: "01", তারপর 3 থেকে 9-এর মধ্যে একটা অঙ্ক <code>[3-9]</code>, তারপর ঠিক 8টা অঙ্ক <code>\d{8}</code>। শুরুর <code>r</code> মানে raw string — এতে backslash <code>\</code> নিজের মতো থাকে, Python বদলায় না। RegEx সবসময় raw string-এ লেখো।</td></tr><tr><td class="lab">5</td><td class="snip"><pre>numbers = re.findall(pattern, text)</pre></td><td>findall() লেখার সব জায়গায় pattern খুঁজে মিলে যাওয়া অংশগুলোর list দেয়। অফিসের নম্বর (02-...) ধরনে মেলেনি, তাই বাদ।</td></tr></tbody></table></div></details>
+<p><strong>RegEx-এর ব্যবহার:</strong> form-এ ইনপুট যাচাই (email, phone, password), বড় লেখা থেকে তথ্য বের করা (তারিখ, নম্বর, link), খুঁজে প্রতিস্থাপন (find &amp; replace), log file বিশ্লেষণ, data পরিষ্কার করা।</p>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Regular expression (RegEx) কাকে বলে? এর ব্যবহার লেখো। (3 নম্বর)</li></ul></aside>
+<h2 id="s2">10.2 Python RegEx-এর Built-in Method</h2><div class="yt" data-id="Jo9pBP4Dc0U"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Python Regular Expression (Regex) Complete Tutorial in Bangla class-19 |reপাইথনে রেগুলার এক্সপ্রেশন"><img src="https://i.ytimg.com/vi/Jo9pBP4Dc0U/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · মে ২০২৬</p><p class="yt-t">Python Regular Expression (Regex) Complete Tutorial in Bangla class-19 |reপাইথনে রেগুলার এক্সপ্রেশন</p><p class="yt-c">math2py · <a href="https://www.youtube.com/watch?v=Jo9pBP4Dc0U" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<div class="tbl"><table><thead><tr><th>Method</th><th>কাজ</th><th>ফেরত দেয়</th></tr></thead><tbody><tr><td class="m">re.search(p, s)</td><td class="">s-এর যেকোনো জায়গায় প্রথম মিল খোঁজে</td><td class="">Match object বা None</td></tr><tr><td class="m">re.match(p, s)</td><td class="">শুধু s-এর শুরুতে মিল খোঁজে</td><td class="">Match object বা None</td></tr><tr><td class="m">re.fullmatch(p, s)</td><td class="">পুরো s pattern-এর সাথে মেলে কিনা</td><td class="">Match object বা None</td></tr><tr><td class="m">re.findall(p, s)</td><td class="">সব মিল</td><td class="">string-এর list</td></tr><tr><td class="m">re.finditer(p, s)</td><td class="">সব মিল, অবস্থানসহ</td><td class="">Match object-এর iterator</td></tr><tr><td class="m">re.sub(p, r, s)</td><td class="">সব মিল r দিয়ে প্রতিস্থাপন</td><td class="">নতুন string</td></tr><tr><td class="m">re.split(p, s)</td><td class="">pattern অনুযায়ী s ভাগ</td><td class="">string-এর list</td></tr><tr><td class="m">re.compile(p)</td><td class="">pattern আগে থেকে তৈরি রাখা, বারবার ব্যবহারের জন্য</td><td class="">Pattern object</td></tr></tbody></table></div>
+<p>search/match/fullmatch মিল পেলে একটা <strong>Match object</strong> দেয়, যার method: <code>group()</code> মিলে যাওয়া লেখা, <code>start()</code> ও <code>end()</code> শুরু-শেষের index, <code>span()</code> দুটো একসাথে।</p>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 10.2</span>প্রধান Method-গুলো একসাথে</p><p class="problem"><strong>সমস্যা:</strong> একটা বাক্যে বিভিন্ন method প্রয়োগ করে পার্থক্য দেখো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import re
+<span class="ln">2</span> 
+<span class="ln">3</span>s = "Python 3 was released in 2008 and Python 2 in 2000"
+<span class="ln">4</span> 
+<span class="ln">5</span>m = re.search(r"\d{4}", s)
+<span class="ln">6</span>print("search  :", m.group(), m.span())
+<span class="ln">7</span>print("match   :", re.match(r"\d{4}", s))
+<span class="ln">8</span>print("match   :", re.match(r"Python", s).group())
+<span class="ln">9</span>print("findall :", re.findall(r"\d{4}", s))
+<span class="ln">10</span>print("sub     :", re.sub(r"\d{4}", "YEAR", s))
+<span class="ln">11</span>print("split   :", re.split(r"\s+and\s+", s))
+<span class="ln">12</span>print("full    :", bool(re.fullmatch(r"\d{4}", "2008")))
+<span class="ln">13</span> 
+<span class="ln">14</span>for m in re.finditer(r"Python \d", s):
+<span class="ln">15</span>    print("finditer:", m.group(), "at", m.start())
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>search  : 2008 (25, 29)
+match   : None
+match   : Python
+findall : ['2008', '2000']
+sub     : Python 3 was released in YEAR and Python 2 in YEAR
+split   : ['Python 3 was released in 2008', 'Python 2 in 2000']
+full    : True
+finditer: Python 3 at 0
+finditer: Python 2 at 34</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">5–6</td><td class="snip"><pre>m = re.search(r"\d{4}", s)
+print("search  :", m.group(), m.span())</pre></td><td>search() প্রথম চার অঙ্কের সংখ্যা (2008) পেল, তার index 25 থেকে 29 (শেষটা বাদ)।</td></tr><tr><td class="lab">7</td><td class="snip"><pre>print("match   :", re.match(r"\d{4}", s))</pre></td><td>match() শুধু শুরুতে খোঁজে — লেখা "Python" দিয়ে শুরু, সংখ্যা দিয়ে নয়, তাই None।</td></tr><tr><td class="lab">8</td><td class="snip"><pre>print("match   :", re.match(r"Python", s).group())</pre></td><td>শুরুতে "Python" খুঁজলে match() মিল পায়।</td></tr><tr><td class="lab">9–10</td><td class="snip"><pre>print("findall :", re.findall(r"\d{4}", s))
+print("sub     :", re.sub(r"\d{4}", "YEAR", s))</pre></td><td>findall() সব মিলের list; sub() সব মিল বদলে দেয়।</td></tr><tr><td class="lab">11</td><td class="snip"><pre>print("split   :", re.split(r"\s+and\s+", s))</pre></td><td>\s+ মানে এক বা একাধিক space — "and"-এর দুই পাশের space-সহ ভাগ।</td></tr><tr><td class="lab">12</td><td class="snip"><pre>print("full    :", bool(re.fullmatch(r"\d{4}", "2008")))</pre></td><td>fullmatch() পুরো string যাচাই করে — ইনপুট validation-এ এটাই ব্যবহার করো।</td></tr><tr><td class="lab">14–15</td><td class="snip"><pre>for m in re.finditer(r"Python \d", s):
+    print("finditer:", m.group(), "at", m.start())</pre></td><td>finditer() প্রতিটা মিলের জন্য Match object দেয়, তাই অবস্থানও পাওয়া যায়।</td></tr></tbody></table></div></details>
+<h3>compile(): Pattern বারবার ব্যবহার</h3>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import re
+<span class="ln">2</span> 
+<span class="ln">3</span>phone = re.compile(r"01[3-9]\d{8}")
+<span class="ln">4</span>for p in ["01711223344", "01211223344", "0171122334"]:
+<span class="ln">5</span>    print(p, "-&gt;", "valid" if phone.fullmatch(p) else "invalid")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>01711223344 -&gt; valid
+01211223344 -&gt; invalid
+0171122334 -&gt; invalid</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">3</td><td class="snip"><pre>phone = re.compile(r"01[3-9]\d{8}")</pre></td><td>pattern একবার compile করে Pattern object বানানো হলো। একই pattern বারবার ব্যবহার করলে এটা দ্রুত আর কোড পরিষ্কার।</td></tr><tr><td class="lab">4–5</td><td class="snip"><pre>for p in ["01711223344", "01211223344", "0171122334"]:
+    print(p, "-&gt;", "valid" if phone.fullmatch(p) else "invalid")</pre></td><td>Pattern object-এর নিজেরই search/fullmatch/findall method আছে। দ্বিতীয় নম্বর 012 দিয়ে শুরু, তৃতীয়টায় একটা অঙ্ক কম।</td></tr></tbody></table></div></details>
+<aside class="box mistake"><p class="box-title">সাধারণ ভুল</p><div class="mk"><div class="mk-col bad"><p class="mk-h">ভুল</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>import re
+m = re.search(r"\d+", "no digits here")
+print(m.group())
+</code></pre></figure><p class="err">ফল: <code>AttributeError: 'NoneType' object has no attribute 'group'</code></p></div><div class="mk-col good"><p class="mk-h">সঠিক</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>import re
+m = re.search(r"\d+", "no digits here")
+if m:
+    print(m.group())
+else:
+    print("No match")
+</code></pre></figure></div><p class="why">মিল না পেলে search() None দেয়, আর None-এর group() নেই। সবসময় আগে যাচাই করো মিল পাওয়া গেছে কিনা।</p></div></aside>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Python RegEx-এর built-in method-গুলো উল্লেখ করো। (3-4 নম্বর)</li><li>search() ও match()-এর পার্থক্য লেখো।</li></ul></aside>
+<h2 id="s3">10.3 Metacharacter ও Special Sequence</h2><div class="yt" data-id="XeJoNgNQ4n0"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Python Bangla Tutorials 64 : Meta Characters"><img src="https://i.ytimg.com/vi/XeJoNgNQ4n0/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · আগস্ট ২০১৯</p><p class="yt-t">Python Bangla Tutorials 64 : Meta Characters</p><p class="yt-c">Anisul Islam · <a href="https://www.youtube.com/watch?v=XeJoNgNQ4n0" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p>RegEx-এ বেশিরভাগ character নিজেকেই বোঝায় — <code>cat</code> মানে হুবহু "cat"। কিন্তু কিছু character-এর বিশেষ অর্থ আছে, এদের বলে <strong>metacharacter</strong>।</p>
+<div class="tbl"><table><thead><tr><th>Metacharacter</th><th>অর্থ</th><th>উদাহরণ</th><th>মেলে</th></tr></thead><tbody><tr><td class="m">.</td><td class="">নতুন লাইন ছাড়া যেকোনো একটা character</td><td class="m">c.t</td><td class="">cat, cut, c9t</td></tr><tr><td class="m">^</td><td class="">string-এর শুরু</td><td class="m">^Hello</td><td class="">"Hello world"-এর শুরু</td></tr><tr><td class="m">$</td><td class="">string-এর শেষ</td><td class="m">end$</td><td class="">"the end"-এর শেষ</td></tr><tr><td class="m">*</td><td class="">আগেরটা 0 বা বেশিবার</td><td class="m">ab*</td><td class="">a, ab, abbb</td></tr><tr><td class="m">+</td><td class="">আগেরটা 1 বা বেশিবার</td><td class="m">ab+</td><td class="">ab, abbb (a নয়)</td></tr><tr><td class="m">?</td><td class="">আগেরটা 0 বা 1 বার (ঐচ্ছিক)</td><td class="m">colou?r</td><td class="">color, colour</td></tr><tr><td class="m">{m,n}</td><td class="">আগেরটা m থেকে n বার</td><td class="m">\d{2,4}</td><td class="">12, 123, 1234</td></tr><tr><td class="m">[ ]</td><td class="">set — ভেতরের যেকোনো একটা</td><td class="m">[aeiou]</td><td class="">যেকোনো স্বরবর্ণ</td></tr><tr><td class="m">|</td><td class="">অথবা</td><td class="m">cat|dog</td><td class="">cat বা dog</td></tr><tr><td class="m">( )</td><td class="">group — অংশ আলাদা করে ধরা</td><td class="m">(\d+)-(\d+)</td><td class="">12-34, দুটো group</td></tr><tr><td class="m">\</td><td class="">পরের character-এর বিশেষ অর্থ বাতিল</td><td class="m">\.</td><td class="">শুধু বিন্দু .</td></tr></tbody></table></div>
+<div class="tbl"><table><thead><tr><th>Special Sequence</th><th>অর্থ</th><th>সমতুল্য set</th></tr></thead><tbody><tr><td class="m">\d</td><td class="">যেকোনো অঙ্ক</td><td class="m">[0-9]</td></tr><tr><td class="m">\D</td><td class="">অঙ্ক নয় এমন</td><td class="m">[^0-9]</td></tr><tr><td class="m">\w</td><td class="">শব্দের character (অক্ষর, অঙ্ক, _)</td><td class="m">[a-zA-Z0-9_]</td></tr><tr><td class="m">\W</td><td class="">শব্দের character নয়</td><td class="m">[^a-zA-Z0-9_]</td></tr><tr><td class="m">\s</td><td class="">whitespace (space, tab, newline)</td><td class="m">[ \t\n]</td></tr><tr><td class="m">\S</td><td class="">whitespace নয়</td><td class="m">—</td></tr><tr><td class="m">\b</td><td class="">শব্দের সীমানা (শুরু বা শেষ)</td><td class="m">—</td></tr></tbody></table></div>
+<p>Set-এর ভেতরে <code>-</code> দিয়ে পরিসর (range) বোঝায়: <code>[a-z]</code> ছোট হাতের অক্ষর, <code>[A-Z0-9]</code> বড় হাতের অক্ষর ও অঙ্ক। Set-এর শুরুতে <code>^</code> মানে "এগুলো ছাড়া": <code>[^0-9]</code> মানে অঙ্ক ছাড়া যেকোনো কিছু।</p>
+<h3>একটা Pattern ভেঙে পড়া</h3>
+<p>জটিল pattern দেখতে ভয়ংকর, কিন্তু টুকরো টুকরো পড়লে সহজ। একটা সাধারণ email pattern:</p>
+<div class="tbl"><table><thead><tr><th>অংশ</th><th>অর্থ</th></tr></thead><tbody><tr><td class="m">^</td><td class="">শুরু থেকে মেলাতে হবে</td></tr><tr><td class="m">[\w.]+</td><td class="">এক বা একাধিক অক্ষর/অঙ্ক/underscore/বিন্দু — ইউজারনেম</td></tr><tr><td class="m">@</td><td class="">হুবহু @</td></tr><tr><td class="m">[\w-]+</td><td class="">domain নাম (gmail, miu-edu)</td></tr><tr><td class="m">\.</td><td class="">হুবহু একটা বিন্দু</td></tr><tr><td class="m">[a-z]{2,}</td><td class="">কমপক্ষে দুটো ছোট হাতের অক্ষর — com, org, bd</td></tr><tr><td class="m">$</td><td class="">এখানেই শেষ</td></tr></tbody></table></div>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 10.3</span>Metacharacter-এর ব্যবহার</p><p class="problem"><strong>সমস্যা:</strong> group দিয়ে তারিখ ভেঙে বের করো, email যাচাই করো, আর \b-এর পার্থক্য দেখো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import re
+<span class="ln">2</span> 
+<span class="ln">3</span>notice = "Exam on 15-11-2026, result on 30-12-2026."
+<span class="ln">4</span>for day, month, year in re.findall(r"(\d{2})-(\d{2})-(\d{4})", notice):
+<span class="ln">5</span>    print(f"Day {day}, Month {month}, Year {year}")
+<span class="ln">6</span> 
+<span class="ln">7</span>email = re.compile(r"^[\w.]+@[\w-]+\.[a-z]{2,}$")
+<span class="ln">8</span>for e in ["rahim.cst@gmail.com", "karim@miu", "nusrat@miu-edu.bd"]:
+<span class="ln">9</span>    print(e, "-&gt;", bool(email.match(e)))
+<span class="ln">10</span> 
+<span class="ln">11</span>text = "The cat sat on a category of catalog."
+<span class="ln">12</span>print(re.findall(r"cat", text))
+<span class="ln">13</span>print(re.findall(r"\bcat\b", text))
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Day 15, Month 11, Year 2026
+Day 30, Month 12, Year 2026
+rahim.cst@gmail.com -&gt; True
+karim@miu -&gt; False
+nusrat@miu-edu.bd -&gt; True
+['cat', 'cat', 'cat']
+['cat']</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">4</td><td class="snip"><pre>for day, month, year in re.findall(r"(\d{2})-(\d{2})-(\d{4})", notice):</pre></td><td>তিনটা group থাকায় findall() প্রতিটা মিলের জন্য তিনটা অংশের tuple দেয় — loop-এ তিনটা variable-এ ভাগ হলো।</td></tr><tr><td class="lab">7–9</td><td class="snip"><pre>email = re.compile(r"^[\w.]+@[\w-]+\.[a-z]{2,}$")
+for e in ["rahim.cst@gmail.com", "karim@miu", "nusrat@miu-edu.bd"]:
+    print(e, "-&gt;", bool(email.match(e)))</pre></td><td>"karim@miu"-এ বিন্দু আর শেষ অংশ নেই, তাই False।</td></tr><tr><td class="lab">11–13</td><td class="snip"><pre>text = "The cat sat on a category of catalog."
+print(re.findall(r"cat", text))
+print(re.findall(r"\bcat\b", text))</pre></td><td>শুধু "cat" খুঁজলে category আর catalog-এর ভেতরেরটাও আসে। <code>\b</code> দুই পাশে দিলে শুধু আলাদা শব্দ "cat" মেলে — 10.5-এ শব্দ খুঁজতে এটাই লাগবে।</td></tr></tbody></table></div></details>
+<aside class="box mistake"><p class="box-title">সাধারণ ভুল</p><div class="mk"><div class="mk-col bad"><p class="mk-h">ভুল</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>import re
+print(re.findall(r"3.14", "3.14 and 3514"))
+</code></pre></figure><p class="err">ফল: <code>['3.14', '3514']</code></p></div><div class="mk-col good"><p class="mk-h">সঠিক</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>import re
+print(re.findall(r"3\.14", "3.14 and 3514"))
+</code></pre></figure></div><p class="why"><code>.</code> মানে যেকোনো character, তাই 3514-ও মিলে গেছে। হুবহু বিন্দু খুঁজতে <code>\.</code> লিখতে হবে।</p></div></aside>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>RegEx-এর metacharacter ও special sequence উদাহরণসহ দেখাও। (5 নম্বর)</li></ul><p>দুটো টেবিল (metacharacter আর special sequence) লিখে একটা pattern (যেমন phone বা email) টুকরো টুকরো ব্যাখ্যা করো।</p></aside>
+<aside class="box practice"><p class="box-title">অনুশীলন</p><p>এমন একটা pattern লেখো যেটা Polytechnic-এর 6 অঙ্কের রোল নম্বর যাচাই করে, আর আরেকটা যেটা 8 থেকে 16 character-এর password যাচাই করে যাতে অন্তত একটা অঙ্ক আছে। (ইঙ্গিত: দ্বিতীয়টার জন্য দুটো আলাদা search ব্যবহার করতে পারো।)</p></aside>
+<h2 id="s4">10.4 RegEx-এর কার্যপদ্ধতি</h2><div class="yt" data-id="rlXJMyRrVG8"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: #67 Python Regular Expression  Bangla Tutorial"><img src="https://i.ytimg.com/vi/rlXJMyRrVG8/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · জুন ২০২৩</p><p class="yt-t">#67 Python Regular Expression  Bangla Tutorial</p><p class="yt-c">Hablu Programmer · <a href="https://www.youtube.com/watch?v=rlXJMyRrVG8" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p><code>re.search(pattern, text)</code> ডাকলে ভেতরে মোটামুটি এই ধাপগুলো ঘটে:</p>
+<ol><li><strong>Compile:</strong> pattern-কে ভেতরের একটা যন্ত্রে (state machine) রূপান্তর করা হয়। re.compile() এই ধাপটা আগেভাগে করে রাখে।</li><li><strong>শুরুর অবস্থান:</strong> RegEx engine লেখার প্রথম character (index 0) থেকে মেলানোর চেষ্টা শুরু করে।</li><li><strong>বাঁ থেকে ডানে মেলানো:</strong> pattern-এর প্রতিটা অংশ পরপর লেখার character-এর সাথে মেলায়।</li><li><strong>ব্যর্থ হলে পিছিয়ে চেষ্টা (backtracking):</strong> কোনো অংশ না মিললে আগের অংশের বিকল্প (যেমন + কম বার নেওয়া) দিয়ে আবার চেষ্টা করে।</li><li><strong>এক ঘর সরে আবার:</strong> এই অবস্থান থেকে কোনোভাবেই না মিললে শুরুর অবস্থান এক ঘর ডানে সরিয়ে আবার চেষ্টা।</li><li><strong>ফলাফল:</strong> প্রথম সফল মিলে থামে আর Match object দেয়; লেখার শেষ পর্যন্ত না মিললে None। findall/finditer মিলের পরের জায়গা থেকে খোঁজা চালিয়ে যায়।</li></ol>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 10.4</span>Engine কোথায় কোথায় মেলে</p><p class="problem"><strong>সমস্যা:</strong> finditer দিয়ে প্রতিটা মিলের অবস্থান দেখো, তারপর greedy আর non-greedy quantifier-এর পার্থক্য দেখো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import re
+<span class="ln">2</span> 
+<span class="ln">3</span>text = "Roll 512301 scored 78, roll 512305 scored 92"
+<span class="ln">4</span>for m in re.finditer(r"\d{6}", text):
+<span class="ln">5</span>    print(f"Found {m.group()} at index {m.start()}-{m.end()}")
+<span class="ln">6</span> 
+<span class="ln">7</span>html = "&lt;b&gt;Python&lt;/b&gt; and &lt;b&gt;RegEx&lt;/b&gt;"
+<span class="ln">8</span>print(re.findall(r"&lt;b&gt;.*&lt;/b&gt;", html))
+<span class="ln">9</span>print(re.findall(r"&lt;b&gt;.*?&lt;/b&gt;", html))
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Found 512301 at index 5-11
+Found 512305 at index 28-34
+['&lt;b&gt;Python&lt;/b&gt; and &lt;b&gt;RegEx&lt;/b&gt;']
+['&lt;b&gt;Python&lt;/b&gt;', '&lt;b&gt;RegEx&lt;/b&gt;']</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">4–5</td><td class="snip"><pre>for m in re.finditer(r"\d{6}", text):
+    print(f"Found {m.group()} at index {m.start()}-{m.end()}")</pre></td><td>engine বাঁ থেকে খুঁজে প্রথম 6 অঙ্কের সংখ্যা পেল index 5-এ, তারপর সেখান থেকে খোঁজা চালিয়ে দ্বিতীয়টা। 78 আর 92 দুই অঙ্কের, তাই বাদ।</td></tr><tr><td class="lab">8</td><td class="snip"><pre>print(re.findall(r"&lt;b&gt;.*&lt;/b&gt;", html))</pre></td><td><code>.*</code> হলো <strong>greedy</strong> — যত বেশি সম্ভব নেয়। তাই প্রথম &lt;b&gt; থেকে একদম শেষ &lt;/b&gt; পর্যন্ত পুরোটা একটা মিল হয়ে গেল।</td></tr><tr><td class="lab">9</td><td class="snip"><pre>print(re.findall(r"&lt;b&gt;.*?&lt;/b&gt;", html))</pre></td><td><code>.*?</code> হলো <strong>non-greedy (lazy)</strong> — যত কম সম্ভব নেয়। তাই প্রতিটা &lt;b&gt;...&lt;/b&gt; আলাদা মিল। quantifier-এর পরে ? দিলে সেটা lazy হয়।</td></tr></tbody></table></div></details>
+<h3>Flag: খোঁজার নিয়ম বদলানো</h3>
+<div class="tbl"><table><thead><tr><th>Flag</th><th>কাজ</th></tr></thead><tbody><tr><td class="m">re.IGNORECASE (re.I)</td><td class="">বড়-ছোট হাতের অক্ষর পার্থক্য উপেক্ষা</td></tr><tr><td class="m">re.MULTILINE (re.M)</td><td class="">^ ও $ প্রতিটা লাইনের শুরু-শেষ বোঝায়</td></tr><tr><td class="m">re.DOTALL (re.S)</td><td class="">. নতুন লাইনও মেলায়</td></tr></tbody></table></div>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Python RegEx-এর কার্যপদ্ধতি বর্ণনা করো। (4-5 নম্বর)</li><li>Greedy ও non-greedy matching-এর পার্থক্য কী?</li></ul><p>ধাপগুলো ক্রমানুসারে লেখো (compile → বাঁ থেকে মেলানো → backtracking → এক ঘর সরা → ফলাফল), সাথে finditer-এর মতো একটা উদাহরণ যেখানে মিলের অবস্থান দেখা যায়।</p></aside>
+<h2 id="s5">10.5 বাক্য বা অনুচ্ছেদে নির্দিষ্ট শব্দ খোঁজার Program</h2><div class="yt" data-id="fZok23U4NPg"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Regex দিয়ে Word Search in Python | সহজ বাংলা টিউটোরিয়াল"><img src="https://i.ytimg.com/vi/fZok23U4NPg/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · জুলাই ২০২৬</p><p class="yt-t">Regex দিয়ে Word Search in Python | সহজ বাংলা টিউটোরিয়াল</p><p class="yt-c">PYbrain · <a href="https://www.youtube.com/watch?v=fZok23U4NPg" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 10.5</span>Word Finder</p><p class="problem"><strong>সমস্যা:</strong> একটা অনুচ্ছেদে ব্যবহারকারীর দেওয়া শব্দ খোঁজো: বড়-ছোট হাতের অক্ষর উপেক্ষা করে শুধু পূর্ণ শব্দ হিসেবে মিলবে। কতবার পাওয়া গেল, কোথায় কোথায়, আর শব্দটা চিহ্নিত করে অনুচ্ছেদটা দেখাও।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import re
+<span class="ln">2</span> 
+<span class="ln">3</span>paragraph = """Python is easy to learn. Many students learn python
+<span class="ln">4</span>in polytechnic. Pythonic code is clean, and PYTHON has a huge community."""
+<span class="ln">5</span> 
+<span class="ln">6</span>def find_word(text, word):
+<span class="ln">7</span>    pattern = re.compile(r"\b" + re.escape(word) + r"\b", re.IGNORECASE)
+<span class="ln">8</span>    matches = list(pattern.finditer(text))
+<span class="ln">9</span>    print(f"'{word}' found {len(matches)} time(s)")
+<span class="ln">10</span>    for m in matches:
+<span class="ln">11</span>        print(f"  '{m.group()}' at position {m.start()}")
+<span class="ln">12</span>    highlighted = pattern.sub(lambda m: "[" + m.group().upper() + "]", text)
+<span class="ln">13</span>    print(highlighted)
+<span class="ln">14</span> 
+<span class="ln">15</span>word = input("Word to search: ")
+<span class="ln">16</span>find_word(paragraph, word)
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Word to search: <span class="in">python</span>
+'python' found 3 time(s)
+  'Python' at position 0
+  'python' at position 45
+  'PYTHON' at position 96
+[PYTHON] is easy to learn. Many students learn [PYTHON]
+in polytechnic. Pythonic code is clean, and [PYTHON] has a huge community.</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">7</td><td class="snip"><pre>    pattern = re.compile(r"\b" + re.escape(word) + r"\b", re.IGNORECASE)</pre></td><td>pattern তৈরি: <code>\b</code> দুই পাশে, যাতে শুধু পূর্ণ শব্দ মেলে (Pythonic বাদ পড়বে)। <code>re.escape()</code> ব্যবহারকারীর শব্দে কোনো metacharacter (যেমন . বা +) থাকলে সেটাকে সাধারণ character বানায় — ব্যবহারকারীর ইনপুট দিয়ে pattern বানালে এটা অবশ্যই করবে। re.IGNORECASE দিয়ে Python, python, PYTHON সব মিলবে।</td></tr><tr><td class="lab">8–11</td><td class="snip"><pre>    matches = list(pattern.finditer(text))
+    print(f"'{word}' found {len(matches)} time(s)")
+    for m in matches:
+        print(f"  '{m.group()}' at position {m.start()}")</pre></td><td>finditer থেকে সব মিল আর তাদের অবস্থান।</td></tr><tr><td class="lab">12</td><td class="snip"><pre>    highlighted = pattern.sub(lambda m: "[" + m.group().upper() + "]", text)</pre></td><td>sub()-এ প্রতিস্থাপনের জায়গায় একটা function (lambda) দেওয়া যায় — প্রতিটা মিলকে বড় হাতের করে [ ] দিয়ে ঘিরে দিল।</td></tr></tbody></table></div></details>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 10.6</span>Paragraph থেকে তথ্য বের করা</p><p class="problem"><strong>সমস্যা:</strong> একটা notice থেকে সব তারিখ, মোবাইল নম্বর আর email বের করো, আর মোট কয়টা শব্দ আছে গোনো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import re
+<span class="ln">2</span> 
+<span class="ln">3</span>notice = """Admission test on 20-12-2026. Contact 01711223344 or
+<span class="ln">4</span>office@rpi.edu.bd. Result on 05-01-2027; call 01819988776."""
+<span class="ln">5</span> 
+<span class="ln">6</span>dates = re.findall(r"\b\d{2}-\d{2}-\d{4}\b", notice)
+<span class="ln">7</span>phones = re.findall(r"\b01[3-9]\d{8}\b", notice)
+<span class="ln">8</span>emails = re.findall(r"[\w.]+@[\w-]+(?:\.[\w-]+)+", notice)
+<span class="ln">9</span>words = re.findall(r"\b[A-Za-z]+\b", notice)
+<span class="ln">10</span> 
+<span class="ln">11</span>print("Dates :", dates)
+<span class="ln">12</span>print("Phones:", phones)
+<span class="ln">13</span>print("Emails:", emails)
+<span class="ln">14</span>print("Words :", len(words))
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Dates : ['20-12-2026', '05-01-2027']
+Phones: ['01711223344', '01819988776']
+Emails: ['office@rpi.edu.bd']
+Words : 12</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">8</td><td class="snip"><pre>emails = re.findall(r"[\w.]+@[\w-]+(?:\.[\w-]+)+", notice)</pre></td><td><code>(?:\.[\w-]+)+</code> মানে ".কিছু" এক বা একাধিকবার — rpi.edu.bd-এর মতো একাধিক অংশের domain ধরতে। <code>(?:...)</code> হলো এমন group যা findall আলাদা করে ফেরত দেয় না।</td></tr><tr><td class="lab">9</td><td class="snip"><pre>words = re.findall(r"\b[A-Za-z]+\b", notice)</pre></td><td>শুধু ইংরেজি অক্ষরের শব্দ গোনা হলো।</td></tr></tbody></table></div></details>
+<aside class="box tip"><p class="box-title">Exam Tip</p><p>10.5-এর program-এ \b দিয়ে পূর্ণ শব্দ খোঁজা, re.IGNORECASE, আর গণনা ও অবস্থান দেখানো — এই তিনটা থাকলে উত্তর সম্পূর্ণ।</p></aside>
+<aside class="box practice"><p class="box-title">অনুশীলন</p><p>একটা অনুচ্ছেদে কোন শব্দ কতবার এসেছে (বড়-ছোট হাতের অক্ষর উপেক্ষা করে) গুনে সবচেয়ে বেশি আসা পাঁচটা শব্দ দেখাও।</p></aside>
+<h2 id="s6">অধ্যায়ের সারসংক্ষেপ</h2>
+<div class="tbl"><table><thead><tr><th>বিষয়</th><th>মূল কথা</th></tr></thead><tbody><tr><td class="">RegEx</td><td class="">লেখার ধরন (pattern) বর্ণনা করার ভাষা; re module; raw string r"..." ব্যবহার।</td></tr><tr><td class="">Method</td><td class="">search, match, fullmatch, findall, finditer, sub, split, compile; Match object: group, start, end, span।</td></tr><tr><td class="">Metacharacter</td><td class="">. ^ $ * + ? {m,n} [ ] | ( ) \</td></tr><tr><td class="">Special sequence</td><td class="">\d \D \w \W \s \S \b</td></tr><tr><td class="">কার্যপদ্ধতি</td><td class="">compile → বাঁ থেকে মেলানো → backtracking → এক ঘর সরে আবার → Match বা None; greedy বনাম lazy।</td></tr></tbody></table></div>
+<h2 id="s7">অনুশীলনী · অধ্যায় ১০ (বোর্ড প্রশ্ন ও উত্তর)</h2>
+<p>এই অনুশীলনীতে অধ্যায় ১০ থেকে বিগত বছরগুলোতে বোর্ডে আসা সব প্রশ্ন, পরীক্ষার খাতায় লেখার উপযোগী উত্তরসহ দেওয়া হলো। শেষে আছে বোর্ডে এখনো সরাসরি না আসা একটি গুরুত্বপূর্ণ প্রশ্ন।</p>
+<p>উত্তরগুলো নম্বর অনুযায়ী মাপা: ১ নম্বরের প্রশ্নে দুই-তিন লাইন, ২ নম্বরে মূল পয়েন্টসহ সংক্ষিপ্ত উত্তর, আর ৬ নম্বরে সংজ্ঞা, ব্যাখ্যা, program ও output — পূর্ণ উত্তর। Program-গুলোর output কোড চালিয়ে যাচাই করা।</p>
+<h3>ক. অতি সংক্ষিপ্ত প্রশ্ন (মান: ১)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>পাইথন রেগুলার এক্সপ্রেশন (RegEx) কী?</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৩ · বই: 10.1</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>Regular Expression (RegEx) হলো character-এর একটি বিশেষ ক্রম, যা একটি <strong>search pattern</strong> বা খোঁজার ধরন নির্দেশ করে। এই pattern দিয়ে কোনো লেখায় নির্দিষ্ট ধরনের অংশ খোঁজা, যাচাই, বের করা বা প্রতিস্থাপন করা যায়। Python-এ এর জন্য built-in <strong>re</strong> module আছে। যেমন: <code>r"01[3-9]\d{8}"</code> — বাংলাদেশি মোবাইল নম্বরের pattern।</p></aside>
+<div class="q"><span class="qn">২</span><div class="qt"><strong>Meta Character কী?</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২২, ২০২৩, ২০২৩ (পরি), ২০২৫ · বই: 10.3</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>RegEx-এ যেসব character সাধারণ অর্থের বদলে বিশেষ অর্থ বহন করে, তাদের meta character বলে — যেমন <code>.</code> <code>^</code> <code>$</code> <code>*</code> <code>+</code> <code>?</code> <code>{ }</code> <code>[ ]</code> <code>|</code> <code>( )</code> <code>\</code>। (পূর্ণ উত্তর: অনুশীলনী ৬, ক-৫; প্রতিটির অর্থের টেবিল: এই অনুশীলনীর ঘ-১)</p></aside>
+<h3>খ. সংক্ষিপ্ত প্রশ্ন (মান: ২)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>রেগুলার এক্সপ্রেশন-এর বিল্ট-ইন মেথডগুলোর নাম লেখ। (তালিকা তৈরি কর)</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৫ (পরি) · বই: 10.2</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<div class="tbl"><table><thead><tr><th>Method</th><th>কাজ</th></tr></thead><tbody><tr><td class="m">re.search(p, s)</td><td class="">s-এর যেকোনো জায়গায় প্রথম মিল খোঁজে; Match object বা None</td></tr><tr><td class="m">re.match(p, s)</td><td class="">শুধু s-এর শুরুতে মিল খোঁজে</td></tr><tr><td class="m">re.fullmatch(p, s)</td><td class="">পুরো s pattern-এর সাথে মেলে কিনা (ইনপুট যাচাইয়ে)</td></tr><tr><td class="m">re.findall(p, s)</td><td class="">সব মিল list আকারে দেয়</td></tr><tr><td class="m">re.finditer(p, s)</td><td class="">সব মিল অবস্থানসহ (Match object) দেয়</td></tr><tr><td class="m">re.sub(p, r, s)</td><td class="">সব মিল r দিয়ে প্রতিস্থাপন করে</td></tr><tr><td class="m">re.split(p, s)</td><td class="">pattern অনুযায়ী s ভাগ করে list দেয়</td></tr><tr><td class="m">re.compile(p)</td><td class="">pattern আগে থেকে তৈরি রাখে, বারবার ব্যবহারের জন্য</td></tr></tbody></table></div>
+<div class="q"><span class="qn">২</span><div class="qt"><strong>RegEx module Methods-এ Optional Flag-গুলো লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৪ (পরি) · বই: 10.4</span></span><span class="stars s2" title="গুরুত্ব 2/3" aria-label="গুরুত্ব 2 তারকা">★★☆</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>re module-এর method-গুলোতে <code>flags</code> argument দিয়ে খোঁজার নিয়ম বদলানো যায়:</p></aside>
+<div class="tbl"><table><thead><tr><th>Flag</th><th>পূর্ণ নাম</th><th>কাজ</th></tr></thead><tbody><tr><td class="m">re.I</td><td class="m">re.IGNORECASE</td><td class="">বড়-ছোট হাতের অক্ষরের পার্থক্য উপেক্ষা করে</td></tr><tr><td class="m">re.M</td><td class="m">re.MULTILINE</td><td class="">^ ও $ প্রতিটি লাইনের শুরু ও শেষ বোঝায়</td></tr><tr><td class="m">re.S</td><td class="m">re.DOTALL</td><td class="">. নতুন লাইন (\n)-ও মেলায়</td></tr><tr><td class="m">re.X</td><td class="m">re.VERBOSE</td><td class="">pattern-এ space ও comment লিখে পাঠযোগ্য করা যায়</td></tr><tr><td class="m">re.A</td><td class="m">re.ASCII</td><td class="">\w, \d ইত্যাদি শুধু ASCII character মেলায়</td></tr></tbody></table></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import re
+<span class="ln">2</span>text = "Python python PYTHON"
+<span class="ln">3</span>print(re.findall(r"python", text))
+<span class="ln">4</span>print(re.findall(r"python", text, re.IGNORECASE))
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>['python']
+['Python', 'python', 'PYTHON']</pre></figure>
+<h3>গ. রচনামূলক প্রশ্ন (মান: ৬)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>উদাহরণসহ পাইথন রেগুলার এক্সপ্রেশন-এর বিল্ট-ইন মেথডগুলো বর্ণনা কর। (উদাহরণসহ পাইথন রেগুলার এক্সপ্রেশনগুলো বর্ণনা কর।)</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৩ (পরি), ২০২৪ · বই: 10.1–10.2</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p><strong>Regular Expression:</strong> লেখার ধরন (pattern) বর্ণনা করার একটি বিশেষ ভাষা; Python-এ <code>re</code> module দিয়ে ব্যবহার করা হয়। pattern সবসময় raw string (<code>r"..."</code>)-এ লেখা হয়, যাতে <code>\</code> নিজের মতো থাকে।</p><p><strong>প্রধান built-in method:</strong></p><ul><li><strong>search():</strong> লেখার যেকোনো জায়গায় প্রথম মিল খোঁজে; পেলে Match object, না পেলে None।</li><li><strong>match():</strong> শুধু লেখার শুরুতে মিল খোঁজে।</li><li><strong>fullmatch():</strong> পুরো লেখা pattern-এর সাথে মেলে কিনা দেখে — ইনপুট যাচাইয়ে ব্যবহৃত।</li><li><strong>findall():</strong> সব মিল একটি list-এ দেয়।</li><li><strong>finditer():</strong> সব মিল Match object আকারে দেয়, ফলে অবস্থান (start, end) পাওয়া যায়।</li><li><strong>sub():</strong> সব মিল নতুন লেখা দিয়ে প্রতিস্থাপন করে।</li><li><strong>split():</strong> pattern অনুযায়ী লেখা ভাগ করে।</li><li><strong>compile():</strong> pattern-কে Pattern object বানিয়ে রাখে, বারবার ব্যবহারের জন্য।</li></ul><p>Match object-এর method: <code>group()</code> মিলে যাওয়া লেখা, <code>start()</code> ও <code>end()</code> শুরু-শেষের index, <code>span()</code> দুটো একসাথে।</p></aside>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import re
+<span class="ln">2</span> 
+<span class="ln">3</span>s = "Python 3 was released in 2008 and Python 2 in 2000"
+<span class="ln">4</span> 
+<span class="ln">5</span>m = re.search(r"\d{4}", s)
+<span class="ln">6</span>print("search  :", m.group(), m.span())
+<span class="ln">7</span>print("match   :", re.match(r"\d{4}", s))
+<span class="ln">8</span>print("match   :", re.match(r"Python", s).group())
+<span class="ln">9</span>print("full    :", bool(re.fullmatch(r"\d{4}", "2008")))
+<span class="ln">10</span>print("findall :", re.findall(r"\d{4}", s))
+<span class="ln">11</span>print("sub     :", re.sub(r"\d{4}", "YEAR", s))
+<span class="ln">12</span>print("split   :", re.split(r"\s+and\s+", s))
+<span class="ln">13</span>for m in re.finditer(r"Python \d", s):
+<span class="ln">14</span>    print("finditer:", m.group(), "at", m.start())
+<span class="ln">15</span> 
+<span class="ln">16</span>phone = re.compile(r"01[3-9]\d{8}")
+<span class="ln">17</span>print("compile :", bool(phone.fullmatch("01711223344")))
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>search  : 2008 (25, 29)
+match   : None
+match   : Python
+full    : True
+findall : ['2008', '2000']
+sub     : Python 3 was released in YEAR and Python 2 in YEAR
+split   : ['Python 3 was released in 2008', 'Python 2 in 2000']
+finditer: Python 3 at 0
+finditer: Python 2 at 34
+compile : True</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">5–6</td><td class="snip"><pre>m = re.search(r"\d{4}", s)
+print("search  :", m.group(), m.span())</pre></td><td>search() প্রথম চার অঙ্কের সংখ্যা 2008 পেল, index 25 থেকে 29।</td></tr><tr><td class="lab">7–8</td><td class="snip"><pre>print("match   :", re.match(r"\d{4}", s))
+print("match   :", re.match(r"Python", s).group())</pre></td><td>match() শুধু শুরুতে খোঁজে: লেখা সংখ্যা দিয়ে শুরু হয়নি, তাই None; "Python" খুঁজলে মিল পায়।</td></tr><tr><td class="lab">9</td><td class="snip"><pre>print("full    :", bool(re.fullmatch(r"\d{4}", "2008")))</pre></td><td>fullmatch() পুরো লেখা যাচাই করে।</td></tr><tr><td class="lab">10–12</td><td class="snip"><pre>print("findall :", re.findall(r"\d{4}", s))
+print("sub     :", re.sub(r"\d{4}", "YEAR", s))
+print("split   :", re.split(r"\s+and\s+", s))</pre></td><td>findall() সব মিলের list, sub() প্রতিস্থাপন, split() ভাগ।</td></tr><tr><td class="lab">13–14</td><td class="snip"><pre>for m in re.finditer(r"Python \d", s):
+    print("finditer:", m.group(), "at", m.start())</pre></td><td>finditer() প্রতিটি মিলের অবস্থানসহ।</td></tr><tr><td class="lab">16–17</td><td class="snip"><pre>phone = re.compile(r"01[3-9]\d{8}")
+print("compile :", bool(phone.fullmatch("01711223344")))</pre></td><td>compile() করা pattern বারবার ব্যবহার।</td></tr></tbody></table></div></details>
+<div class="q"><span class="qn">২</span><div class="qt"><strong>RegEx ব্যবহার করে নির্দিষ্ট Word খোঁজা ও গণনা করার Python Program লেখ। (নির্দিষ্ট Word খুঁজে বের করার Program লেখ।)</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৩, ২০২৪ (পরি), ২০২৫ (পরি) · বই: 10.5</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>কৌশল: (১) <code>\b</code> দিয়ে শব্দের সীমানা — যাতে শুধু পূর্ণ শব্দ মেলে; (২) <code>re.IGNORECASE</code> — বড়-ছোট হাতের অক্ষর উপেক্ষা; (৩) <code>re.escape()</code> — ব্যবহারকারীর শব্দের বিশেষ character নিরাপদ করা; (৪) <code>finditer()</code> দিয়ে সংখ্যা ও অবস্থান।</p></aside>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import re
+<span class="ln">2</span> 
+<span class="ln">3</span>paragraph = """Python is easy to learn. Many students learn python
+<span class="ln">4</span>in polytechnic. Pythonic code is clean, and PYTHON is popular."""
+<span class="ln">5</span> 
+<span class="ln">6</span>word = input("Enter the word to search: ")
+<span class="ln">7</span>pattern = re.compile(r"\b" + re.escape(word) + r"\b", re.IGNORECASE)
+<span class="ln">8</span> 
+<span class="ln">9</span>matches = list(pattern.finditer(paragraph))
+<span class="ln">10</span>if matches:
+<span class="ln">11</span>    print(f"'{word}' found {len(matches)} time(s)")
+<span class="ln">12</span>    for m in matches:
+<span class="ln">13</span>        print(f"  '{m.group()}' at position {m.start()}")
+<span class="ln">14</span>else:
+<span class="ln">15</span>    print(f"'{word}' not found")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Enter the word to search: <span class="in">python</span>
+'python' found 3 time(s)
+  'Python' at position 0
+  'python' at position 45
+  'PYTHON' at position 96</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">3–4</td><td class="snip"><pre>paragraph = """Python is easy to learn. Many students learn python
+in polytechnic. Pythonic code is clean, and PYTHON is popular."""</pre></td><td>যে অনুচ্ছেদে খোঁজা হবে।</td></tr><tr><td class="lab">6–7</td><td class="snip"><pre>word = input("Enter the word to search: ")
+pattern = re.compile(r"\b" + re.escape(word) + r"\b", re.IGNORECASE)</pre></td><td>শব্দ input নিয়ে pattern তৈরি: দুই পাশে \b থাকায় "Pythonic" বাদ পড়বে।</td></tr><tr><td class="lab">9–13</td><td class="snip"><pre>matches = list(pattern.finditer(paragraph))
+if matches:
+    print(f"'{word}' found {len(matches)} time(s)")
+    for m in matches:
+        print(f"  '{m.group()}' at position {m.start()}")</pre></td><td>finditer() দিয়ে সব মিল; মোট সংখ্যা ও প্রতিটির অবস্থান দেখানো।</td></tr><tr><td class="lab">14–15</td><td class="snip"><pre>else:
+    print(f"'{word}' not found")</pre></td><td>একবারও না পেলে বার্তা।</td></tr></tbody></table></div></details>
+<aside class="box tip"><p class="box-title">Exam Tip</p><p>প্রশ্নে "খোঁজা" বললে অবস্থান দেখাও, "গণনা" বললে মোট সংখ্যা — এই program দুটোই করে, তাই তিন রূপের প্রশ্নেই চলবে।</p></aside>
+<div class="q"><span class="qn">৩</span><div class="qt"><strong>Regex ব্যবহারপূর্বক নিম্নোক্ত String হতে Number-গুলোকে Extract করার জন্য Program লেখ: String = "hello 23, hi 77, lovely 18 and sweet 16"</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২২ · বই: 10.2</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import re
+<span class="ln">2</span> 
+<span class="ln">3</span>string = "hello 23, hi 77, lovely 18 and sweet 16"
+<span class="ln">4</span> 
+<span class="ln">5</span>numbers = re.findall(r"\d+", string)
+<span class="ln">6</span>print("Extracted (text)   :", numbers)
+<span class="ln">7</span> 
+<span class="ln">8</span>values = [int(n) for n in numbers]
+<span class="ln">9</span>print("Extracted (numbers):", values)
+<span class="ln">10</span>print("Sum =", sum(values), "| Largest =", max(values))
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Extracted (text)   : ['23', '77', '18', '16']
+Extracted (numbers): [23, 77, 18, 16]
+Sum = 134 | Largest = 77</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">5</td><td class="snip"><pre>numbers = re.findall(r"\d+", string)</pre></td><td><code>\d+</code> মানে এক বা একাধিক অঙ্ক; findall() সব সংখ্যা string আকারে list-এ দেয়।</td></tr><tr><td class="lab">8–10</td><td class="snip"><pre>values = [int(n) for n in numbers]
+print("Extracted (numbers):", values)
+print("Sum =", sum(values), "| Largest =", max(values))</pre></td><td>int()-এ রূপান্তর করে হিসাবেও ব্যবহার করা যায় — যোগফল ও সবচেয়ে বড় সংখ্যা।</td></tr></tbody></table></div></details>
+<div class="q"><span class="qn">৪</span><div class="qt"><strong>RegEx ব্যবহার করে ইমেইল অ্যাড্রেস ভেরিফাই করার প্রোগ্রাম লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৫ · বই: 10.3</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>Email-এর গঠন: <code>ব্যবহারকারীর নাম</code> + <code>@</code> + <code>domain</code> + <code>.</code> + <code>extension</code>। pattern অংশ অংশে:</p><ul><li><code>^[\w.+-]+</code> — শুরুতে অক্ষর, অঙ্ক, underscore, বিন্দু, + বা - (এক বা একাধিক)</li><li><code>@</code> — হুবহু @</li><li><code>[\w-]+</code> — domain নাম (gmail, rpi-edu)</li><li><code>(\.[\w-]+)*</code> — মাঝের অংশ, যেমন .edu (০ বা একাধিক)</li><li><code>\.[A-Za-z]{2,}$</code> — শেষে বিন্দু ও অন্তত দুই অক্ষরের extension (com, bd)</li></ul></aside>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>import re
+<span class="ln">2</span> 
+<span class="ln">3</span>EMAIL = re.compile(r"^[\w.+-]+@[\w-]+(\.[\w-]+)*\.[A-Za-z]{2,}$")
+<span class="ln">4</span> 
+<span class="ln">5</span>def is_valid_email(email):
+<span class="ln">6</span>    return EMAIL.fullmatch(email) is not None
+<span class="ln">7</span> 
+<span class="ln">8</span>emails = ["rahim.cst@gmail.com", "info@rpi.edu.bd", "karim@miu",
+<span class="ln">9</span>          "nusrat@@yahoo.com", "sumaiya123@outlook.com", "@gmail.com"]
+<span class="ln">10</span> 
+<span class="ln">11</span>for e in emails:
+<span class="ln">12</span>    print(f"{e:&lt;24} -&gt;", "Valid" if is_valid_email(e) else "Invalid")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>rahim.cst@gmail.com      -&gt; Valid
+info@rpi.edu.bd          -&gt; Valid
+karim@miu                -&gt; Invalid
+nusrat@@yahoo.com        -&gt; Invalid
+sumaiya123@outlook.com   -&gt; Valid
+@gmail.com               -&gt; Invalid</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">3</td><td class="snip"><pre>EMAIL = re.compile(r"^[\w.+-]+@[\w-]+(\.[\w-]+)*\.[A-Za-z]{2,}$")</pre></td><td>pattern একবার compile করা হলো।</td></tr><tr><td class="lab">5–6</td><td class="snip"><pre>def is_valid_email(email):
+    return EMAIL.fullmatch(email) is not None</pre></td><td>fullmatch() পুরো লেখা pattern-এর সাথে মিলিয়ে দেখে; মিললে True।</td></tr><tr><td class="lab">8–12</td><td class="snip"><pre>emails = ["rahim.cst@gmail.com", "info@rpi.edu.bd", "karim@miu",
+          "nusrat@@yahoo.com", "sumaiya123@outlook.com", "@gmail.com"]
+
+for e in emails:
+    print(f"{e:&lt;24} -&gt;", "Valid" if is_valid_email(e) else "Invalid")</pre></td><td>ছয়টি email পরীক্ষা: শেষ অংশ ছাড়া "karim@miu", দুটি @, আর নাম ছাড়া "@gmail.com" অবৈধ।</td></tr></tbody></table></div></details>
+<h3>ঘ. অতিরিক্ত গুরুত্বপূর্ণ প্রশ্ন</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>RegEx Meta Character ও Special Sequence বর্ণনা কর।</strong></div><span class="qr"><span class="qref">বই: 10.3</span></span><span class="stars s2" title="গুরুত্ব 2/3" aria-label="গুরুত্ব 2 তারকা">★★☆</span></div>
+<div class="tbl"><table><thead><tr><th>Meta Character</th><th>অর্থ</th><th>উদাহরণ</th></tr></thead><tbody><tr><td class="m">.</td><td class="">নতুন লাইন ছাড়া যেকোনো একটি character</td><td class="m">c.t → cat, cut</td></tr><tr><td class="m">^</td><td class="">লেখার শুরু</td><td class="m">^Hello</td></tr><tr><td class="m">$</td><td class="">লেখার শেষ</td><td class="m">end$</td></tr><tr><td class="m">*</td><td class="">আগেরটি 0 বা বেশিবার</td><td class="m">ab* → a, ab, abb</td></tr><tr><td class="m">+</td><td class="">আগেরটি 1 বা বেশিবার</td><td class="m">ab+ → ab, abb</td></tr><tr><td class="m">?</td><td class="">আগেরটি 0 বা 1 বার</td><td class="m">colou?r</td></tr><tr><td class="m">{m,n}</td><td class="">আগেরটি m থেকে n বার</td><td class="m">\d{2,4}</td></tr><tr><td class="m">[ ]</td><td class="">set — ভেতরের যেকোনো একটি</td><td class="m">[aeiou]</td></tr><tr><td class="m">|</td><td class="">অথবা</td><td class="m">cat|dog</td></tr><tr><td class="m">( )</td><td class="">group</td><td class="m">(\d+)-(\d+)</td></tr><tr><td class="m">\</td><td class="">বিশেষ অর্থ বাতিল বা special sequence শুরু</td><td class="m">\.</td></tr></tbody></table></div>
+<div class="tbl"><table><thead><tr><th>Special Sequence</th><th>অর্থ</th></tr></thead><tbody><tr><td class="m">\d / \D</td><td class="">অঙ্ক / অঙ্ক নয়</td></tr><tr><td class="m">\w / \W</td><td class="">শব্দের character (অক্ষর, অঙ্ক, _) / নয়</td></tr><tr><td class="m">\s / \S</td><td class="">whitespace / whitespace নয়</td></tr><tr><td class="m">\b / \B</td><td class="">শব্দের সীমানা / সীমানা নয়</td></tr><tr><td class="m">\A / \Z</td><td class="">লেখার একদম শুরু / একদম শেষ</td></tr></tbody></table></div><section class="quick" id="quick"><h2>এই অধ্যায় কেমন লাগল?</h2><p>তোমার মতামত সরাসরি লেখকের কাছে যাবে। ভুল পেলে কোন section-এ, সেটাও লিখে দিও।</p>
+<form class="fb-form" data-kind="অধ্যায়ের মতামত"><input type="hidden" name="chapter" value="অধ্যায় ১০ — Python RegEx (Regular Expression)">
+<div class="rate" role="radiogroup" aria-label="রেটিং"><label><input type="radio" name="rating" value="1" required><span>★</span><em>1</em></label><label><input type="radio" name="rating" value="2" ><span>★</span><em>2</em></label><label><input type="radio" name="rating" value="3" ><span>★</span><em>3</em></label><label><input type="radio" name="rating" value="4" ><span>★</span><em>4</em></label><label><input type="radio" name="rating" value="5" ><span>★</span><em>5</em></label></div>
+<label class="fld"><span>তোমার নাম (ঐচ্ছিক)</span><input name="name" autocomplete="name"></label>
+<label class="fld"><span>মতামত বা যে ভুল পেয়েছ</span><textarea name="message" rows="4" required placeholder="যেমন: 4.5-এর উদাহরণটা বুঝতে কষ্ট হয়েছে, কারণ…"></textarea></label>
+<input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off"><button type="submit">মতামত পাঠাও</button><p class="status" role="status"></p></form></section><nav class="pager"><a class="pn prev" href="ch09.html"><small>আগের অধ্যায়</small>Unit Testing</a><a class="pn next" href="ch11.html"><small>পরের অধ্যায়</small>Application Software</a></nav></main><aside class="mini"><p>এই অধ্যায়ে</p><ol><li><a href="#s1">10.1 RegEx কী?</a></li><li><a href="#s2">10.2 Python RegEx-এর Built-in Method</a></li><li><a href="#s3">10.3 Metacharacter ও Special Sequence</a></li><li><a href="#s4">10.4 RegEx-এর কার্যপদ্ধতি</a></li><li><a href="#s5">10.5 বাক্য বা অনুচ্ছেদে নির্দিষ্ট শব্দ খোঁজার Program</a></li><li><a href="#s6">অধ্যায়ের সারসংক্ষেপ</a></li><li><a href="#s7">অনুশীলনী · অধ্যায় ১০ (বোর্ড প্রশ্ন ও উত্তর)</a></li></ol><a class="report" href="#quick">ভুল পেয়েছ? জানাও</a></aside></div><nav class="bnav" aria-label="মোবাইল মেনু"><a href="../index.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>হোম</span></a><button type="button" class="bn-toc on" aria-expanded="false" aria-controls="sheet"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5zM4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3"/><path d="M8 7h7M8 10.5h5"/></svg><span>অধ্যায়</span></button><a href="../runner.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m8 9 3 3-3 3M13 15h3"/></svg><span>কোড রানার</span></a><a href="../feedback.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4.5"/></svg><span>মতামত</span></a></nav><div class="sheet" id="sheet" hidden><div class="sheet-backdrop" data-close></div><div class="sheet-panel" role="dialog" aria-modal="true" aria-label="বিষয়সূচি"><div class="sheet-grip" data-close></div><div class="sheet-head"><strong>বিষয়সূচি</strong><button type="button" data-close aria-label="বন্ধ করো">✕</button></div><div class="sheet-body"><p class="sheet-h">এই অধ্যায়ে</p><ol class="sheet-sec"><li><a href="#s1">10.1 RegEx কী?</a></li><li><a href="#s2">10.2 Python RegEx-এর Built-in Method</a></li><li><a href="#s3">10.3 Metacharacter ও Special Sequence</a></li><li><a href="#s4">10.4 RegEx-এর কার্যপদ্ধতি</a></li><li><a href="#s5">10.5 বাক্য বা অনুচ্ছেদে নির্দিষ্ট শব্দ খোঁজার Program</a></li><li><a href="#s6">অধ্যায়ের সারসংক্ষেপ</a></li><li><a href="#s7">অনুশীলনী · অধ্যায় ১০ (বোর্ড প্রশ্ন ও উত্তর)</a></li></ol><p class="sheet-h">সব অধ্যায়</p><ol class="sheet-ch"><li><a href="../chapters/ch01.html"><span class="u">১</span>Python Functions</a></li><li><a href="../chapters/ch02.html"><span class="u">২</span>File Operation</a></li><li><a href="../chapters/ch03.html"><span class="u">৩</span>Module, Package ও Application Software</a></li><li><a href="../chapters/ch04.html"><span class="u">৪</span>Basics of OOP</a></li><li><a href="../chapters/ch05.html"><span class="u">৫</span>Four Pillars of OOP</a></li><li><a href="../chapters/ch06.html"><span class="u">৬</span>Iterator, Generator ও Decorator</a></li><li><a href="../chapters/ch07.html"><span class="u">৭</span>Exception ও Error Handling</a></li><li><a href="../chapters/ch08.html"><span class="u">৮</span>Logging</a></li><li><a href="../chapters/ch09.html"><span class="u">৯</span>Unit Testing</a></li><li><a href="../chapters/ch10.html" class=on aria-current=page><span class="u">১০</span>RegEx</a></li><li><a href="../chapters/ch11.html"><span class="u">১১</span>Application Software</a></li><li><a href="../chapters/ch12.html"><span class="u">পরি</span>বোর্ড প্রশ্ন ও সাজেশন</a></li></ol></div></div></div><footer class="foot"><p><strong>Application Development Using Python</strong> · লেখক: Kazi Tauhid Rana, Computer Science and Technology, Rajshahi Polytechnic Institute</p><p class="copy-note">© ২০২৬ Kazi Tauhid Rana · সর্বস্বত্ব সংরক্ষিত · <a href="../copyright.html">কপিরাইট নোটিশ</a> · <a href="../pdf.html">বইয়ের PDF</a></p><p>MIU Platform · Learn Grow Succeed</p></footer>
+<script src="../assets/config.js"></script><script src="../assets/app.js"></script><script src="../assets/runner.js"></script></body></html>

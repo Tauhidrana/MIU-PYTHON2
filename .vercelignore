@@ -1,0 +1,4 @@
+# Vercel-এ শুধু website (site/) আর vercel.json যায়
+/*
+!site
+!vercel.json

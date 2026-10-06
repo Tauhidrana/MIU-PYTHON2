@@ -1,0 +1,354 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#FBFCFE"><meta name="format-detection" content="telephone=no">
+<title>অধ্যায় ৯: Unit Testing in Python — Python বই</title><meta name="description" content="Application Development Using Python — Polytechnic ছাত্রদের জন্য বাংলায় সম্পূর্ণ বই, বোর্ড প্রশ্নের উত্তরসহ।">
+<link rel="icon" href="../img/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta name="robots" content="noarchive"><link rel="stylesheet" href="../assets/style.css"><script src="../assets/protect.js"></script><script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script></head><body class="reader"><header class="topbar"><a class="brand" href="../index.html"><img src="../img/logo.png" alt="MIU"><span>Python বই</span></a>
+<nav class="topnav"><a href="../index.html#chapters">অধ্যায়</a><a href="../runner.html">কোড রানার</a><a href="../feedback.html">রিভিউ ও মতামত</a>
+<button class="theme" type="button" aria-label="ডার্ক মোড">◐</button></nav></header><div class="progress"><span></span></div><div class="layout"><nav class="side" aria-label="অধ্যায়ের তালিকা"><button class="side-toggle" type="button">অধ্যায়ের তালিকা</button><ol><li><a class="" href="ch01.html"><span class="u">১</span>Python Functions</a></li><li><a class="" href="ch02.html"><span class="u">২</span>File Operation</a></li><li><a class="" href="ch03.html"><span class="u">৩</span>Module, Package ও Application Software</a></li><li><a class="" href="ch04.html"><span class="u">৪</span>Basics of OOP</a></li><li><a class="" href="ch05.html"><span class="u">৫</span>Four Pillars of OOP</a></li><li><a class="" href="ch06.html"><span class="u">৬</span>Iterator, Generator ও Decorator</a></li><li><a class="" href="ch07.html"><span class="u">৭</span>Exception ও Error Handling</a></li><li><a class="" href="ch08.html"><span class="u">৮</span>Logging</a></li><li><a class="cur" href="ch09.html"><span class="u">৯</span>Unit Testing</a></li><li><a class="" href="ch10.html"><span class="u">১০</span>RegEx</a></li><li><a class="" href="ch11.html"><span class="u">১১</span>Application Software</a></li><li><a class="" href="ch12.html"><span class="u">পরি</span>বোর্ড প্রশ্ন ও সাজেশন</a></li></ol></nav><main class="content"><header class="chap-head"><p class="chap-num">অধ্যায় ৯</p><h1>Unit Testing in Python</h1><p class="lead">তুমি একটা grade বের করার function লিখলে, দুয়েকটা মার্কস দিয়ে চালিয়ে দেখলে ঠিক আছে। এক মাস পর grading নিয়মে ছোট একটা পরিবর্তন করলে। এখন কি নিশ্চিত যে 79.5 মার্কস এখনো ঠিক grade পাচ্ছে? 40-এর সীমায় কী হচ্ছে? প্রতিবার হাতে হাতে সব পরীক্ষা করা অসম্ভব — আর সেখানেই ভুল লুকিয়ে থাকে।</p><p class="lead"><strong>Unit testing</strong> এই সমস্যার সমাধান: কোড ঠিকমতো কাজ করছে কিনা সেটা পরীক্ষা করার জন্য আলাদা কোড লেখা, যেটা এক command-এ যতবার খুশি চালানো যায়। এই অধ্যায়ে শিখব unit test কী, কেন জরুরি, এর গঠন, Python-এর built-in <strong>unittest</strong> library দিয়ে test লেখা ও চালানোর পদ্ধতি, আর test লেখার জন্য কী কী লাগে।</p></header>
+<h2 id="s1">9.1 Unit Testing কী?</h2><div class="yt" data-id="axHrj0_m2S4"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: UNIT TESTING | SOFTWARE ENGINEERING (BANGLA)"><img src="https://i.ytimg.com/vi/axHrj0_m2S4/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · এপ্রিল ২০২৫</p><p class="yt-t">UNIT TESTING | SOFTWARE ENGINEERING (BANGLA)</p><p class="yt-c">COMPUTER SCIENCE WITH BHASKAR SIR · <a href="https://www.youtube.com/watch?v=axHrj0_m2S4" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<aside class="box definition"><p class="box-title">সংজ্ঞা (পরীক্ষার জন্য)</p><p><strong>Unit testing</strong> হলো software testing-এর এমন একটি পদ্ধতি, যেখানে program-এর সবচেয়ে ছোট পরীক্ষাযোগ্য অংশ — একটি function, method বা class (যাকে <strong>unit</strong> বলে) — আলাদাভাবে পরীক্ষা করে দেখা হয় যে সেটি প্রত্যাশিত ফলাফল দিচ্ছে কিনা। এই পরীক্ষাগুলো কোড আকারে লেখা হয় এবং স্বয়ংক্রিয়ভাবে চালানো যায়।</p></aside>
+<aside class="box analogy"><p class="box-title">বাস্তব উদাহরণ</p><p>মোটরসাইকেলের কারখানায় পুরো গাড়ি জোড়া লাগানোর আগে প্রতিটা অংশ — ব্রেক, হেডলাইট, ইঞ্জিন — আলাদা আলাদা পরীক্ষা করা হয়। ব্রেক ঠিক আছে কিনা জানতে পুরো গাড়ি বানিয়ে রাস্তায় নামাতে হয় না। আর একটা অংশ বদলালে শুধু সেই অংশের পরীক্ষা আবার চালানো যায়। Unit testing হলো software-এর এই অংশভিত্তিক মান-পরীক্ষা (quality check)।</p></aside>
+<p>সবচেয়ে সরল test লেখা যায় Python-এর <code>assert</code> statement দিয়ে: শর্ত সত্য হলে কিছুই হয় না, মিথ্যা হলে AssertionError।</p>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 9.1</span>assert দিয়ে প্রথম Test</p><p class="problem"><strong>সমস্যা:</strong> একটা add() function আর তার জন্য কয়েকটা test লেখো, যার একটা ইচ্ছা করে ভুল।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>def add(a, b):
+<span class="ln">2</span>    return a + b
+<span class="ln">3</span> 
+<span class="ln">4</span>assert add(2, 3) == 5
+<span class="ln">5</span>assert add(-1, 1) == 0
+<span class="ln">6</span>print("First two tests passed")
+<span class="ln">7</span>assert add(0.1, 0.2) == 0.3, "0.1 + 0.2 should be 0.3"
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>First two tests passed
+Traceback (most recent call last):
+  ...
+AssertionError: 0.1 + 0.2 should be 0.3</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">4–6</td><td class="snip"><pre>assert add(2, 3) == 5
+assert add(-1, 1) == 0
+print("First two tests passed")</pre></td><td>দুটো test পাস করেছে, তাই চুপচাপ পরের লাইনে চলে গেছে।</td></tr><tr><td class="lab">7</td><td class="snip"><pre>assert add(0.1, 0.2) == 0.3, "0.1 + 0.2 should be 0.3"</pre></td><td>এই test ব্যর্থ! কারণ computer-এ দশমিক সংখ্যা পুরোপুরি নিখুঁতভাবে রাখা যায় না: 0.1 + 0.2 আসলে 0.30000000000000004। Test ঠিক এই ধরনের অপ্রত্যাশিত আচরণই ধরে ফেলে। এর সমাধান 9.3-এ (assertAlmostEqual)।</td></tr></tbody></table></div></details>
+<p>assert দিয়ে শুরু করা যায়, কিন্তু প্রথম ব্যর্থতাতেই সব থেমে যায় আর কোন কোন test পাস করল তার হিসাব থাকে না। তাই বাস্তবে ব্যবহার হয় <strong>unittest</strong> library — যেটা Python-এর সাথেই আসে।</p>
+<div class="tbl"><table><thead><tr><th>বিষয়</th><th>হাতে হাতে পরীক্ষা (Manual)</th><th>Unit Test (Automated)</th></tr></thead><tbody><tr><td class="">পদ্ধতি</td><td class="">program চালিয়ে চোখে দেখে মেলানো</td><td class="">কোড নিজেই প্রত্যাশিত ফলের সাথে মেলায়</td></tr><tr><td class="">সময়</td><td class="">প্রতিবার অনেক সময়</td><td class="">এক command, কয়েক সেকেন্ড</td></tr><tr><td class="">পুনরাবৃত্তি</td><td class="">ক্লান্তিকর, তাই বাদ পড়ে</td><td class="">যতবার খুশি, একই নিখুঁতভাবে</td></tr><tr><td class="">ভুলের সম্ভাবনা</td><td class="">মানুষের চোখ ভুল করে</td><td class="">নির্ধারিত নিয়মে, ভুল কম</td></tr></tbody></table></div>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Unit testing কাকে বলে? (2 নম্বর)</li><li>"Unit" বলতে কী বোঝায়?</li></ul></aside>
+<h2 id="s2">9.2 Unit Testing-এর গুরুত্ব</h2><div class="yt" data-id="VQgE2K7-wNA"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Black Box White Box Testing | Unit Testing | Integration Testing | Bangla Tutorial | Edu Clinic"><img src="https://i.ytimg.com/vi/VQgE2K7-wNA/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · মে ২০১৯</p><p class="yt-t">Black Box White Box Testing | Unit Testing | Integration Testing | Bangla Tutorial | Edu Clinic</p><p class="yt-c">Edu Clinic · <a href="https://www.youtube.com/watch?v=VQgE2K7-wNA" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<ol><li><strong>শুরুতেই ভুল ধরা পড়ে:</strong> কোড লেখার সাথে সাথে ভুল ধরা পড়ে, ব্যবহারকারীর হাতে পৌঁছানোর আগে। যত দেরিতে ভুল ধরা পড়ে, ঠিক করতে খরচ তত বেশি।</li><li><strong>নিশ্চিন্তে কোড বদলানো যায়:</strong> পুরনো কোড উন্নত (refactor) করার পর test চালালেই বোঝা যায় কিছু ভেঙেছে কিনা। পুরনো ঠিক থাকা কোড নতুন পরিবর্তনে ভেঙে যাওয়াকে বলে <strong>regression</strong> — unit test এর বিরুদ্ধে পাহারাদার।</li><li><strong>Debugging সহজ:</strong> কোন test ব্যর্থ হলো দেখেই বোঝা যায় ঠিক কোন function-এ সমস্যা — পুরো program খুঁজতে হয় না।</li><li><strong>জীবন্ত document:</strong> test পড়লেই বোঝা যায় function কী ইনপুটে কী ফল দেওয়ার কথা — লিখিত বর্ণনার চেয়ে নির্ভরযোগ্য।</li><li><strong>ভালো ডিজাইন:</strong> test লেখা যায় এমন কোড সাধারণত ছোট, পরিষ্কার, একটা কাজের function — test লেখার অভ্যাস কোডের মান বাড়ায়।</li><li><strong>দলগত কাজে আস্থা:</strong> অন্যের লেখা কোডে পরিবর্তন করার পর test পাস করলে নিশ্চিত হওয়া যায় যে তার কাজ ভাঙেনি।</li><li><strong>সময় ও খরচ সাশ্রয়:</strong> শুরুতে test লিখতে সময় লাগে, কিন্তু পরে বারবার হাতে পরীক্ষা আর বড় ভুলের মাশুল থেকে অনেক বেশি সময় বাঁচে।</li></ol>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Unit testing-এর গুরুত্ব বর্ণনা করো। (4-5 নম্বর)</li></ul><p>প্রতিটা পয়েন্টের ছোট শিরোনাম আর এক-দুই লাইনের ব্যাখ্যা। "regression" শব্দটা ব্যাখ্যাসহ ব্যবহার করলে উত্তর মানসম্মত হয়।</p></aside>
+<h2 id="s3">9.3 Unit Test-এর গঠন</h2><div class="yt" data-id="eq6774FqGJM"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: ইউনিট টেস্টিং বেসিক স্ট্রাকচার | অ্যাপ্লিকেশন ডেভেলপমেন্ট পাইথন | ডিপ্লোমা ৩য় সেমি CST"><img src="https://i.ytimg.com/vi/eq6774FqGJM/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · জুলাই ২০২৫</p><p class="yt-t">ইউনিট টেস্টিং বেসিক স্ট্রাকচার | অ্যাপ্লিকেশন ডেভেলপমেন্ট পাইথন | ডিপ্লোমা ৩য় সেমি CST</p><p class="yt-c">Python Lover · <a href="https://www.youtube.com/watch?v=eq6774FqGJM" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p>unittest library-তে একটা test file কয়েকটা নির্দিষ্ট অংশ নিয়ে তৈরি:</p>
+<div class="tbl"><table><thead><tr><th>অংশ</th><th>কী</th><th>unittest-এ কীভাবে</th></tr></thead><tbody><tr><td class="">Test Case</td><td class="">একটা unit-এর জন্য সম্পর্কিত test-এর সংগ্রহ</td><td class="">unittest.TestCase থেকে inherit করা class</td></tr><tr><td class="">Test Method</td><td class="">একটা নির্দিষ্ট পরিস্থিতির পরীক্ষা</td><td class="">নাম অবশ্যই test_ দিয়ে শুরু</td></tr><tr><td class="">Assertion</td><td class="">প্রত্যাশিত ও আসল ফল মেলানো</td><td class="">self.assertEqual() ইত্যাদি</td></tr><tr><td class="">Test Fixture</td><td class="">প্রতিটা test-এর আগে প্রস্তুতি ও পরে পরিষ্কার</td><td class="">setUp() ও tearDown() method</td></tr><tr><td class="">Test Suite</td><td class="">একসাথে চালানোর জন্য অনেক test-এর সমষ্টি</td><td class="">একাধিক TestCase বা file</td></tr><tr><td class="">Test Runner</td><td class="">test চালিয়ে ফলাফল দেখায়</td><td class="">python -m unittest বা unittest.main()</td></tr></tbody></table></div>
+<div class="syntax"><p class="box-title">Syntax</p><figure class="code mini"><figcaption><span>Syntax</span><span class="fn"></span></figcaption><pre><code>import unittest
+from my_module import my_function       # যে কোড পরীক্ষা হবে
+ 
+class TestMyFunction(unittest.TestCase):  # Test Case
+ 
+    def setUp(self):                      # Fixture: প্রতিটা test-এর আগে
+        ...
+ 
+    def test_normal_case(self):           # Test Method
+        result = my_function(...)         # Act
+        self.assertEqual(result, ...)     # Assert
+ 
+    def tearDown(self):                   # Fixture: প্রতিটা test-এর পরে
+        ...
+ 
+if __name__ == "__main__":
+    unittest.main()                       # Test Runner
+</code></pre></figure><p>প্রতিটা test method সাধারণত তিন ধাপে লেখা হয়, যাকে বলে <strong>AAA pattern</strong>: <strong>Arrange</strong> (data প্রস্তুত), <strong>Act</strong> (function চালানো), <strong>Assert</strong> (ফল যাচাই)।</p></div>
+<h3>প্রধান Assertion Method</h3>
+<div class="tbl"><table><thead><tr><th>Method</th><th>কী যাচাই করে</th></tr></thead><tbody><tr><td class="m">assertEqual(a, b)</td><td class="">a == b</td></tr><tr><td class="m">assertNotEqual(a, b)</td><td class="">a != b</td></tr><tr><td class="m">assertTrue(x) / assertFalse(x)</td><td class="">x সত্য / মিথ্যা</td></tr><tr><td class="m">assertIn(a, b)</td><td class="">a, b-এর ভেতরে আছে</td></tr><tr><td class="m">assertIsNone(x)</td><td class="">x হলো None</td></tr><tr><td class="m">assertAlmostEqual(a, b)</td><td class="">a ও b প্রায় সমান (দশমিকের জন্য, 7 ঘর পর্যন্ত)</td></tr><tr><td class="m">assertRaises(Error)</td><td class="">নির্দিষ্ট exception ঘটে</td></tr></tbody></table></div>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Unit test-এর গঠন ব্যাখ্যা করো। (4-5 নম্বর)</li><li>setUp() ও tearDown()-এর কাজ কী?</li></ul><p>উপরের কাঠামোটা লিখে প্রতিটা অংশ চিহ্নিত করো, আর AAA pattern এক লাইনে ব্যাখ্যা করো।</p></aside>
+<h2 id="s4">9.4 unittest দিয়ে Unit Test-এর পদ্ধতি</h2><div class="yt" data-id="UhIwkjwz6Ek"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Python Tutorial Bangla (বাংলা)  🔥Unit Testing 💪🤓🎯"><img src="https://i.ytimg.com/vi/UhIwkjwz6Ek/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · ফেব্রুয়ারি ২০১৮</p><p class="yt-t">Python Tutorial Bangla (বাংলা)  🔥Unit Testing 💪🤓🎯</p><p class="yt-c">Mahmud Ahsan · <a href="https://www.youtube.com/watch?v=UhIwkjwz6Ek" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p>ধাপগুলো: (১) পরীক্ষা করার কোড একটা module-এ লেখো, (২) <code>test_</code> দিয়ে শুরু নামের আলাদা test file বানাও, (৩) TestCase class আর test method লেখো, (৪) test চালাও, (৫) ফলাফল পড়ো, ব্যর্থ হলে কোড ঠিক করে আবার চালাও।</p>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 9.2</span>ধাপ ১-৩: কোড ও Test লেখা</p><p class="problem"><strong>সমস্যা:</strong> result.py-তে grade() আর average() function লেখো, তারপর test_result.py-তে তাদের test লেখো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">result.py</span></figcaption><pre><code><span class="ln">1</span>def average(marks):
+<span class="ln">2</span>    if not marks:
+<span class="ln">3</span>        raise ValueError("marks list is empty")
+<span class="ln">4</span>    return sum(marks) / len(marks)
+<span class="ln">5</span> 
+<span class="ln">6</span>def grade(avg):
+<span class="ln">7</span>    if avg &gt;= 80:
+<span class="ln">8</span>        return "A+"
+<span class="ln">9</span>    elif avg &gt;= 60:
+<span class="ln">10</span>        return "A"
+<span class="ln">11</span>    elif avg &gt;= 40:
+<span class="ln">12</span>        return "B"
+<span class="ln">13</span>    return "F"
+</code></pre></figure>
+<figure class="code "><figcaption><span>Python</span><span class="fn">test_result.py</span></figcaption><pre><code><span class="ln">1</span>import unittest
+<span class="ln">2</span>from result import average, grade
+<span class="ln">3</span> 
+<span class="ln">4</span>class TestAverage(unittest.TestCase):
+<span class="ln">5</span>    def test_normal_marks(self):
+<span class="ln">6</span>        self.assertEqual(average([80, 90, 70]), 80)
+<span class="ln">7</span> 
+<span class="ln">8</span>    def test_decimal_result(self):
+<span class="ln">9</span>        self.assertAlmostEqual(average([1, 2]), 1.5)
+<span class="ln">10</span> 
+<span class="ln">11</span>    def test_empty_list_raises(self):
+<span class="ln">12</span>        with self.assertRaises(ValueError):
+<span class="ln">13</span>            average([])
+<span class="ln">14</span> 
+<span class="ln">15</span>class TestGrade(unittest.TestCase):
+<span class="ln">16</span>    def test_boundaries(self):
+<span class="ln">17</span>        self.assertEqual(grade(80), "A+")
+<span class="ln">18</span>        self.assertEqual(grade(79.9), "A")
+<span class="ln">19</span>        self.assertEqual(grade(40), "B")
+<span class="ln">20</span>        self.assertEqual(grade(39.9), "F")
+</code></pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">2</td><td class="snip"><pre>from result import average, grade</pre></td><td>যে module পরীক্ষা হবে, সেখান থেকে function import।</td></tr><tr><td class="lab">4–6</td><td class="snip"><pre>class TestAverage(unittest.TestCase):
+    def test_normal_marks(self):
+        self.assertEqual(average([80, 90, 70]), 80)</pre></td><td>TestCase থেকে inherit করা class, ভেতরে test_ দিয়ে শুরু method। unittest শুধু test_ নামের method-কেই test হিসেবে চেনে।</td></tr><tr><td class="lab">8–9</td><td class="snip"><pre>    def test_decimal_result(self):
+        self.assertAlmostEqual(average([1, 2]), 1.5)</pre></td><td>দশমিক তুলনায় assertAlmostEqual — 9.1-এর 0.1 + 0.2 সমস্যার সমাধান।</td></tr><tr><td class="lab">11–13</td><td class="snip"><pre>    def test_empty_list_raises(self):
+        with self.assertRaises(ValueError):
+            average([])</pre></td><td>exception ঘটার কথা, সেটাও test করা যায়: with assertRaises-এর ভেতরে ValueError হলে test পাস, না হলে ফেল।</td></tr><tr><td class="lab">16–20</td><td class="snip"><pre>    def test_boundaries(self):
+        self.assertEqual(grade(80), "A+")
+        self.assertEqual(grade(79.9), "A")
+        self.assertEqual(grade(40), "B")
+        self.assertEqual(grade(39.9), "F")</pre></td><td><strong>সীমানার মান (boundary)</strong> পরীক্ষা — 80 আর 79.9, 40 আর 39.9। ভুল সবচেয়ে বেশি লুকিয়ে থাকে এই সীমানাগুলোতেই।</td></tr></tbody></table></div></details>
+<p><strong>ধাপ ৪: Test চালানো।</strong> Terminal-এ test file-এর folder-এ গিয়ে লেখো (<code>-v</code> মানে verbose — প্রতিটা test-এর নাম ও ফল দেখাবে):</p>
+<figure class="code term"><figcaption><span>Terminal</span><span class="fn"></span></figcaption><pre><code>python -m unittest -v test_result
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>test_decimal_result (test_result.TestAverage.test_decimal_result) ... ok
+test_empty_list_raises (test_result.TestAverage.test_empty_list_raises) ... ok
+test_normal_marks (test_result.TestAverage.test_normal_marks) ... ok
+test_boundaries (test_result.TestGrade.test_boundaries) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.000s
+
+OK</pre></figure>
+<p>প্রতিটা test-এর পাশে <strong>ok</strong> মানে পাস। শেষে মোট কয়টা test চলল, কত সময় লাগল (তোমার ক্ষেত্রে সামান্য আলাদা হতে পারে), আর সব পাস হলে <strong>OK</strong>।</p>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 9.3</span>ধাপ ৫: ব্যর্থ Test পড়া ও ঠিক করা</p><p class="problem"><strong>সমস্যা:</strong> কেউ ভুল করে grade()-এ <code>&gt;= 80</code>-এর জায়গায় <code>&gt; 80</code> লিখে ফেলল। Test কী বলে দেখো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">result.py</span></figcaption><pre><code><span class="ln">1</span>def average(marks):
+<span class="ln">2</span>    if not marks:
+<span class="ln">3</span>        raise ValueError("marks list is empty")
+<span class="ln">4</span>    return sum(marks) / len(marks)
+<span class="ln">5</span> 
+<span class="ln">6</span>def grade(avg):
+<span class="ln">7</span>    if avg &gt; 80:
+<span class="ln">8</span>        return "A+"
+<span class="ln">9</span>    elif avg &gt;= 60:
+<span class="ln">10</span>        return "A"
+<span class="ln">11</span>    elif avg &gt;= 40:
+<span class="ln">12</span>        return "B"
+<span class="ln">13</span>    return "F"
+</code></pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">7</td><td class="snip"><pre>    if avg &gt; 80:</pre></td><td><code>&gt;</code> আর <code>&gt;=</code> — এক অক্ষরের পার্থক্য। হাতে পরীক্ষা করলে 80 দিয়ে কেউ পরীক্ষাই না-ও করতে পারত।</td></tr></tbody></table></div></details>
+<figure class="code term"><figcaption><span>Terminal</span><span class="fn"></span></figcaption><pre><code>python -m unittest test_result
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>...F
+======================================================================
+FAIL: test_boundaries (test_result.TestGrade.test_boundaries)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_result.py", line 17, in test_boundaries
+    self.assertEqual(grade(80), "A+")
+AssertionError: 'A' != 'A+'
+- A
++ A+
+?  +
+
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+FAILED (failures=1)</pre></figure>
+<p><code>-v</code> ছাড়া চালালে প্রতিটা test-এর জন্য একটা চিহ্ন আসে: <strong>.</strong> মানে পাস, <strong>F</strong> মানে ব্যর্থ (assertion মেলেনি), <strong>E</strong> মানে test-এর ভেতরে অপ্রত্যাশিত error। ব্যর্থ test-এর বিবরণে লেখা থাকে কোন test, কোন লাইন, আর <code>'A' != 'A+'</code> — মানে পাওয়া গেছে A, চাওয়া হয়েছিল A+। এখান থেকে সাথে সাথে বোঝা যায় 80-এর সীমায় সমস্যা। <code>&gt;</code> বদলে আবার <code>&gt;=</code> করে test চালালে আবার OK আসবে।</p>
+<h3>setUp() ও unittest.main() সহ Test</h3>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 9.4</span>BankAccount Class-এর Test</p><p class="problem"><strong>সমস্যা:</strong> একটা BankAccount class-এর জন্য test লেখো। প্রতিটা test-এর আগে setUp() একটা নতুন account বানাবে, আর file-টা সরাসরি python দিয়ে চালানো যাবে।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">bank.py</span></figcaption><pre><code><span class="ln">1</span>class BankAccount:
+<span class="ln">2</span>    def __init__(self, balance=0):
+<span class="ln">3</span>        self.balance = balance
+<span class="ln">4</span> 
+<span class="ln">5</span>    def deposit(self, amount):
+<span class="ln">6</span>        if amount &lt;= 0:
+<span class="ln">7</span>            raise ValueError("Deposit must be positive")
+<span class="ln">8</span>        self.balance += amount
+<span class="ln">9</span> 
+<span class="ln">10</span>    def withdraw(self, amount):
+<span class="ln">11</span>        if amount &gt; self.balance:
+<span class="ln">12</span>            raise ValueError("Insufficient balance")
+<span class="ln">13</span>        self.balance -= amount
+</code></pre></figure>
+<figure class="code "><figcaption><span>Python</span><span class="fn">test_bank.py</span></figcaption><pre><code><span class="ln">1</span>import unittest
+<span class="ln">2</span>from bank import BankAccount
+<span class="ln">3</span> 
+<span class="ln">4</span>class TestBankAccount(unittest.TestCase):
+<span class="ln">5</span>    def setUp(self):
+<span class="ln">6</span>        self.acc = BankAccount(1000)
+<span class="ln">7</span> 
+<span class="ln">8</span>    def test_deposit(self):
+<span class="ln">9</span>        self.acc.deposit(500)
+<span class="ln">10</span>        self.assertEqual(self.acc.balance, 1500)
+<span class="ln">11</span> 
+<span class="ln">12</span>    def test_withdraw(self):
+<span class="ln">13</span>        self.acc.withdraw(300)
+<span class="ln">14</span>        self.assertEqual(self.acc.balance, 700)
+<span class="ln">15</span> 
+<span class="ln">16</span>    def test_overdraw_not_allowed(self):
+<span class="ln">17</span>        with self.assertRaises(ValueError):
+<span class="ln">18</span>            self.acc.withdraw(5000)
+<span class="ln">19</span>        self.assertEqual(self.acc.balance, 1000)
+<span class="ln">20</span> 
+<span class="ln">21</span>    def test_negative_deposit(self):
+<span class="ln">22</span>        self.assertRaises(ValueError, self.acc.deposit, -50)
+<span class="ln">23</span> 
+<span class="ln">24</span>if __name__ == "__main__":
+<span class="ln">25</span>    unittest.main(verbosity=2)
+</code></pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">5–6</td><td class="snip"><pre>    def setUp(self):
+        self.acc = BankAccount(1000)</pre></td><td>setUp() প্রতিটা test-এর আগে নতুন করে চলে। তাই test_deposit-এর 500 টাকা test_withdraw-এ প্রভাব ফেলে না — প্রত্যেক test 1000 দিয়ে শুরু। Test-গুলো একে অপরের থেকে স্বাধীন রাখার এটাই উপায়।</td></tr><tr><td class="lab">16–19</td><td class="snip"><pre>    def test_overdraw_not_allowed(self):
+        with self.assertRaises(ValueError):
+            self.acc.withdraw(5000)
+        self.assertEqual(self.acc.balance, 1000)</pre></td><td>ব্যর্থ উত্তোলনের পর balance যে অপরিবর্তিত আছে, সেটাও যাচাই — শুধু error হলো কিনা না, ভুল কিছু ঘটেনি তাও দেখা।</td></tr><tr><td class="lab">21–22</td><td class="snip"><pre>    def test_negative_deposit(self):
+        self.assertRaises(ValueError, self.acc.deposit, -50)</pre></td><td>assertRaises-এর আরেক রূপ: exception, function, তারপর argument।</td></tr><tr><td class="lab">24–25</td><td class="snip"><pre>if __name__ == "__main__":
+    unittest.main(verbosity=2)</pre></td><td>unittest.main() file-এর সব test খুঁজে চালায়, তাই <code>python test_bank.py</code> লিখলেই চলে। verbosity=2 মানে -v-এর মতো বিস্তারিত।</td></tr></tbody></table></div></details>
+<figure class="code term"><figcaption><span>Terminal</span><span class="fn"></span></figcaption><pre><code>python test_bank.py
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>test_deposit (__main__.TestBankAccount.test_deposit) ... ok
+test_negative_deposit (__main__.TestBankAccount.test_negative_deposit) ... ok
+test_overdraw_not_allowed (__main__.TestBankAccount.test_overdraw_not_allowed) ... ok
+test_withdraw (__main__.TestBankAccount.test_withdraw) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.000s
+
+OK</pre></figure>
+<p>লক্ষ করো, test-এর ক্রম আমাদের লেখার ক্রম নয় — unittest test method-গুলো নামের বর্ণানুক্রমে চালায়। তাই একটা test আরেকটার উপর নির্ভর করবে, এমন test কখনো লিখবে না।</p>
+<aside class="box mistake"><p class="box-title">সাধারণ ভুল</p><div class="mk"><div class="mk-col bad"><p class="mk-h">ভুল</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>import unittest
+ 
+class TestMath(unittest.TestCase):
+    def check_add(self):
+        self.assertEqual(2 + 2, 5)
+ 
+unittest.main()
+</code></pre></figure><p class="err">ফল: <code>NO TESTS RAN</code></p></div><div class="mk-col good"><p class="mk-h">সঠিক</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>import unittest
+ 
+class TestMath(unittest.TestCase):
+    def test_add(self):
+        self.assertEqual(2 + 2, 4)
+ 
+unittest.main()
+</code></pre></figure></div><p class="why">method-এর নাম test_ দিয়ে শুরু হয়নি, তাই unittest এটাকে test হিসেবে চেনেইনি — "Ran 0 tests"। ভুল assertion থাকা সত্ত্বেও কিছুই ধরা পড়েনি, যা আরও বিপজ্জনক।</p></div></aside>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>unittest library ব্যবহার করে unit test-এর পদ্ধতি বর্ণনা করো। (5 নম্বর)</li></ul><p>ধাপগুলো লিখে একটা ছোট module, তার test file আর চালানোর command ও output দেখাও। সম্ভব হলে একটা ব্যর্থ test-এর output-ও দেখাও।</p></aside>
+<aside class="box practice"><p class="box-title">অনুশীলন</p><p>একটা string module লেখো যাতে <code>is_palindrome(word)</code> আর <code>count_vowels(text)</code> থাকবে। প্রতিটার জন্য অন্তত তিনটা test লেখো — সাধারণ ক্ষেত্র, ফাঁকা string, আর বড়-ছোট হাতের অক্ষর মেশানো।</p></aside>
+<h2 id="s5">9.5 Unit Test লেখা ও চালানোর প্রয়োজনীয়তা</h2><div class="yt" data-id="rR-VMgzgvdY"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Bangla Python Basic Uniitest Tutorial"><img src="https://i.ytimg.com/vi/rR-VMgzgvdY/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · ফেব্রুয়ারি ২০১৮</p><p class="yt-t">Bangla Python Basic Uniitest Tutorial</p><p class="yt-c">Asaduzzaman Sohel · <a href="https://www.youtube.com/watch?v=rR-VMgzgvdY" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p>Python-এ unit test লিখতে ও চালাতে যা যা দরকার:</p>
+<div class="tbl"><table><thead><tr><th>প্রয়োজনীয়তা</th><th>ব্যাখ্যা</th></tr></thead><tbody><tr><td class="">Python ও unittest</td><td class="">Python install থাকলেই চলে — unittest built-in, আলাদা install লাগে না।</td></tr><tr><td class="">পরীক্ষাযোগ্য কোড</td><td class="">কোড module-এ (.py file) ছোট ছোট function বা class-এ ভাগ করা থাকতে হবে, যাতে import করা যায়।</td></tr><tr><td class="">Test file-এর নাম</td><td class="">test_ দিয়ে শুরু (test_result.py), যাতে unittest স্বয়ংক্রিয়ভাবে খুঁজে পায়।</td></tr><tr><td class="">import</td><td class="">test file-এ <code>import unittest</code> আর পরীক্ষাধীন module import; দুটো file সাধারণত একই folder-এ।</td></tr><tr><td class="">TestCase class</td><td class="">unittest.TestCase থেকে inherit করা class।</td></tr><tr><td class="">Test method</td><td class="">নাম test_ দিয়ে শুরু, প্রথম parameter self।</td></tr><tr><td class="">Assertion</td><td class="">প্রতিটা test-এ অন্তত একটা self.assert…() method।</td></tr><tr><td class="">প্রত্যাশিত ফল জানা</td><td class="">কোন ইনপুটে কী ফল আসার কথা আগে থেকে জানতে হবে — সাধারণ, সীমানা ও ভুল ইনপুট।</td></tr><tr><td class="">স্বাধীন ও নির্ধারিত test</td><td class="">একটা test অন্যটার উপর নির্ভর করবে না; প্রতিবার একই ফল দেবে (random বা বর্তমান সময়ের উপর নির্ভর নয়)।</td></tr><tr><td class="">চালানোর উপায়</td><td class=""><code>python -m unittest -v test_file</code> অথবা file-এ unittest.main() রেখে <code>python test_file.py</code>; VS Code/PyCharm-এর Testing panel থেকেও চালানো যায়।</td></tr></tbody></table></div>
+<aside class="box tip"><p class="box-title">Exam Tip</p><p>এই প্রশ্নে টেবিলের প্রথম আটটা পয়েন্ট লিখলেই যথেষ্ট। সাথে একটা ছোট test file-এর কাঠামো দিয়ে কোথায় কোন requirement পূরণ হচ্ছে চিহ্নিত করলে পূর্ণ নম্বর।</p></aside>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Unit test লেখা ও চালানোর জন্য প্রয়োজনীয় বিষয়গুলো উল্লেখ করো। (3-4 নম্বর)</li></ul></aside>
+<h2 id="s6">অধ্যায়ের সারসংক্ষেপ</h2>
+<div class="tbl"><table><thead><tr><th>বিষয়</th><th>মূল কথা</th></tr></thead><tbody><tr><td class="">Unit testing</td><td class="">program-এর ছোট অংশ (function/method/class) আলাদাভাবে, স্বয়ংক্রিয়ভাবে পরীক্ষা।</td></tr><tr><td class="">গুরুত্ব</td><td class="">শুরুতে ভুল ধরা, regression ঠেকানো, সহজ debugging, document, ভালো ডিজাইন, সময় সাশ্রয়।</td></tr><tr><td class="">গঠন</td><td class="">TestCase class, test_ method, assertion, setUp/tearDown fixture, suite, runner; AAA pattern।</td></tr><tr><td class="">পদ্ধতি</td><td class="">module → test_ file → TestCase → python -m unittest -v → ফল পড়া (. F E, OK/FAILED)।</td></tr><tr><td class="">প্রয়োজনীয়তা</td><td class="">Python, importযোগ্য কোড, test_ নাম, TestCase, assertion, প্রত্যাশিত ফল, স্বাধীন test।</td></tr></tbody></table></div>
+<h2 id="s7">অনুশীলনী · অধ্যায় ৯ (বোর্ড প্রশ্ন ও উত্তর)</h2>
+<p>এই অনুশীলনীতে অধ্যায় ৯ থেকে বিগত বছরগুলোতে বোর্ডে আসা সব প্রশ্ন, পরীক্ষার খাতায় লেখার উপযোগী উত্তরসহ দেওয়া হলো। শেষে আছে বোর্ডে এখনো সরাসরি না আসা একটি গুরুত্বপূর্ণ প্রশ্ন।</p>
+<p>উত্তরগুলো নম্বর অনুযায়ী মাপা: ১ নম্বরের প্রশ্নে দুই-তিন লাইন, ২ নম্বরে মূল পয়েন্টসহ সংক্ষিপ্ত উত্তর, আর ৬ নম্বরে সংজ্ঞা, ব্যাখ্যা, program ও output — পূর্ণ উত্তর। Test-গুলো সত্যিকারের file বানিয়ে চালিয়ে output নেওয়া; "Ran … tests in …s"-এর সময় প্রতিবার সামান্য আলাদা হতে পারে।</p>
+<h3>ক. অতি সংক্ষিপ্ত প্রশ্ন (মান: ১)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>Unit Testing কী? / Unit Testing বলতে কী বুঝায়?</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৩, ২০২৪ (পরি), ২০২৫, ২০২৫ (পরি) · বই: 9.1</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>Program-এর সবচেয়ে ছোট পরীক্ষাযোগ্য অংশ — একটি function, method বা class (unit) — আলাদাভাবে পরীক্ষা করে দেখা যে সেটি প্রত্যাশিত ফল দিচ্ছে কিনা, তাকে unit testing বলে। পরীক্ষাগুলো কোড আকারে লেখা হয় এবং স্বয়ংক্রিয়ভাবে বারবার চালানো যায়। Python-এ এর জন্য built-in <strong>unittest</strong> library আছে।</p></aside>
+<h3>খ. সংক্ষিপ্ত প্রশ্ন (মান: ২)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>পাইথনে Unit Testing-এর গুরুত্ব (প্রয়োজনীয়তা) লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৩, ২০২৩ (পরি), ২০২৪ · বই: 9.2</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><ul><li><strong>শুরুতেই ভুল ধরা পড়ে:</strong> কোড লেখার সাথে সাথে bug ধরা যায়, ব্যবহারকারীর কাছে পৌঁছানোর আগে; দেরিতে ধরা পড়লে ঠিক করার খরচ অনেক বেশি।</li><li><strong>কোডের সঠিকতা যাচাই:</strong> প্রতিটি function ও method আলাদাভাবে পরীক্ষা করে নিশ্চিত হওয়া যায় যে সেটি ঠিক কাজ করছে।</li><li><strong>নিশ্চিন্তে পরিবর্তন:</strong> কোড বদলানোর পর test চালালেই বোঝা যায় পুরনো কিছু ভেঙেছে কিনা (regression ঠেকায়)।</li><li><strong>Debugging সহজ:</strong> কোন test ব্যর্থ হলো দেখে ঠিক কোন unit-এ সমস্যা তা বোঝা যায়।</li><li><strong>জীবন্ত document:</strong> test পড়লেই বোঝা যায় function কোন ইনপুটে কী ফল দেওয়ার কথা।</li><li><strong>সময় ও খরচ সাশ্রয়:</strong> হাতে হাতে বারবার পরীক্ষার বদলে এক command-এ সব test চলে।</li></ul></aside>
+<h3>গ. রচনামূলক প্রশ্ন (মান: ৬)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>Unit Testing-এর Structure ব্যাখ্যা কর। (Unit Testing-এর Structure দেখাও।)</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২২ · বই: 9.3</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>unittest library-তে একটি test file নিচের অংশগুলো নিয়ে গঠিত:</p><ul><li><strong>Test Case:</strong> একটি unit-এর জন্য সম্পর্কিত test-এর সংগ্রহ — <code>unittest.TestCase</code> থেকে inherit করা class।</li><li><strong>Test Method:</strong> একটি নির্দিষ্ট পরিস্থিতির পরীক্ষা — নাম অবশ্যই <code>test_</code> দিয়ে শুরু।</li><li><strong>Assertion:</strong> প্রত্যাশিত ও আসল ফল মেলানো — <code>self.assertEqual()</code>, <code>assertTrue()</code>, <code>assertRaises()</code> ইত্যাদি।</li><li><strong>Test Fixture:</strong> প্রতিটি test-এর আগে প্রস্তুতি <code>setUp()</code> এবং পরে পরিষ্কার <code>tearDown()</code>।</li><li><strong>Test Suite:</strong> একসাথে চালানোর জন্য একাধিক test-এর সমষ্টি।</li><li><strong>Test Runner:</strong> test চালিয়ে ফল দেখায় — <code>unittest.main()</code> বা <code>python -m unittest</code>।</li></ul><p>প্রতিটি test method সাধারণত <strong>AAA pattern</strong>-এ লেখা হয়: <strong>Arrange</strong> (data প্রস্তুত), <strong>Act</strong> (function চালানো), <strong>Assert</strong> (ফল যাচাই)।</p></aside>
+<div class="tbl"><table><thead><tr><th>Assertion Method</th><th>যাচাই করে</th></tr></thead><tbody><tr><td class="m">assertEqual(a, b)</td><td class="">a == b</td></tr><tr><td class="m">assertNotEqual(a, b)</td><td class="">a != b</td></tr><tr><td class="m">assertTrue(x) / assertFalse(x)</td><td class="">x সত্য / মিথ্যা</td></tr><tr><td class="m">assertIn(a, b)</td><td class="">a, b-এর ভেতরে আছে</td></tr><tr><td class="m">assertAlmostEqual(a, b)</td><td class="">a ও b প্রায় সমান (দশমিক সংখ্যা)</td></tr><tr><td class="m">assertRaises(Error)</td><td class="">নির্দিষ্ট exception ঘটে</td></tr></tbody></table></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">test_calculator.py</span></figcaption><pre><code><span class="ln">1</span>import unittest                              # import
+<span class="ln">2</span> 
+<span class="ln">3</span>def add(a, b):                               # code to test
+<span class="ln">4</span>    return a + b
+<span class="ln">5</span> 
+<span class="ln">6</span>def divide(a, b):
+<span class="ln">7</span>    if b == 0:
+<span class="ln">8</span>        raise ValueError("Cannot divide by zero")
+<span class="ln">9</span>    return a / b
+<span class="ln">10</span> 
+<span class="ln">11</span>class TestCalculator(unittest.TestCase):     # test case
+<span class="ln">12</span> 
+<span class="ln">13</span>    def setUp(self):                         # fixture
+<span class="ln">14</span>        self.x, self.y = 10, 5
+<span class="ln">15</span> 
+<span class="ln">16</span>    def test_add(self):                      # test method
+<span class="ln">17</span>        result = add(self.x, self.y)         # Act
+<span class="ln">18</span>        self.assertEqual(result, 15)         # Assert
+<span class="ln">19</span> 
+<span class="ln">20</span>    def test_divide(self):
+<span class="ln">21</span>        self.assertAlmostEqual(divide(1, 3), 0.3333333)
+<span class="ln">22</span> 
+<span class="ln">23</span>    def test_divide_by_zero(self):
+<span class="ln">24</span>        with self.assertRaises(ValueError):
+<span class="ln">25</span>            divide(self.x, 0)
+<span class="ln">26</span> 
+<span class="ln">27</span>if __name__ == "__main__":
+<span class="ln">28</span>    unittest.main(verbosity=2)               # test runner
+</code></pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1</td><td class="snip"><pre>import unittest                              # import</pre></td><td>unittest library import — built-in, আলাদা install লাগে না।</td></tr><tr><td class="lab">3–9</td><td class="snip"><pre>def add(a, b):                               # code to test
+    return a + b
+
+def divide(a, b):
+    if b == 0:
+        raise ValueError("Cannot divide by zero")
+    return a / b</pre></td><td>যে দুটি function পরীক্ষা হবে। বাস্তবে এগুলো আলাদা module-এ থাকে এবং import করা হয়।</td></tr><tr><td class="lab">11</td><td class="snip"><pre>class TestCalculator(unittest.TestCase):     # test case</pre></td><td>TestCase থেকে inherit করা class — test case।</td></tr><tr><td class="lab">13–14</td><td class="snip"><pre>    def setUp(self):                         # fixture
+        self.x, self.y = 10, 5</pre></td><td>setUp() প্রতিটি test-এর আগে চলে, x ও y প্রস্তুত করে।</td></tr><tr><td class="lab">16–18</td><td class="snip"><pre>    def test_add(self):                      # test method
+        result = add(self.x, self.y)         # Act
+        self.assertEqual(result, 15)         # Assert</pre></td><td>test_ দিয়ে শুরু method; Act ও Assert ধাপ।</td></tr><tr><td class="lab">23–25</td><td class="snip"><pre>    def test_divide_by_zero(self):
+        with self.assertRaises(ValueError):
+            divide(self.x, 0)</pre></td><td>exception ঘটার কথা — assertRaises দিয়ে যাচাই।</td></tr><tr><td class="lab">27–28</td><td class="snip"><pre>if __name__ == "__main__":
+    unittest.main(verbosity=2)               # test runner</pre></td><td>test runner: file সরাসরি চালালে সব test খুঁজে চালায়; verbosity=2 প্রতিটি test-এর নাম দেখায়।</td></tr></tbody></table></div></details>
+<figure class="code term"><figcaption><span>Terminal</span><span class="fn"></span></figcaption><pre><code>python test_calculator.py
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>test_add (__main__.TestCalculator.test_add) ... ok
+test_divide (__main__.TestCalculator.test_divide) ... ok
+test_divide_by_zero (__main__.TestCalculator.test_divide_by_zero) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK</pre></figure>
+<div class="q"><span class="qn">২</span><div class="qt"><strong>পাইথন বিল্ট-ইন unittest দিয়ে ইউনিট টেস্টিং প্রসিডিউর বর্ণনা কর।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৫ (পরি) · বই: 9.4</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p><strong>ধাপসমূহ:</strong></p><ul><li><strong>১. পরীক্ষার কোড module-এ লেখা:</strong> যে function পরীক্ষা হবে সেটি একটি .py file-এ রাখা (যেমন result.py)।</li><li><strong>২. test file তৈরি:</strong> <code>test_</code> দিয়ে শুরু নামের file বানানো (test_result.py) এবং <code>import unittest</code> ও পরীক্ষাধীন module import করা।</li><li><strong>৩. TestCase class ও test method লেখা:</strong> <code>unittest.TestCase</code> থেকে inherit করা class, ভেতরে <code>test_</code> দিয়ে শুরু method, প্রতিটিতে assertion।</li><li><strong>৪. test চালানো:</strong> terminal-এ <code>python -m unittest -v test_result</code> অথবা file-এ <code>unittest.main()</code> রেখে <code>python test_result.py</code>।</li><li><strong>৫. ফল পড়া:</strong> প্রতিটি test-এর জন্য <code>.</code> (পাস), <code>F</code> (assertion ব্যর্থ) বা <code>E</code> (অপ্রত্যাশিত error); শেষে OK বা FAILED।</li><li><strong>৬. ব্যর্থ হলে কোড ঠিক করে আবার চালানো</strong> — যতক্ষণ না সব test পাস করে।</li></ul></aside>
+<figure class="code "><figcaption><span>Python</span><span class="fn">result.py</span></figcaption><pre><code><span class="ln">1</span>def grade(avg):
+<span class="ln">2</span>    if avg &gt;= 80:
+<span class="ln">3</span>        return "A+"
+<span class="ln">4</span>    elif avg &gt;= 60:
+<span class="ln">5</span>        return "A"
+<span class="ln">6</span>    elif avg &gt;= 40:
+<span class="ln">7</span>        return "B"
+<span class="ln">8</span>    return "F"
+</code></pre></figure>
+<figure class="code "><figcaption><span>Python</span><span class="fn">test_result.py</span></figcaption><pre><code><span class="ln">1</span>import unittest
+<span class="ln">2</span>from result import grade
+<span class="ln">3</span> 
+<span class="ln">4</span>class TestGrade(unittest.TestCase):
+<span class="ln">5</span>    def test_top_grade(self):
+<span class="ln">6</span>        self.assertEqual(grade(85), "A+")
+<span class="ln">7</span> 
+<span class="ln">8</span>    def test_boundaries(self):
+<span class="ln">9</span>        self.assertEqual(grade(80), "A+")
+<span class="ln">10</span>        self.assertEqual(grade(79.9), "A")
+<span class="ln">11</span>        self.assertEqual(grade(40), "B")
+<span class="ln">12</span>        self.assertEqual(grade(39.9), "F")
+</code></pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">2</td><td class="snip"><pre>from result import grade</pre></td><td>পরীক্ষাধীন module (result.py) থেকে function import; দুটি file একই folder-এ।</td></tr><tr><td class="lab">4–6</td><td class="snip"><pre>class TestGrade(unittest.TestCase):
+    def test_top_grade(self):
+        self.assertEqual(grade(85), "A+")</pre></td><td>TestCase class আর একটি সাধারণ test।</td></tr><tr><td class="lab">8–12</td><td class="snip"><pre>    def test_boundaries(self):
+        self.assertEqual(grade(80), "A+")
+        self.assertEqual(grade(79.9), "A")
+        self.assertEqual(grade(40), "B")
+        self.assertEqual(grade(39.9), "F")</pre></td><td>সীমানার মান (80/79.9, 40/39.9) পরীক্ষা — এখানেই ভুল বেশি লুকিয়ে থাকে।</td></tr></tbody></table></div></details>
+<figure class="code term"><figcaption><span>Terminal</span><span class="fn"></span></figcaption><pre><code>python -m unittest -v test_result
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>test_boundaries (test_result.TestGrade.test_boundaries) ... ok
+test_top_grade (test_result.TestGrade.test_top_grade) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+OK</pre></figure>
+<aside class="box tip"><p class="box-title">Exam Tip</p><p>উত্তরে ধাপগুলোর সাথে দুটি file (module ও test file), চালানোর command এবং output লেখো। <code>.</code>, <code>F</code>, <code>E</code> চিহ্নের অর্থ উল্লেখ করলে উত্তর পূর্ণ হয়।</p></aside>
+<h3>ঘ. অতিরিক্ত গুরুত্বপূর্ণ প্রশ্ন</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>পাইথন ইউনিট টেস্টের Requirements বর্ণনা কর।</strong></div><span class="qr"><span class="qref">বই: 9.5</span></span><span class="stars s2" title="গুরুত্ব 2/3" aria-label="গুরুত্ব 2 তারকা">★★☆</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><ul><li><strong>Python ও unittest:</strong> Python install থাকলেই হয়; unittest built-in।</li><li><strong>পরীক্ষাযোগ্য কোড:</strong> কোড module-এ ছোট ছোট function/class-এ ভাগ করা, যাতে import করা যায়।</li><li><strong>Test file-এর নাম:</strong> <code>test_</code> দিয়ে শুরু, যাতে unittest স্বয়ংক্রিয়ভাবে খুঁজে পায়।</li><li><strong>TestCase class:</strong> <code>unittest.TestCase</code> থেকে inherit করা।</li><li><strong>Test method:</strong> নাম <code>test_</code> দিয়ে শুরু, প্রথম parameter self, ভেতরে অন্তত একটি assertion।</li><li><strong>প্রত্যাশিত ফল জানা:</strong> সাধারণ, সীমানা ও ভুল ইনপুটে কী ফল হওয়ার কথা আগে থেকে জানা।</li><li><strong>স্বাধীন test:</strong> একটি test অন্যটির উপর নির্ভর করবে না; প্রতিবার একই ফল দেবে।</li><li><strong>চালানোর উপায়:</strong> <code>python -m unittest</code> বা <code>unittest.main()</code>।</li></ul></aside><section class="quick" id="quick"><h2>এই অধ্যায় কেমন লাগল?</h2><p>তোমার মতামত সরাসরি লেখকের কাছে যাবে। ভুল পেলে কোন section-এ, সেটাও লিখে দিও।</p>
+<form class="fb-form" data-kind="অধ্যায়ের মতামত"><input type="hidden" name="chapter" value="অধ্যায় ৯ — Unit Testing in Python">
+<div class="rate" role="radiogroup" aria-label="রেটিং"><label><input type="radio" name="rating" value="1" required><span>★</span><em>1</em></label><label><input type="radio" name="rating" value="2" ><span>★</span><em>2</em></label><label><input type="radio" name="rating" value="3" ><span>★</span><em>3</em></label><label><input type="radio" name="rating" value="4" ><span>★</span><em>4</em></label><label><input type="radio" name="rating" value="5" ><span>★</span><em>5</em></label></div>
+<label class="fld"><span>তোমার নাম (ঐচ্ছিক)</span><input name="name" autocomplete="name"></label>
+<label class="fld"><span>মতামত বা যে ভুল পেয়েছ</span><textarea name="message" rows="4" required placeholder="যেমন: 4.5-এর উদাহরণটা বুঝতে কষ্ট হয়েছে, কারণ…"></textarea></label>
+<input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off"><button type="submit">মতামত পাঠাও</button><p class="status" role="status"></p></form></section><nav class="pager"><a class="pn prev" href="ch08.html"><small>আগের অধ্যায়</small>Logging</a><a class="pn next" href="ch10.html"><small>পরের অধ্যায়</small>RegEx</a></nav></main><aside class="mini"><p>এই অধ্যায়ে</p><ol><li><a href="#s1">9.1 Unit Testing কী?</a></li><li><a href="#s2">9.2 Unit Testing-এর গুরুত্ব</a></li><li><a href="#s3">9.3 Unit Test-এর গঠন</a></li><li><a href="#s4">9.4 unittest দিয়ে Unit Test-এর পদ্ধতি</a></li><li><a href="#s5">9.5 Unit Test লেখা ও চালানোর প্রয়োজনীয়তা</a></li><li><a href="#s6">অধ্যায়ের সারসংক্ষেপ</a></li><li><a href="#s7">অনুশীলনী · অধ্যায় ৯ (বোর্ড প্রশ্ন ও উত্তর)</a></li></ol><a class="report" href="#quick">ভুল পেয়েছ? জানাও</a></aside></div><nav class="bnav" aria-label="মোবাইল মেনু"><a href="../index.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>হোম</span></a><button type="button" class="bn-toc on" aria-expanded="false" aria-controls="sheet"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5zM4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3"/><path d="M8 7h7M8 10.5h5"/></svg><span>অধ্যায়</span></button><a href="../runner.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m8 9 3 3-3 3M13 15h3"/></svg><span>কোড রানার</span></a><a href="../feedback.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4.5"/></svg><span>মতামত</span></a></nav><div class="sheet" id="sheet" hidden><div class="sheet-backdrop" data-close></div><div class="sheet-panel" role="dialog" aria-modal="true" aria-label="বিষয়সূচি"><div class="sheet-grip" data-close></div><div class="sheet-head"><strong>বিষয়সূচি</strong><button type="button" data-close aria-label="বন্ধ করো">✕</button></div><div class="sheet-body"><p class="sheet-h">এই অধ্যায়ে</p><ol class="sheet-sec"><li><a href="#s1">9.1 Unit Testing কী?</a></li><li><a href="#s2">9.2 Unit Testing-এর গুরুত্ব</a></li><li><a href="#s3">9.3 Unit Test-এর গঠন</a></li><li><a href="#s4">9.4 unittest দিয়ে Unit Test-এর পদ্ধতি</a></li><li><a href="#s5">9.5 Unit Test লেখা ও চালানোর প্রয়োজনীয়তা</a></li><li><a href="#s6">অধ্যায়ের সারসংক্ষেপ</a></li><li><a href="#s7">অনুশীলনী · অধ্যায় ৯ (বোর্ড প্রশ্ন ও উত্তর)</a></li></ol><p class="sheet-h">সব অধ্যায়</p><ol class="sheet-ch"><li><a href="../chapters/ch01.html"><span class="u">১</span>Python Functions</a></li><li><a href="../chapters/ch02.html"><span class="u">২</span>File Operation</a></li><li><a href="../chapters/ch03.html"><span class="u">৩</span>Module, Package ও Application Software</a></li><li><a href="../chapters/ch04.html"><span class="u">৪</span>Basics of OOP</a></li><li><a href="../chapters/ch05.html"><span class="u">৫</span>Four Pillars of OOP</a></li><li><a href="../chapters/ch06.html"><span class="u">৬</span>Iterator, Generator ও Decorator</a></li><li><a href="../chapters/ch07.html"><span class="u">৭</span>Exception ও Error Handling</a></li><li><a href="../chapters/ch08.html"><span class="u">৮</span>Logging</a></li><li><a href="../chapters/ch09.html" class=on aria-current=page><span class="u">৯</span>Unit Testing</a></li><li><a href="../chapters/ch10.html"><span class="u">১০</span>RegEx</a></li><li><a href="../chapters/ch11.html"><span class="u">১১</span>Application Software</a></li><li><a href="../chapters/ch12.html"><span class="u">পরি</span>বোর্ড প্রশ্ন ও সাজেশন</a></li></ol></div></div></div><footer class="foot"><p><strong>Application Development Using Python</strong> · লেখক: Kazi Tauhid Rana, Computer Science and Technology, Rajshahi Polytechnic Institute</p><p class="copy-note">© ২০২৬ Kazi Tauhid Rana · সর্বস্বত্ব সংরক্ষিত · <a href="../copyright.html">কপিরাইট নোটিশ</a> · <a href="../pdf.html">বইয়ের PDF</a></p><p>MIU Platform · Learn Grow Succeed</p></footer>
+<script src="../assets/config.js"></script><script src="../assets/app.js"></script><script src="../assets/runner.js"></script></body></html>

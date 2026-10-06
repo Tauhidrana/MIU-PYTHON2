@@ -1,0 +1,409 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#FBFCFE"><meta name="format-detection" content="telephone=no">
+<title>অধ্যায় ২: File Operation in Python — Python বই</title><meta name="description" content="Application Development Using Python — Polytechnic ছাত্রদের জন্য বাংলায় সম্পূর্ণ বই, বোর্ড প্রশ্নের উত্তরসহ।">
+<link rel="icon" href="../img/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta name="robots" content="noarchive"><link rel="stylesheet" href="../assets/style.css"><script src="../assets/protect.js"></script><script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script></head><body class="reader"><header class="topbar"><a class="brand" href="../index.html"><img src="../img/logo.png" alt="MIU"><span>Python বই</span></a>
+<nav class="topnav"><a href="../index.html#chapters">অধ্যায়</a><a href="../runner.html">কোড রানার</a><a href="../feedback.html">রিভিউ ও মতামত</a>
+<button class="theme" type="button" aria-label="ডার্ক মোড">◐</button></nav></header><div class="progress"><span></span></div><div class="layout"><nav class="side" aria-label="অধ্যায়ের তালিকা"><button class="side-toggle" type="button">অধ্যায়ের তালিকা</button><ol><li><a class="" href="ch01.html"><span class="u">১</span>Python Functions</a></li><li><a class="cur" href="ch02.html"><span class="u">২</span>File Operation</a></li><li><a class="" href="ch03.html"><span class="u">৩</span>Module, Package ও Application Software</a></li><li><a class="" href="ch04.html"><span class="u">৪</span>Basics of OOP</a></li><li><a class="" href="ch05.html"><span class="u">৫</span>Four Pillars of OOP</a></li><li><a class="" href="ch06.html"><span class="u">৬</span>Iterator, Generator ও Decorator</a></li><li><a class="" href="ch07.html"><span class="u">৭</span>Exception ও Error Handling</a></li><li><a class="" href="ch08.html"><span class="u">৮</span>Logging</a></li><li><a class="" href="ch09.html"><span class="u">৯</span>Unit Testing</a></li><li><a class="" href="ch10.html"><span class="u">১০</span>RegEx</a></li><li><a class="" href="ch11.html"><span class="u">১১</span>Application Software</a></li><li><a class="" href="ch12.html"><span class="u">পরি</span>বোর্ড প্রশ্ন ও সাজেশন</a></li></ol></nav><main class="content"><header class="chap-head"><p class="chap-num">অধ্যায় ২</p><h1>File Operation in Python</h1><p class="lead">এতক্ষণ যত program লিখেছি, সবগুলোর একটা বড় সমস্যা আছে: program বন্ধ হলেই সব data হারিয়ে যায়। একশো ছাত্রের মার্কস input দিলে, program শেষ হওয়া মাত্র সব শেষ — পরের দিন আবার প্রথম থেকে input দিতে হবে। কারণ variable-এর data থাকে RAM-এ, যা অস্থায়ী।</p><p class="lead">Data স্থায়ীভাবে রাখতে হলে সেটা hard disk বা SSD-তে <strong>file</strong> আকারে লিখতে হয়। এই অধ্যায়ে শিখব Python দিয়ে file খোলা, পড়া, লেখা আর বন্ধ করা — আর শেষে file ব্যবহার করে পূর্ণ কয়েকটা program।</p></header><div class="yt yt-big" data-id="YRt3ImkzvpU"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Application Development Using Python | Chapter-2 | পাইথন-এর ফাইল অপারেশনস #diploma #polytechnic"><img src="https://i.ytimg.com/vi/YRt3ImkzvpU/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>পুরো অধ্যায়ের ভিডিও ক্লাস · জুন ২০২৩</p><p class="yt-t">Application Development Using Python | Chapter-2 | পাইথন-এর ফাইল অপারেশনস #diploma #polytechnic</p><p class="yt-c">EduCity - এডুসিটি · <a href="https://www.youtube.com/watch?v=YRt3ImkzvpU" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<h2 id="s1">2.1 File Operation কী?</h2><div class="yt" data-id="stc_OngK3fE"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Python File Handling in Bangla 2026 | মাত্র ৫ মিনিটে"><img src="https://i.ytimg.com/vi/stc_OngK3fE/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · এপ্রিল ২০২৬</p><p class="yt-t">Python File Handling in Bangla 2026 | মাত্র ৫ মিনিটে</p><p class="yt-c">Nine AI · <a href="https://www.youtube.com/watch?v=stc_OngK3fE" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<aside class="box definition"><p class="box-title">সংজ্ঞা (পরীক্ষার জন্য)</p><p><strong>File</strong> হলো storage device-এ (hard disk, SSD, pen drive) একটা নাম দিয়ে স্থায়ীভাবে সংরক্ষিত data-র সংগ্রহ। <strong>File operation</strong> বলতে program-এর মাধ্যমে file তৈরি করা, খোলা, পড়া, লেখা, data যোগ করা এবং বন্ধ করার কাজগুলোকে বোঝায়।</p></aside>
+<aside class="box analogy"><p class="box-title">বাস্তব উদাহরণ</p><p>File হলো একটা খাতা। খাতায় কিছু লিখতে বা পড়তে হলে আগে খাতাটা খুলতে হয়, তারপর পড়ো বা লেখো, কাজ শেষে বন্ধ করে তাকে রাখো। খোলার সময় ঠিক করো শুধু পড়বে, নতুন করে লিখবে, নাকি আগের লেখার পরে যোগ করবে — এটাই file-এর "mode"।</p></aside>
+<h3>File-এর প্রকারভেদ</h3>
+<div class="tbl"><table><thead><tr><th>ধরন</th><th>কী থাকে</th><th>উদাহরণ</th></tr></thead><tbody><tr><td class="">Text file</td><td class="">মানুষ পড়তে পারে এমন লেখা, লাইন আকারে</td><td class="">.txt, .csv, .py, .html</td></tr><tr><td class="">Binary file</td><td class="">0 আর 1-এর আকারে data, সরাসরি পড়া যায় না</td><td class="">.jpg, .mp3, .pdf, .exe</td></tr></tbody></table></div>
+<h3>File Operation-এর তিনটি ধাপ</h3>
+<figure class="pic"><img src="../img/fileops.png" alt="চিত্র 2.1: যেকোনো file operation-এর মৌলিক তিন ধাপ" loading="lazy"><figcaption>চিত্র 2.1: যেকোনো file operation-এর মৌলিক তিন ধাপ</figcaption></figure>
+<p>Python-এ file-এর নাম দেওয়ার দুই উপায়: <strong>relative path</strong> (যেমন <code>"marks.txt"</code> — program যে folder-এ চলছে সেখানে খোঁজে) আর <strong>absolute path</strong> (যেমন <code>"D:/data/marks.txt"</code> — পুরো ঠিকানা)। এই অধ্যায়ের সব উদাহরণে relative path ব্যবহার করা হয়েছে।</p>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>File operation কাকে বলে? File operation-এর ধাপগুলো লেখো। (3 নম্বর)</li><li>Text file ও binary file-এর পার্থক্য লেখো।</li></ul></aside>
+<h2 id="s2">2.2 File খোলার Mode</h2><div class="yt" data-id="1nFPshmGhKY"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: 🔥 Live: File Operation in Python (বাংলা) | Read, Write, Append | School of CSE Bangla"><img src="https://i.ytimg.com/vi/1nFPshmGhKY/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · মার্চ ২০২৫</p><p class="yt-t">🔥 Live: File Operation in Python (বাংলা) | Read, Write, Append | School of CSE Bangla</p><p class="yt-c">School of CSE Bangla · <a href="https://www.youtube.com/watch?v=1nFPshmGhKY" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p>File খোলার সময় বলে দিতে হয় file-টা দিয়ে কী করবে। একে বলে <strong>mode</strong>। ভুল mode দিলে হয় error আসবে, নয়তো আরও খারাপ — আগের data মুছে যাবে।</p>
+<div class="tbl"><table><thead><tr><th>Mode</th><th>অর্থ</th><th>File না থাকলে</th><th>File থাকলে</th></tr></thead><tbody><tr><td class="m">r</td><td class="">শুধু পড়া (default)</td><td class="">FileNotFoundError</td><td class="">শুরু থেকে পড়ে</td></tr><tr><td class="m">w</td><td class="">লেখা</td><td class="">নতুন file তৈরি</td><td class="">আগের সব লেখা মুছে নতুন করে লেখে</td></tr><tr><td class="m">a</td><td class="">শেষে যোগ (append)</td><td class="">নতুন file তৈরি</td><td class="">আগের লেখা রেখে শেষে যোগ করে</td></tr><tr><td class="m">x</td><td class="">শুধু নতুন file তৈরি</td><td class="">নতুন file তৈরি</td><td class="">FileExistsError</td></tr><tr><td class="m">r+</td><td class="">পড়া ও লেখা</td><td class="">FileNotFoundError</td><td class="">শুরু থেকে পড়ে ও লেখে</td></tr><tr><td class="m">w+</td><td class="">লেখা ও পড়া</td><td class="">নতুন file তৈরি</td><td class="">আগের সব মুছে দেয়</td></tr><tr><td class="m">a+</td><td class="">যোগ ও পড়া</td><td class="">নতুন file তৈরি</td><td class="">লেখা সবসময় শেষে যোগ হয়</td></tr></tbody></table></div>
+<p>এর সাথে <code>t</code> (text, default) বা <code>b</code> (binary) যোগ করা যায়: যেমন <code>"rb"</code> মানে binary file পড়া (ছবি, PDF), <code>"wb"</code> মানে binary file লেখা।</p>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 2.1</span>w আর a mode-এর পার্থক্য</p><p class="problem"><strong>সমস্যা:</strong> একই file-এ প্রথমে w mode-এ দুবার লেখো, তারপর a mode-এ লেখো — প্রতিবার file-এ কী থাকে দেখো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>f = open("notice.txt", "w")
+<span class="ln">2</span>f.write("Class starts at 9 AM\n")
+<span class="ln">3</span>f.close()
+<span class="ln">4</span> 
+<span class="ln">5</span>f = open("notice.txt", "w")
+<span class="ln">6</span>f.write("Class starts at 10 AM\n")
+<span class="ln">7</span>f.close()
+<span class="ln">8</span>print(open("notice.txt").read())
+<span class="ln">9</span> 
+<span class="ln">10</span>f = open("notice.txt", "a")
+<span class="ln">11</span>f.write("Lab on Thursday\n")
+<span class="ln">12</span>f.close()
+<span class="ln">13</span>print(open("notice.txt").read())
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Class starts at 10 AM
+
+Class starts at 10 AM
+Lab on Thursday</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1–3</td><td class="snip"><pre>f = open("notice.txt", "w")
+f.write("Class starts at 9 AM\n")
+f.close()</pre></td><td>notice.txt তৈরি হলো, একটা লাইন লেখা হলো। <code>\n</code> মানে নতুন লাইন — write() নিজে থেকে লাইন ভাঙে না।</td></tr><tr><td class="lab">5–7</td><td class="snip"><pre>f = open("notice.txt", "w")
+f.write("Class starts at 10 AM\n")
+f.close()</pre></td><td>আবার w mode — আগের "9 AM" লাইন মুছে গেল, শুধু নতুন লাইন রইল।</td></tr><tr><td class="lab">8</td><td class="snip"><pre>print(open("notice.txt").read())</pre></td><td>file পড়ে দেখালাম: শুধু "10 AM"।</td></tr><tr><td class="lab">10–12</td><td class="snip"><pre>f = open("notice.txt", "a")
+f.write("Lab on Thursday\n")
+f.close()</pre></td><td>a mode — আগের লেখা অক্ষত রেখে শেষে নতুন লাইন যোগ হলো।</td></tr></tbody></table></div></details>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 2.2</span>ভুল mode-এ যা ঘটে</p><p class="problem"><strong>সমস্যা:</strong> নেই এমন file r mode-এ আর আছে এমন file x mode-এ খোলার চেষ্টা করো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>try:
+<span class="ln">2</span>    open("missing.txt", "r")
+<span class="ln">3</span>except FileNotFoundError:
+<span class="ln">4</span>    print("r mode: file does not exist")
+<span class="ln">5</span> 
+<span class="ln">6</span>try:
+<span class="ln">7</span>    open("notice.txt", "x")
+<span class="ln">8</span>except FileExistsError:
+<span class="ln">9</span>    print("x mode: file already exists")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>r mode: file does not exist
+x mode: file already exists</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1–4</td><td class="snip"><pre>try:
+    open("missing.txt", "r")
+except FileNotFoundError:
+    print("r mode: file does not exist")</pre></td><td><code>try-except</code> দিয়ে error ধরলাম, যাতে program বন্ধ না হয়ে বার্তা দেখায়। try-এর ভেতরে error হলে সংশ্লিষ্ট except-এ চলে আসে।</td></tr><tr><td class="lab">6–9</td><td class="snip"><pre>try:
+    open("notice.txt", "x")
+except FileExistsError:
+    print("x mode: file already exists")</pre></td><td>x mode ব্যবহার হয় যখন নিশ্চিত হতে চাও যে ভুল করে পুরনো file-এর উপর লিখছ না।</td></tr></tbody></table></div></details>
+<aside class="box mistake"><p class="box-title">সাধারণ ভুল</p><div class="mk"><div class="mk-col bad"><p class="mk-h">ভুল</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code># Want to add one more student
+f = open("students.txt", "w")
+f.write("Tanvir\n")
+f.close()
+</code></pre></figure></div><div class="mk-col good"><p class="mk-h">সঠিক</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code># Want to add one more student
+f = open("students.txt", "a")
+f.write("Tanvir\n")
+f.close()
+</code></pre></figure></div><p class="why">Error আসে না, কিন্তু w mode আগের সব ছাত্রের নাম মুছে দেয়! কিছু যোগ করতে চাইলে সবসময় a mode। এটা file operation-এর সবচেয়ে বিপজ্জনক ভুল।</p></div></aside>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>File opening mode-গুলো বর্ণনা করো। (4-5 নম্বর)</li><li>w ও a mode-এর পার্থক্য উদাহরণসহ লেখো।</li></ul><p>উপরের mode টেবিলটা হুবহু লিখতে পারলে পূর্ণ নম্বর নিশ্চিত। w আর a-এর পার্থক্য একটা ছোট program দিয়ে দেখাও।</p></aside>
+<aside class="box practice"><p class="box-title">অনুশীলন</p><p>"diary.txt" file-এ a mode ব্যবহার করে তিনবার তিনটা আলাদা লাইন যোগ করো, তারপর পুরো file পড়ে দেখাও। তারপর w mode দিয়ে একবার লিখে আবার পড়ো — কী পার্থক্য হলো?</p></aside>
+<h2 id="s3">2.3 File খোলা ও বন্ধ করার Function</h2><div class="yt" data-id="kYoCvI-TPsM"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: File Handling (Txt and Json) | Lesson 62 | Python Bangla Full Course | Python Bangla Tutorial 💡🧠✨"><img src="https://i.ytimg.com/vi/kYoCvI-TPsM/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · অক্টোবর ২০২৫</p><p class="yt-t">File Handling (Txt and Json) | Lesson 62 | Python Bangla Full Course | Python Bangla Tutorial 💡🧠✨</p><p class="yt-c">Arms of Coding · <a href="https://www.youtube.com/watch?v=kYoCvI-TPsM" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<h3>open() ও close()</h3>
+<div class="syntax"><p class="box-title">Syntax</p><figure class="code mini"><figcaption><span>Syntax</span><span class="fn"></span></figcaption><pre><code>file_object = open(file_name, mode, encoding="utf-8")
+# file নিয়ে কাজ
+file_object.close()
+</code></pre></figure><p>open() একটা <strong>file object</strong> return করে — এর মাধ্যমেই পড়া-লেখা হয়। encoding="utf-8" দিলে বাংলাসহ যেকোনো ভাষার লেখা ঠিকমতো সংরক্ষণ হয়।</p></div>
+<p><strong>close() কেন জরুরি?</strong> write() দিয়ে লেখা data সাথে সাথে disk-এ যায় না, প্রথমে memory-র একটা অস্থায়ী জায়গায় (buffer) জমা থাকে। close() ডাকলে তবেই সব data নিশ্চিতভাবে disk-এ লেখা হয় এবং file-টা অন্য program-এর জন্য মুক্ত হয়। close() ভুলে গেলে শেষের কিছু data হারিয়ে যেতে পারে।</p>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 2.3</span>open, close ও file object</p><p class="problem"><strong>সমস্যা:</strong> একটা file খুলে তার তথ্য দেখো, close করো, তারপর বন্ধ file-এ লেখার চেষ্টা করো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>f = open("demo.txt", "w", encoding="utf-8")
+<span class="ln">2</span>print("Name  :", f.name)
+<span class="ln">3</span>print("Mode  :", f.mode)
+<span class="ln">4</span>print("Closed:", f.closed)
+<span class="ln">5</span>f.write("Hello file")
+<span class="ln">6</span>f.close()
+<span class="ln">7</span>print("Closed:", f.closed)
+<span class="ln">8</span>f.write("More text")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Name  : demo.txt
+Mode  : w
+Closed: False
+Closed: True
+Traceback (most recent call last):
+  ...
+ValueError: I/O operation on closed file.</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">2–4</td><td class="snip"><pre>print("Name  :", f.name)
+print("Mode  :", f.mode)
+print("Closed:", f.closed)</pre></td><td>file object-এর কিছু attribute: name, mode, আর closed (বন্ধ কিনা)।</td></tr><tr><td class="lab">6–7</td><td class="snip"><pre>f.close()
+print("Closed:", f.closed)</pre></td><td>close()-এর পর closed = True।</td></tr><tr><td class="lab">8</td><td class="snip"><pre>f.write("More text")</pre></td><td>বন্ধ file-এ লেখার চেষ্টা — ValueError।</td></tr></tbody></table></div></details>
+<h3>with Statement: স্বয়ংক্রিয় close</h3>
+<p>close() লিখতে ভুলে যাওয়া খুব সাধারণ, আর মাঝখানে error হলে close() পর্যন্ত পৌঁছানোই হয় না। তাই Python-এ file খোলার সবচেয়ে ভালো উপায় হলো <strong>with</strong> statement — block শেষ হলে Python নিজেই file বন্ধ করে দেয়, error হলেও।</p>
+<div class="syntax"><p class="box-title">Syntax</p><figure class="code mini"><figcaption><span>Syntax</span><span class="fn"></span></figcaption><pre><code>with open(file_name, mode) as f:
+    # f দিয়ে কাজ
+# এখানে আসার আগেই file নিজে বন্ধ হয়ে গেছে
+</code></pre></figure></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>with open("demo.txt", "w") as f:
+<span class="ln">2</span>    f.write("Written using with\n")
+<span class="ln">3</span>    print("Inside with, closed?", f.closed)
+<span class="ln">4</span> 
+<span class="ln">5</span>print("After with, closed? ", f.closed)
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Inside with, closed? False
+After with, closed?  True</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1</td><td class="snip"><pre>with open("demo.txt", "w") as f:</pre></td><td><code>as f</code> মানে open() যে file object দিল তার নাম f।</td></tr><tr><td class="lab">3</td><td class="snip"><pre>    print("Inside with, closed?", f.closed)</pre></td><td>block-এর ভেতরে file খোলা।</td></tr><tr><td class="lab">5</td><td class="snip"><pre>print("After with, closed? ", f.closed)</pre></td><td>block থেকে বের হতেই file বন্ধ — আমরা close() লিখিনি।</td></tr></tbody></table></div></details>
+<aside class="box tip"><p class="box-title">Exam Tip</p><p>বাস্তবে এবং পরীক্ষায় দুটোতেই with ব্যবহার করো। তবে পরীক্ষায় open()/close() জিজ্ঞেস করলে প্রথমে close() সহ উদাহরণ দাও, তারপর with-এর কথা উল্লেখ করো।</p></aside>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>File খোলা ও বন্ধ করার function বর্ণনা করো। (4 নম্বর)</li><li>close() কেন জরুরি? with statement-এর সুবিধা কী?</li></ul></aside>
+<h2 id="s4">2.4 File পড়া ও লেখার Function</h2><div class="yt" data-id="RyBgnrBvwUE"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Bangla Python Tutorial for Beginners Part 22 - Python File I/O - Read in Python Part 01"><img src="https://i.ytimg.com/vi/RyBgnrBvwUE/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · ডিসেম্বর ২০২৩</p><p class="yt-t">Bangla Python Tutorial for Beginners Part 22 - Python File I/O - Read in Python Part 01</p><p class="yt-c">Saiful Islam · <a href="https://www.youtube.com/watch?v=RyBgnrBvwUE" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<div class="tbl"><table><thead><tr><th>Function</th><th>কাজ</th></tr></thead><tbody><tr><td class="m">write(string)</td><td class="">একটা string লেখে; লেখা character-এর সংখ্যা return করে</td></tr><tr><td class="m">writelines(list)</td><td class="">string-এর list একবারে লেখে (নিজে থেকে \n বসায় না)</td></tr><tr><td class="m">read()</td><td class="">পুরো file একটা string হিসেবে পড়ে</td></tr><tr><td class="m">read(n)</td><td class="">প্রথম n টা character পড়ে</td></tr><tr><td class="m">readline()</td><td class="">একবারে একটা লাইন পড়ে (\n সহ)</td></tr><tr><td class="m">readlines()</td><td class="">সব লাইন একটা list হিসেবে পড়ে</td></tr><tr><td class="m">for line in f</td><td class="">লাইন ধরে ধরে পড়ার সবচেয়ে সহজ ও memory-সাশ্রয়ী উপায়</td></tr></tbody></table></div>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 2.4</span>লেখার Function</p><p class="problem"><strong>সমস্যা:</strong> write() আর writelines() দিয়ে একটা ছাত্র তালিকা file-এ লেখো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>with open("students.txt", "w") as f:
+<span class="ln">2</span>    count = f.write("Rahim,101,78\n")
+<span class="ln">3</span>    print("Characters written:", count)
+<span class="ln">4</span>    f.write("Sumaiya,102,91\n")
+<span class="ln">5</span>    rows = ["Karim,103,35\n", "Tanvir,104,66\n", "Nusrat,105,84\n"]
+<span class="ln">6</span>    f.writelines(rows)
+<span class="ln">7</span>print("File saved.")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Characters written: 13
+File saved.</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1</td><td class="snip"><pre>with open("students.txt", "w") as f:</pre></td><td>প্রতিটা লাইনে নাম, রোল, মার্কস comma দিয়ে আলাদা — এই ধরনটাকে CSV (Comma Separated Values) বলে। Excel-ও এভাবে data খুলতে পারে।</td></tr><tr><td class="lab">2</td><td class="snip"><pre>    count = f.write("Rahim,101,78\n")</pre></td><td>write() লেখা character-এর সংখ্যা return করে — এখানে 13 (\n-ও একটা character)।</td></tr><tr><td class="lab">5–6</td><td class="snip"><pre>    rows = ["Karim,103,35\n", "Tanvir,104,66\n", "Nusrat,105,84\n"]
+    f.writelines(rows)</pre></td><td>writelines() পুরো list একবারে লেখে। প্রতিটা string-এর শেষে \n নিজেকেই দিতে হয়েছে।</td></tr></tbody></table></div></details>
+<figure class="code text"><figcaption><span>Text</span><span class="fn">students.txt</span></figcaption><pre><code>Rahim,101,78
+Sumaiya,102,91
+Karim,103,35
+Tanvir,104,66
+Nusrat,105,84
+</code></pre></figure>
+<p>উপরে দেখানো হলো file-টার ভেতরে এখন কী আছে। এবার এটা চারভাবে পড়ি।</p>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 2.5</span>পড়ার Function</p><p class="problem"><strong>সমস্যা:</strong> students.txt file-টা read(), read(n), readline(), readlines() আর for loop দিয়ে পড়ো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>with open("students.txt") as f:
+<span class="ln">2</span>    print(repr(f.read(10)))
+<span class="ln">3</span>    print(repr(f.readline()))
+<span class="ln">4</span>    print(repr(f.readline()))
+<span class="ln">5</span> 
+<span class="ln">6</span>with open("students.txt") as f:
+<span class="ln">7</span>    lines = f.readlines()
+<span class="ln">8</span>print(lines[:2])
+<span class="ln">9</span>print("Total lines:", len(lines))
+<span class="ln">10</span> 
+<span class="ln">11</span>with open("students.txt") as f:
+<span class="ln">12</span>    for line in f:
+<span class="ln">13</span>        name, roll, marks = line.strip().split(",")
+<span class="ln">14</span>        print(f"{roll}: {name:&lt;8} {marks}")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>'Rahim,101,'
+'78\n'
+'Sumaiya,102,91\n'
+['Rahim,101,78\n', 'Sumaiya,102,91\n']
+Total lines: 5
+101: Rahim    78
+102: Sumaiya  91
+103: Karim    35
+104: Tanvir   66
+105: Nusrat   84</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">2</td><td class="snip"><pre>    print(repr(f.read(10)))</pre></td><td>প্রথম 10টা character। <code>repr()</code> দেখায় লেখাটা ঠিক কেমন, \n সহ।</td></tr><tr><td class="lab">3</td><td class="snip"><pre>    print(repr(f.readline()))</pre></td><td>read(10)-এর পর থেকে লাইনের বাকি অংশ। File object মনে রাখে কোথা পর্যন্ত পড়া হয়েছে — অনেকটা বইয়ের বুকমার্কের মতো।</td></tr><tr><td class="lab">4</td><td class="snip"><pre>    print(repr(f.readline()))</pre></td><td>পরের পুরো লাইন।</td></tr><tr><td class="lab">6–9</td><td class="snip"><pre>with open("students.txt") as f:
+    lines = f.readlines()
+print(lines[:2])
+print("Total lines:", len(lines))</pre></td><td>readlines() সব লাইন list হিসেবে দেয়; প্রতিটার শেষে \n থাকে।</td></tr><tr><td class="lab">11–14</td><td class="snip"><pre>with open("students.txt") as f:
+    for line in f:
+        name, roll, marks = line.strip().split(",")
+        print(f"{roll}: {name:&lt;8} {marks}")</pre></td><td>for loop-এ file সরাসরি দিলে লাইন ধরে পড়ে। strip() শেষের \n সরায়, split(",") comma দিয়ে ভেঙে list বানায়, তারপর তিনটা মান তিনটা variable-এ।</td></tr></tbody></table></div></details>
+<aside class="box mistake"><p class="box-title">সাধারণ ভুল</p><div class="mk"><div class="mk-col bad"><p class="mk-h">ভুল</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>with open("numbers.txt", "w") as f:
+    f.write(100)
+</code></pre></figure><p class="err">ফল: <code>TypeError: write() argument must be str, not int</code></p></div><div class="mk-col good"><p class="mk-h">সঠিক</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>with open("numbers.txt", "w") as f:
+    f.write(str(100))
+</code></pre></figure></div><p class="why">write() শুধু string নেয়। সংখ্যা লিখতে আগে str() দিয়ে string বানাও। একইভাবে file থেকে পড়া সংখ্যা string হিসেবে আসে — হিসাবের আগে int() বা float() লাগবে।</p></div></aside>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>File পড়া ও লেখার function-গুলো ব্যাখ্যা করো। (4-5 নম্বর)</li><li>read(), readline() ও readlines()-এর পার্থক্য লেখো।</li></ul></aside>
+<aside class="box practice"><p class="box-title">অনুশীলন</p><p>একটা file-এ 1 থেকে 10 পর্যন্ত সংখ্যা প্রতি লাইনে একটা করে লেখো, তারপর file পড়ে সংখ্যাগুলোর যোগফল বের করো।</p></aside>
+<h2 id="s5">2.5 File Input ও Output দিয়ে Program</h2><div class="yt" data-id="U4VHOQvaTw8"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: পার্ট ৩৪ | Python File Handling Part 2 | Python tutorial for beginners in Bangla"><img src="https://i.ytimg.com/vi/U4VHOQvaTw8/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · আগস্ট ২০২৬</p><p class="yt-t">পার্ট ৩৪ | Python File Handling Part 2 | Python tutorial for beginners in Bangla</p><p class="yt-c">IT VAYA · <a href="https://www.youtube.com/watch?v=U4VHOQvaTw8" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 2.6</span>Student Result File</p><p class="problem"><strong>সমস্যা:</strong> students.txt থেকে প্রত্যেক ছাত্রের মার্কস পড়ে পাস/ফেল ঠিক করো, ফলাফল result.txt-এ লেখো এবং ক্লাসের গড় দেখাও।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>def process_results(infile, outfile):
+<span class="ln">2</span>    total, count = 0, 0
+<span class="ln">3</span>    with open(infile) as fin, open(outfile, "w") as fout:
+<span class="ln">4</span>        fout.write("Roll,Name,Marks,Result\n")
+<span class="ln">5</span>        for line in fin:
+<span class="ln">6</span>            name, roll, marks = line.strip().split(",")
+<span class="ln">7</span>            marks = int(marks)
+<span class="ln">8</span>            result = "Pass" if marks &gt;= 40 else "Fail"
+<span class="ln">9</span>            fout.write(f"{roll},{name},{marks},{result}\n")
+<span class="ln">10</span>            total += marks
+<span class="ln">11</span>            count += 1
+<span class="ln">12</span>    return total / count
+<span class="ln">13</span> 
+<span class="ln">14</span>avg = process_results("students.txt", "result.txt")
+<span class="ln">15</span>print("Class average:", round(avg, 2))
+<span class="ln">16</span>print(open("result.txt").read())
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Class average: 70.8
+Roll,Name,Marks,Result
+101,Rahim,78,Pass
+102,Sumaiya,91,Pass
+103,Karim,35,Fail
+104,Tanvir,66,Pass
+105,Nusrat,84,Pass</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">3</td><td class="snip"><pre>    with open(infile) as fin, open(outfile, "w") as fout:</pre></td><td>একটা with-এ দুটো file একসাথে খোলা যায় — একটা পড়ার, একটা লেখার।</td></tr><tr><td class="lab">4</td><td class="snip"><pre>        fout.write("Roll,Name,Marks,Result\n")</pre></td><td>result.txt-এর প্রথম লাইনে কলামের নাম (header)।</td></tr><tr><td class="lab">6–7</td><td class="snip"><pre>            name, roll, marks = line.strip().split(",")
+            marks = int(marks)</pre></td><td>লাইন ভেঙে তিনটা মান; মার্কস string থেকে int-এ।</td></tr><tr><td class="lab">9–11</td><td class="snip"><pre>            fout.write(f"{roll},{name},{marks},{result}\n")
+            total += marks
+            count += 1</pre></td><td>ফলাফল লেখা এবং গড়ের জন্য যোগফল ও সংখ্যা জমানো।</td></tr><tr><td class="lab">13</td><td class="snip"><pre></pre></td><td>with block শেষ হওয়ায় দুটো file-ই বন্ধ, তারপর গড় return।</td></tr></tbody></table></div></details>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 2.7</span>File-এর Line, Word ও Character গণনা</p><p class="problem"><strong>সমস্যা:</strong> যেকোনো text file-এ কতগুলো লাইন, শব্দ আর character আছে বের করার function লেখো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>def file_stats(filename):
+<span class="ln">2</span>    lines = words = chars = 0
+<span class="ln">3</span>    with open(filename) as f:
+<span class="ln">4</span>        for line in f:
+<span class="ln">5</span>            lines += 1
+<span class="ln">6</span>            words += len(line.split())
+<span class="ln">7</span>            chars += len(line)
+<span class="ln">8</span>    return lines, words, chars
+<span class="ln">9</span> 
+<span class="ln">10</span>with open("poem.txt", "w") as f:
+<span class="ln">11</span>    f.write("Twinkle twinkle little star\n")
+<span class="ln">12</span>    f.write("How I wonder what you are\n")
+<span class="ln">13</span> 
+<span class="ln">14</span>l, w, c = file_stats("poem.txt")
+<span class="ln">15</span>print(f"Lines: {l}, Words: {w}, Characters: {c}")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Lines: 2, Words: 10, Characters: 54</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">2</td><td class="snip"><pre>    lines = words = chars = 0</pre></td><td>তিনটা counter একসাথে 0।</td></tr><tr><td class="lab">6</td><td class="snip"><pre>            words += len(line.split())</pre></td><td>split() কোনো argument ছাড়া space দিয়ে ভাগ করে, তাই শব্দের সংখ্যা পাওয়া যায়।</td></tr><tr><td class="lab">7</td><td class="snip"><pre>            chars += len(line)</pre></td><td>\n-ও character হিসেবে গোনা হচ্ছে।</td></tr></tbody></table></div></details>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 2.8</span>তারিখসহ Log File</p><p class="problem"><strong>সমস্যা:</strong> প্রতিবার কোনো ঘটনা ঘটলে তারিখ-সময়সহ একটা লাইন log.txt-এ যোগ করো (a mode আর অধ্যায় ১-এর datetime একসাথে)।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>from datetime import datetime
+<span class="ln">2</span> 
+<span class="ln">3</span>def log_event(message, when=None):
+<span class="ln">4</span>    when = when or datetime.now()
+<span class="ln">5</span>    with open("log.txt", "a") as f:
+<span class="ln">6</span>        f.write(f"[{when.strftime('%d-%m-%Y %H:%M')}] {message}\n")
+<span class="ln">7</span> 
+<span class="ln">8</span>log_event("Rahim logged in", datetime(2026, 10, 5, 9, 15))
+<span class="ln">9</span>log_event("Result published", datetime(2026, 10, 5, 11, 40))
+<span class="ln">10</span>log_event("Rahim logged out", datetime(2026, 10, 5, 12, 5))
+<span class="ln">11</span> 
+<span class="ln">12</span>with open("log.txt") as f:
+<span class="ln">13</span>    print(f.read())
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>[05-10-2026 09:15] Rahim logged in
+[05-10-2026 11:40] Result published
+[05-10-2026 12:05] Rahim logged out</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">4</td><td class="snip"><pre>    when = when or datetime.now()</pre></td><td>when দেওয়া না হলে বর্তমান সময়। <code>x or y</code> মানে x ফাঁকা (None) হলে y নাও।</td></tr><tr><td class="lab">5–6</td><td class="snip"><pre>    with open("log.txt", "a") as f:
+        f.write(f"[{when.strftime('%d-%m-%Y %H:%M')}] {message}\n")</pre></td><td>a mode তাই প্রতিবার নতুন লাইন শেষে যোগ হয়, পুরনো log হারায় না।</td></tr><tr><td class="lab">8–10</td><td class="snip"><pre>log_event("Rahim logged in", datetime(2026, 10, 5, 9, 15))
+log_event("Result published", datetime(2026, 10, 5, 11, 40))
+log_event("Rahim logged out", datetime(2026, 10, 5, 12, 5))</pre></td><td>উদাহরণে নির্দিষ্ট সময় পাঠানো হয়েছে যাতে output সবসময় একই থাকে; বাস্তবে শুধু <code>log_event("...")</code> লিখবে।</td></tr></tbody></table></div></details>
+<aside class="box tip"><p class="box-title">Exam Tip</p><p>File-এর program লেখার সময় সবসময় with ব্যবহার করো, mode সঠিক কিনা দুবার দেখো, আর পড়া সংখ্যা int()/float() দিয়ে বদলাতে ভুলো না। Output-এর সাথে file-এর ভেতরে কী লেখা হলো সেটাও দেখাও।</p></aside>
+<aside class="box practice"><p class="box-title">অনুশীলন</p><p>একটা program লেখো যেটা source.txt-এর সব লাইন copy.txt-এ কপি করবে, তবে প্রতিটা লাইনের শুরুতে লাইন নম্বর বসাবে।</p></aside>
+<h2 id="s6">অধ্যায়ের সারসংক্ষেপ</h2>
+<div class="tbl"><table><thead><tr><th>বিষয়</th><th>মূল কথা</th></tr></thead><tbody><tr><td class="">File operation</td><td class="">File তৈরি, খোলা, পড়া, লেখা, যোগ ও বন্ধ করা; ধাপ: open → read/write → close।</td></tr><tr><td class="">Mode</td><td class="">r পড়া, w নতুন করে লেখা (আগের মুছে), a শেষে যোগ, x শুধু নতুন file; b binary, t text।</td></tr><tr><td class="">open/close</td><td class="">open() file object দেয়; close() data নিশ্চিতভাবে disk-এ লেখে; with নিজে থেকে বন্ধ করে।</td></tr><tr><td class="">লেখা</td><td class="">write() একটা string, writelines() string-এর list; \n নিজে দিতে হয়; শুধু string লেখা যায়।</td></tr><tr><td class="">পড়া</td><td class="">read(), read(n), readline(), readlines(), for line in f; পড়া data সবসময় string।</td></tr></tbody></table></div>
+<h2 id="s7">অনুশীলনী · অধ্যায় ২ (বোর্ড প্রশ্ন ও উত্তর)</h2>
+<p>এই অনুশীলনীতে অধ্যায় ২ থেকে বিগত বছরগুলোতে বোর্ডে আসা সব প্রশ্ন, পরীক্ষার খাতায় লেখার উপযোগী উত্তরসহ দেওয়া হলো। শেষে আছে বোর্ডে এখনো সরাসরি না আসা একটি গুরুত্বপূর্ণ প্রশ্ন।</p>
+<p>উত্তরগুলো নম্বর অনুযায়ী মাপা: ১ নম্বরের প্রশ্নে দুই-তিন লাইন, ২ নম্বরে মূল পয়েন্টসহ সংক্ষিপ্ত উত্তর, আর ৬ নম্বরে সংজ্ঞা, ব্যাখ্যা, program ও output — পূর্ণ উত্তর। Program-গুলোর output কোড চালিয়ে যাচাই করা।</p>
+<h3>ক. অতি সংক্ষিপ্ত প্রশ্ন (মান: ১)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>File Operation বলতে কী বুঝায়?</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৪ (পরি) · বই: 2.1</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>Program-এর মাধ্যমে storage device-এ রাখা file তৈরি করা, খোলা, file থেকে data পড়া, file-এ data লেখা বা যোগ করা এবং কাজ শেষে file বন্ধ করার প্রক্রিয়াকে file operation বলে। এর ফলে program বন্ধ হলেও data স্থায়ীভাবে সংরক্ষিত থাকে।</p></aside>
+<div class="q"><span class="qn">২</span><div class="qt"><strong>open( ) Function-এর Syntax লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৪ (পরি) · বই: 2.3</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>file_object = open(file_name, mode, encoding="utf-8")
+</code></pre></figure><p>এখানে <strong>file_name</strong> হলো file-এর নাম বা path, <strong>mode</strong> হলো file কী কাজে খোলা হবে ("r", "w", "a" ইত্যাদি; না দিলে "r"), আর <strong>encoding</strong> লেখার ধরন (ঐচ্ছিক)। যেমন: <code>f = open("marks.txt", "w")</code></p></aside>
+<div class="q"><span class="qn">৩</span><div class="qt"><strong>open( ) ফাংশনের কাজ কী?</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৩ (পরি) · বই: 2.3</span></span><span class="stars s2" title="গুরুত্ব 2/3" aria-label="গুরুত্ব 2 তারকা">★★☆</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>open() ফাংশন নির্দিষ্ট mode-এ একটি file খোলে (w বা a mode-এ file না থাকলে নতুন তৈরি করে) এবং একটি <strong>file object</strong> return করে। এই file object-এর মাধ্যমেই file থেকে পড়া ও file-এ লেখার কাজ করা হয়।</p></aside>
+<div class="q"><span class="qn">৪</span><div class="qt"><strong>read( ) Function-এর Syntax লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৫ · বই: 2.4</span></span><span class="stars s2" title="গুরুত্ব 2/3" aria-label="গুরুত্ব 2 তারকা">★★☆</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>content = file_object.read(size)
+</code></pre></figure><p><strong>size</strong> ঐচ্ছিক: না দিলে পুরো file একটি string হিসেবে পড়ে, দিলে প্রথম size সংখ্যক character পড়ে। যেমন: <code>f.read()</code> বা <code>f.read(10)</code></p></aside>
+<div class="q"><span class="qn">৫</span><div class="qt"><strong>চারটি File Operation-এর নাম লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২২ · বই: 2.1</span></span><span class="stars s2" title="গুরুত্ব 2/3" aria-label="গুরুত্ব 2 তারকা">★★☆</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>চারটি মৌলিক file operation:</p><ul><li>File খোলা বা তৈরি করা — <code>open()</code></li><li>File থেকে data পড়া — <code>read()</code>, <code>readline()</code>, <code>readlines()</code></li><li>File-এ data লেখা বা যোগ করা — <code>write()</code>, <code>writelines()</code></li><li>File বন্ধ করা — <code>close()</code></li></ul></aside>
+<div class="q"><span class="qn">৬</span><div class="qt"><strong>পাইথন প্রোগ্রামে কী কী উপায়ে মান ইনপুট নেওয়া হয়?</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৩ (পরি)</span></span><span class="stars s1" title="গুরুত্ব 1/3" aria-label="গুরুত্ব 1 তারকা">★☆☆</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>Python-এ প্রধানত তিনভাবে মান ইনপুট নেওয়া যায়:</p><ul><li><strong>সরাসরি (Directly):</strong> program-এর ভেতরে assignment দিয়ে, যেমন <code>x = 5</code></li><li><strong>Keyboard থেকে:</strong> <code>input()</code> function দিয়ে, যেমন <code>name = input("Name: ")</code> — এটি সবসময় string দেয়, সংখ্যার জন্য int()/float() লাগে</li><li><strong>File থেকে:</strong> <code>open()</code> ও <code>read()</code> দিয়ে file-এ রাখা data পড়ে</li></ul></aside>
+<h3>খ. সংক্ষিপ্ত প্রশ্ন (মান: ২)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>File Operation-এর সুবিধা লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২২, ২০২৫ · বই: 2.1</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><ul><li><strong>স্থায়ী সংরক্ষণ:</strong> program বন্ধ হলেও data হারায় না, পরে আবার ব্যবহার করা যায়।</li><li><strong>বারবার input দিতে হয় না:</strong> একবার রাখা data প্রতিবার file থেকে পড়ে নেওয়া যায়।</li><li><strong>বিপুল data নিয়ে কাজ:</strong> RAM-এর চেয়ে অনেক বেশি data file-এ রাখা যায়।</li><li><strong>Data হালনাগাদ:</strong> file-এর data পরিবর্তন, সংশোধন ও নতুন data যোগ করা যায়।</li><li><strong>আদান-প্রদান:</strong> file এক program থেকে অন্য program বা অন্য কম্পিউটারে পাঠানো যায়।</li><li><strong>রেকর্ড ও রিপোর্ট:</strong> ফলাফল, log বা রিপোর্ট file আকারে রেখে পরে দেখা বা print করা যায়।</li></ul></aside>
+<div class="q"><span class="qn">২</span><div class="qt"><strong>File Operation সম্পর্কে সংক্ষেপে লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৪ (পরি) · বই: 2.1–2.3</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>কোনো file থেকে data পড়া বা file-এ data লেখার জন্য যেসব কাজ করা হয়, তাকে file operation বলে। Python-এ file operation তিন ধাপে সম্পন্ন হয়:</p><ul><li><strong>১. File খোলা (Open):</strong> <code>open(file_name, mode)</code> দিয়ে প্রয়োজনীয় mode-এ file খোলা হয়।</li><li><strong>২. কাজ করা (Read/Write):</strong> <code>read()</code> দিয়ে পড়া বা <code>write()</code> দিয়ে লেখা হয়।</li><li><strong>৩. File বন্ধ করা (Close):</strong> <code>close()</code> দিয়ে file বন্ধ করা হয়, যাতে সব data নিশ্চিতভাবে disk-এ লেখা হয়।</li></ul><p><code>with open(...) as f:</code> ব্যবহার করলে কাজ শেষে file নিজে থেকেই বন্ধ হয়।</p></aside>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>f = open("note.txt", "w")      # 1. open
+<span class="ln">2</span>f.write("Python File Operation")  # 2. write
+<span class="ln">3</span>f.close()                       # 3. close
+<span class="ln">4</span> 
+<span class="ln">5</span>with open("note.txt") as f:     # open (auto close)
+<span class="ln">6</span>    print(f.read())             # read
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Python File Operation</pre></figure>
+<div class="q"><span class="qn">৩</span><div class="qt"><strong>File-এ Data Write ও Read করার প্রোগ্রাম লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৫ (পরি) · বই: 2.4</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span># Writing data to a file
+<span class="ln">2</span>with open("data.txt", "w") as f:
+<span class="ln">3</span>    f.write("Welcome to MIU Platform\n")
+<span class="ln">4</span>    f.write("Python subject code is 28531\n")
+<span class="ln">5</span> 
+<span class="ln">6</span># Reading data from the file
+<span class="ln">7</span>with open("data.txt", "r") as f:
+<span class="ln">8</span>    content = f.read()
+<span class="ln">9</span> 
+<span class="ln">10</span>print("File Content:")
+<span class="ln">11</span>print(content)
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>File Content:
+Welcome to MIU Platform
+Python subject code is 28531</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">2–4</td><td class="snip"><pre>with open("data.txt", "w") as f:
+    f.write("Welcome to MIU Platform\n")
+    f.write("Python subject code is 28531\n")</pre></td><td>w mode-এ data.txt খুলে দুটি লাইন লেখা হলো; <code>\n</code> দিয়ে নতুন লাইন।</td></tr><tr><td class="lab">7–8</td><td class="snip"><pre>with open("data.txt", "r") as f:
+    content = f.read()</pre></td><td>r mode-এ file খুলে read() দিয়ে পুরো লেখা content-এ রাখা হলো।</td></tr><tr><td class="lab">10–11</td><td class="snip"><pre>print("File Content:")
+print(content)</pre></td><td>file-এর লেখা screen-এ দেখানো। with ব্যবহার করায় close() লিখতে হয়নি।</td></tr></tbody></table></div></details>
+<h3>গ. রচনামূলক প্রশ্ন (মান: ৬)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>একটি File-এ Data Store করার Program লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৪ (পরি), ২০২৫ · বই: 2.5</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>নিচের program ব্যবহারকারীর কাছ থেকে ছাত্রের নাম, রোল ও মার্কস নিয়ে students.txt file-এ সংরক্ষণ করে, তারপর file থেকে পড়ে সব রেকর্ড দেখায়। a (append) mode ব্যবহার করায় প্রতিবার নতুন data আগের data-র পরে যোগ হয়, পুরনো data মুছে যায় না।</p></aside>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>def store_student(name, roll, marks):
+<span class="ln">2</span>    with open("students.txt", "a") as f:
+<span class="ln">3</span>        f.write(f"{roll},{name},{marks}\n")
+<span class="ln">4</span> 
+<span class="ln">5</span>def show_students():
+<span class="ln">6</span>    print("Roll  Name        Marks")
+<span class="ln">7</span>    with open("students.txt", "r") as f:
+<span class="ln">8</span>        for line in f:
+<span class="ln">9</span>            roll, name, marks = line.strip().split(",")
+<span class="ln">10</span>            print(f"{roll:&lt;5} {name:&lt;11} {marks}")
+<span class="ln">11</span> 
+<span class="ln">12</span>n = int(input("How many students? "))
+<span class="ln">13</span>for i in range(n):
+<span class="ln">14</span>    name = input("Name : ")
+<span class="ln">15</span>    roll = input("Roll : ")
+<span class="ln">16</span>    marks = input("Marks: ")
+<span class="ln">17</span>    store_student(name, roll, marks)
+<span class="ln">18</span> 
+<span class="ln">19</span>print("Data stored successfully.")
+<span class="ln">20</span>show_students()
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>How many students? <span class="in">2</span>
+Name : <span class="in">Rahim</span>
+Roll : <span class="in">101</span>
+Marks: <span class="in">78</span>
+Name : <span class="in">Sumaiya</span>
+Roll : <span class="in">102</span>
+Marks: <span class="in">91</span>
+Data stored successfully.
+Roll  Name        Marks
+101   Rahim       78
+102   Sumaiya     91</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1–3</td><td class="snip"><pre>def store_student(name, roll, marks):
+    with open("students.txt", "a") as f:
+        f.write(f"{roll},{name},{marks}\n")</pre></td><td>store_student() a mode-এ file খুলে একজন ছাত্রের তথ্য comma দিয়ে আলাদা করে এক লাইনে লেখে।</td></tr><tr><td class="lab">5–10</td><td class="snip"><pre>def show_students():
+    print("Roll  Name        Marks")
+    with open("students.txt", "r") as f:
+        for line in f:
+            roll, name, marks = line.strip().split(",")
+            print(f"{roll:&lt;5} {name:&lt;11} {marks}")</pre></td><td>show_students() file লাইন ধরে পড়ে, strip() দিয়ে \n বাদ দিয়ে split(",") দিয়ে তিন অংশে ভাগ করে সাজিয়ে দেখায়।</td></tr><tr><td class="lab">12–17</td><td class="snip"><pre>n = int(input("How many students? "))
+for i in range(n):
+    name = input("Name : ")
+    roll = input("Roll : ")
+    marks = input("Marks: ")
+    store_student(name, roll, marks)</pre></td><td>কতজন ছাত্র জেনে প্রত্যেকের তথ্য নিয়ে file-এ সংরক্ষণ।</td></tr><tr><td class="lab">19–20</td><td class="snip"><pre>print("Data stored successfully.")
+show_students()</pre></td><td>সংরক্ষণের পর file থেকে পড়ে যাচাই।</td></tr></tbody></table></div></details>
+<aside class="box tip"><p class="box-title">Exam Tip</p><p>Program-এর সাথে file-এর ভেতরে কী লেখা হলো (যেমন <code>101,Rahim,78</code>) সেটাও খাতায় দেখাও। mode কেন "a" নেওয়া হলো এক লাইনে লিখলে পূর্ণ নম্বর পাওয়া সহজ।</p></aside>
+<div class="q"><span class="qn">২</span><div class="qt"><strong>File Opening Mode-সমূহের বর্ণনা দাও। (বিভিন্ন প্রকার File Access Mode-এর ব্যবহার লেখ।)</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৪ · বই: 2.2</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>open() ফাংশনের দ্বিতীয় parameter হলো <strong>mode</strong> — এটি নির্ধারণ করে file কী কাজে খোলা হবে: শুধু পড়া, নতুন করে লেখা, নাকি আগের লেখার পরে যোগ করা। ভুল mode দিলে error আসতে পারে বা আগের data মুছে যেতে পারে।</p></aside>
+<div class="tbl"><table><thead><tr><th>Mode</th><th>অর্থ</th><th>File না থাকলে</th><th>File থাকলে</th></tr></thead><tbody><tr><td class="m">r</td><td class="">শুধু পড়া (default)</td><td class="">FileNotFoundError</td><td class="">শুরু থেকে পড়ে</td></tr><tr><td class="m">w</td><td class="">লেখা</td><td class="">নতুন file তৈরি করে</td><td class="">আগের সব লেখা মুছে নতুন করে লেখে</td></tr><tr><td class="m">a</td><td class="">শেষে যোগ (append)</td><td class="">নতুন file তৈরি করে</td><td class="">আগের লেখা রেখে শেষে যোগ করে</td></tr><tr><td class="m">x</td><td class="">শুধু নতুন file তৈরি</td><td class="">নতুন file তৈরি করে</td><td class="">FileExistsError</td></tr><tr><td class="m">r+</td><td class="">পড়া ও লেখা</td><td class="">FileNotFoundError</td><td class="">শুরু থেকে পড়ে ও লেখে</td></tr><tr><td class="m">w+</td><td class="">লেখা ও পড়া</td><td class="">নতুন file তৈরি করে</td><td class="">আগের সব লেখা মুছে দেয়</td></tr><tr><td class="m">a+</td><td class="">যোগ ও পড়া</td><td class="">নতুন file তৈরি করে</td><td class="">লেখা সবসময় শেষে যোগ হয়</td></tr></tbody></table></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>এর সাথে <strong>t</strong> (text, default) বা <strong>b</strong> (binary) যোগ করা যায়: যেমন <code>"rb"</code> দিয়ে ছবি বা PDF পড়া হয়, <code>"wb"</code> দিয়ে binary file লেখা হয়।</p></aside>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>with open("notice.txt", "w") as f:
+<span class="ln">2</span>    f.write("Class at 9 AM\n")
+<span class="ln">3</span>with open("notice.txt", "w") as f:
+<span class="ln">4</span>    f.write("Class at 10 AM\n")
+<span class="ln">5</span>with open("notice.txt", "a") as f:
+<span class="ln">6</span>    f.write("Lab on Thursday\n")
+<span class="ln">7</span> 
+<span class="ln">8</span>with open("notice.txt", "r") as f:
+<span class="ln">9</span>    print(f.read())
+<span class="ln">10</span> 
+<span class="ln">11</span>try:
+<span class="ln">12</span>    open("notice.txt", "x")
+<span class="ln">13</span>except FileExistsError:
+<span class="ln">14</span>    print("x mode: file already exists")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Class at 10 AM
+Lab on Thursday
+
+x mode: file already exists</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1–4</td><td class="snip"><pre>with open("notice.txt", "w") as f:
+    f.write("Class at 9 AM\n")
+with open("notice.txt", "w") as f:
+    f.write("Class at 10 AM\n")</pre></td><td>দ্বিতীয়বার w mode-এ খোলায় "9 AM" লাইন মুছে গেল, শুধু "10 AM" রইল।</td></tr><tr><td class="lab">5–6</td><td class="snip"><pre>with open("notice.txt", "a") as f:
+    f.write("Lab on Thursday\n")</pre></td><td>a mode আগের লেখা রেখে শেষে নতুন লাইন যোগ করল।</td></tr><tr><td class="lab">8–9</td><td class="snip"><pre>with open("notice.txt", "r") as f:
+    print(f.read())</pre></td><td>r mode-এ পড়ে ফলাফল দেখানো।</td></tr><tr><td class="lab">11–14</td><td class="snip"><pre>try:
+    open("notice.txt", "x")
+except FileExistsError:
+    print("x mode: file already exists")</pre></td><td>file থাকায় x mode-এ খুলতে গিয়ে FileExistsError।</td></tr></tbody></table></div></details>
+<h3>ঘ. অতিরিক্ত গুরুত্বপূর্ণ প্রশ্ন</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>read( ), readline( ) ও readlines( )-এর মধ্যে পার্থক্য লেখ।</strong></div><span class="qr"><span class="qref">বই: 2.4</span></span><span class="stars s2" title="গুরুত্ব 2/3" aria-label="গুরুত্ব 2 তারকা">★★☆</span></div>
+<div class="tbl"><table><thead><tr><th>Function</th><th>কাজ</th><th>ফেরত দেয়</th></tr></thead><tbody><tr><td class="m">read()</td><td class="">পুরো file একবারে পড়ে</td><td class="">একটি string</td></tr><tr><td class="m">readline()</td><td class="">একবারে একটি লাইন পড়ে</td><td class="">একটি লাইনের string (\n সহ)</td></tr><tr><td class="m">readlines()</td><td class="">সব লাইন একসাথে পড়ে</td><td class="">লাইনগুলোর list</td></tr></tbody></table></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>with open("notice.txt") as f:
+<span class="ln">2</span>    print(repr(f.readline()))
+<span class="ln">3</span>with open("notice.txt") as f:
+<span class="ln">4</span>    print(f.readlines())
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>'Class at 10 AM\n'
+['Class at 10 AM\n', 'Lab on Thursday\n']</pre></figure><section class="quick" id="quick"><h2>এই অধ্যায় কেমন লাগল?</h2><p>তোমার মতামত সরাসরি লেখকের কাছে যাবে। ভুল পেলে কোন section-এ, সেটাও লিখে দিও।</p>
+<form class="fb-form" data-kind="অধ্যায়ের মতামত"><input type="hidden" name="chapter" value="অধ্যায় ২ — File Operation in Python">
+<div class="rate" role="radiogroup" aria-label="রেটিং"><label><input type="radio" name="rating" value="1" required><span>★</span><em>1</em></label><label><input type="radio" name="rating" value="2" ><span>★</span><em>2</em></label><label><input type="radio" name="rating" value="3" ><span>★</span><em>3</em></label><label><input type="radio" name="rating" value="4" ><span>★</span><em>4</em></label><label><input type="radio" name="rating" value="5" ><span>★</span><em>5</em></label></div>
+<label class="fld"><span>তোমার নাম (ঐচ্ছিক)</span><input name="name" autocomplete="name"></label>
+<label class="fld"><span>মতামত বা যে ভুল পেয়েছ</span><textarea name="message" rows="4" required placeholder="যেমন: 4.5-এর উদাহরণটা বুঝতে কষ্ট হয়েছে, কারণ…"></textarea></label>
+<input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off"><button type="submit">মতামত পাঠাও</button><p class="status" role="status"></p></form></section><nav class="pager"><a class="pn prev" href="ch01.html"><small>আগের অধ্যায়</small>Python Functions</a><a class="pn next" href="ch03.html"><small>পরের অধ্যায়</small>Module, Package ও Application Software</a></nav></main><aside class="mini"><p>এই অধ্যায়ে</p><ol><li><a href="#s1">2.1 File Operation কী?</a></li><li><a href="#s2">2.2 File খোলার Mode</a></li><li><a href="#s3">2.3 File খোলা ও বন্ধ করার Function</a></li><li><a href="#s4">2.4 File পড়া ও লেখার Function</a></li><li><a href="#s5">2.5 File Input ও Output দিয়ে Program</a></li><li><a href="#s6">অধ্যায়ের সারসংক্ষেপ</a></li><li><a href="#s7">অনুশীলনী · অধ্যায় ২ (বোর্ড প্রশ্ন ও উত্তর)</a></li></ol><a class="report" href="#quick">ভুল পেয়েছ? জানাও</a></aside></div><nav class="bnav" aria-label="মোবাইল মেনু"><a href="../index.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>হোম</span></a><button type="button" class="bn-toc on" aria-expanded="false" aria-controls="sheet"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5zM4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3"/><path d="M8 7h7M8 10.5h5"/></svg><span>অধ্যায়</span></button><a href="../runner.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m8 9 3 3-3 3M13 15h3"/></svg><span>কোড রানার</span></a><a href="../feedback.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4.5"/></svg><span>মতামত</span></a></nav><div class="sheet" id="sheet" hidden><div class="sheet-backdrop" data-close></div><div class="sheet-panel" role="dialog" aria-modal="true" aria-label="বিষয়সূচি"><div class="sheet-grip" data-close></div><div class="sheet-head"><strong>বিষয়সূচি</strong><button type="button" data-close aria-label="বন্ধ করো">✕</button></div><div class="sheet-body"><p class="sheet-h">এই অধ্যায়ে</p><ol class="sheet-sec"><li><a href="#s1">2.1 File Operation কী?</a></li><li><a href="#s2">2.2 File খোলার Mode</a></li><li><a href="#s3">2.3 File খোলা ও বন্ধ করার Function</a></li><li><a href="#s4">2.4 File পড়া ও লেখার Function</a></li><li><a href="#s5">2.5 File Input ও Output দিয়ে Program</a></li><li><a href="#s6">অধ্যায়ের সারসংক্ষেপ</a></li><li><a href="#s7">অনুশীলনী · অধ্যায় ২ (বোর্ড প্রশ্ন ও উত্তর)</a></li></ol><p class="sheet-h">সব অধ্যায়</p><ol class="sheet-ch"><li><a href="../chapters/ch01.html"><span class="u">১</span>Python Functions</a></li><li><a href="../chapters/ch02.html" class=on aria-current=page><span class="u">২</span>File Operation</a></li><li><a href="../chapters/ch03.html"><span class="u">৩</span>Module, Package ও Application Software</a></li><li><a href="../chapters/ch04.html"><span class="u">৪</span>Basics of OOP</a></li><li><a href="../chapters/ch05.html"><span class="u">৫</span>Four Pillars of OOP</a></li><li><a href="../chapters/ch06.html"><span class="u">৬</span>Iterator, Generator ও Decorator</a></li><li><a href="../chapters/ch07.html"><span class="u">৭</span>Exception ও Error Handling</a></li><li><a href="../chapters/ch08.html"><span class="u">৮</span>Logging</a></li><li><a href="../chapters/ch09.html"><span class="u">৯</span>Unit Testing</a></li><li><a href="../chapters/ch10.html"><span class="u">১০</span>RegEx</a></li><li><a href="../chapters/ch11.html"><span class="u">১১</span>Application Software</a></li><li><a href="../chapters/ch12.html"><span class="u">পরি</span>বোর্ড প্রশ্ন ও সাজেশন</a></li></ol></div></div></div><footer class="foot"><p><strong>Application Development Using Python</strong> · লেখক: Kazi Tauhid Rana, Computer Science and Technology, Rajshahi Polytechnic Institute</p><p class="copy-note">© ২০২৬ Kazi Tauhid Rana · সর্বস্বত্ব সংরক্ষিত · <a href="../copyright.html">কপিরাইট নোটিশ</a> · <a href="../pdf.html">বইয়ের PDF</a></p><p>MIU Platform · Learn Grow Succeed</p></footer>
+<script src="../assets/config.js"></script><script src="../assets/app.js"></script><script src="../assets/runner.js"></script></body></html>

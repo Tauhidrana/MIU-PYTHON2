@@ -1,0 +1,512 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#FBFCFE"><meta name="format-detection" content="telephone=no">
+<title>অধ্যায় ৭: Exception and Error Handling in Python — Python বই</title><meta name="description" content="Application Development Using Python — Polytechnic ছাত্রদের জন্য বাংলায় সম্পূর্ণ বই, বোর্ড প্রশ্নের উত্তরসহ।">
+<link rel="icon" href="../img/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta name="robots" content="noarchive"><link rel="stylesheet" href="../assets/style.css"><script src="../assets/protect.js"></script><script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script></head><body class="reader"><header class="topbar"><a class="brand" href="../index.html"><img src="../img/logo.png" alt="MIU"><span>Python বই</span></a>
+<nav class="topnav"><a href="../index.html#chapters">অধ্যায়</a><a href="../runner.html">কোড রানার</a><a href="../feedback.html">রিভিউ ও মতামত</a>
+<button class="theme" type="button" aria-label="ডার্ক মোড">◐</button></nav></header><div class="progress"><span></span></div><div class="layout"><nav class="side" aria-label="অধ্যায়ের তালিকা"><button class="side-toggle" type="button">অধ্যায়ের তালিকা</button><ol><li><a class="" href="ch01.html"><span class="u">১</span>Python Functions</a></li><li><a class="" href="ch02.html"><span class="u">২</span>File Operation</a></li><li><a class="" href="ch03.html"><span class="u">৩</span>Module, Package ও Application Software</a></li><li><a class="" href="ch04.html"><span class="u">৪</span>Basics of OOP</a></li><li><a class="" href="ch05.html"><span class="u">৫</span>Four Pillars of OOP</a></li><li><a class="" href="ch06.html"><span class="u">৬</span>Iterator, Generator ও Decorator</a></li><li><a class="cur" href="ch07.html"><span class="u">৭</span>Exception ও Error Handling</a></li><li><a class="" href="ch08.html"><span class="u">৮</span>Logging</a></li><li><a class="" href="ch09.html"><span class="u">৯</span>Unit Testing</a></li><li><a class="" href="ch10.html"><span class="u">১০</span>RegEx</a></li><li><a class="" href="ch11.html"><span class="u">১১</span>Application Software</a></li><li><a class="" href="ch12.html"><span class="u">পরি</span>বোর্ড প্রশ্ন ও সাজেশন</a></li></ol></nav><main class="content"><header class="chap-head"><p class="chap-num">অধ্যায় ৭</p><h1>Exception and Error Handling in Python</h1><p class="lead">তোমার program যত ভালোই লেখো, বাস্তবে কিছু না কিছু ভুল হবেই: ব্যবহারকারী সংখ্যার জায়গায় নাম লিখবে, যে file পড়তে চাইছ সেটা থাকবে না, কেউ শূন্য দিয়ে ভাগ করতে বলবে। সাধারণ program এসব পরিস্থিতিতে একটা লাল error message দেখিয়ে সাথে সাথে বন্ধ হয়ে যায় — আর ব্যবহারকারী বুঝতেই পারে না কী হলো।</p><p class="lead">ভালো program ভুলের জন্য প্রস্তুত থাকে। এই অধ্যায়ে শিখব exception কী, Python-এর তৈরি exception কোনগুলো, কীভাবে নিজে exception তোলা যায়, আর try, except, else, finally দিয়ে কীভাবে error সামলে program-কে বন্ধ না করে চালু রাখা যায়।</p></header><div class="yt yt-big" data-id="DYdwL2blYQY"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Application Development Using Python | Chapter-7 | পাইথন-এর এক্সপ্রেশন এবং এরর হ্যান্ডিলিং"><img src="https://i.ytimg.com/vi/DYdwL2blYQY/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>পুরো অধ্যায়ের ভিডিও ক্লাস · জুন ২০২৩</p><p class="yt-t">Application Development Using Python | Chapter-7 | পাইথন-এর এক্সপ্রেশন এবং এরর হ্যান্ডিলিং</p><p class="yt-c">EduCity - এডুসিটি · <a href="https://www.youtube.com/watch?v=DYdwL2blYQY" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<h2 id="s1">7.1 Exception কী?</h2><div class="yt" data-id="ugWWK9Q0W3Y"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Exception Handling | Lesson 61 | Python Bangla Full Course | Python Bangla Tutorial 💡🧠✨"><img src="https://i.ytimg.com/vi/ugWWK9Q0W3Y/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · অক্টোবর ২০২৫</p><p class="yt-t">Exception Handling | Lesson 61 | Python Bangla Full Course | Python Bangla Tutorial 💡🧠✨</p><p class="yt-c">Arms of Coding · <a href="https://www.youtube.com/watch?v=ugWWK9Q0W3Y" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p>Program-এ তিন ধরনের ভুল হতে পারে:</p>
+<div class="tbl"><table><thead><tr><th>ধরন</th><th>কখন ধরা পড়ে</th><th>উদাহরণ</th></tr></thead><tbody><tr><td class="">Syntax Error</td><td class="">program চালানোর আগেই, Python কোড পড়ার সময়</td><td class="">colon বাদ পড়া, bracket না মেলা</td></tr><tr><td class="">Exception (Runtime Error)</td><td class="">program চলার সময়, নির্দিষ্ট লাইনে পৌঁছালে</td><td class="">শূন্য দিয়ে ভাগ, নেই এমন file খোলা</td></tr><tr><td class="">Logical Error</td><td class="">কখনো নিজে থেকে ধরা পড়ে না — ফল ভুল আসে</td><td class="">গড়ের সূত্রে ভুল, শর্তের ক্রম ভুল</td></tr></tbody></table></div>
+<aside class="box definition"><p class="box-title">সংজ্ঞা (পরীক্ষার জন্য)</p><p><strong>Exception</strong> হলো program চলার সময় ঘটা এমন একটি অস্বাভাবিক ঘটনা, যা program-এর স্বাভাবিক প্রবাহ বাধাগ্রস্ত করে। কোনো exception ঘটলে Python একটি exception object তৈরি করে; সেটা সামলানো (handle) না হলে program থেমে যায় এবং একটি <strong>traceback</strong> দেখায়।</p></aside>
+<aside class="box analogy"><p class="box-title">বাস্তব উদাহরণ</p><p>গাড়ি চালাতে গিয়ে চাকা পাংচার হলো — এটা একটা exception। গাড়ির ডিজাইন ঠিক ছিল (syntax error নয়), কিন্তু চলার পথে অপ্রত্যাশিত সমস্যা। ভালো চালক গাড়িতে স্পেয়ার চাকা রাখে, পাংচার হলে চাকা বদলে আবার চলে — এটাই exception handling। স্পেয়ার না থাকলে যাত্রা ওখানেই শেষ।</p></aside>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 7.1</span>একটি Exception এবং Traceback</p><p class="problem"><strong>সমস্যা:</strong> দুটো ভাগ করো, যার দ্বিতীয়টিতে ভাজক শূন্য। কী হয় দেখো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>print("Start")
+<span class="ln">2</span>print(10 / 2)
+<span class="ln">3</span>print(10 / 0)
+<span class="ln">4</span>print("End")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Start
+5.0
+Traceback (most recent call last):
+  ...
+ZeroDivisionError: division by zero</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1–2</td><td class="snip"><pre>print("Start")
+print(10 / 2)</pre></td><td>স্বাভাবিকভাবে চলল।</td></tr><tr><td class="lab">3</td><td class="snip"><pre>print(10 / 0)</pre></td><td>শূন্য দিয়ে ভাগ — ZeroDivisionError। Program এখানেই থেমে গেল।</td></tr><tr><td class="lab">4</td><td class="snip"><pre>print("End")</pre></td><td>"End" কখনো print হলো না। Exception সামলানো না হলে পরের সব লাইন বাদ পড়ে।</td></tr></tbody></table></div></details>
+<p>Traceback-এর <strong>শেষ লাইনটাই সবচেয়ে জরুরি</strong>: প্রথমে exception-এর নাম (ZeroDivisionError), তারপর কোলনের পরে কারণ (division by zero)। ভুল খুঁজতে সবসময় traceback নিচ থেকে পড়া শুরু করো।</p>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Exception কাকে বলে? (2 নম্বর)</li><li>Syntax error, exception ও logical error-এর পার্থক্য লেখো।</li></ul></aside>
+<h2 id="s2">7.2 Built-in Exception</h2><div class="yt" data-id="cmIrVzOFwhw"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Day 17: Error Handling in Python | Exception Handling Explained | Python Live Tutorial in Bangla"><img src="https://i.ytimg.com/vi/cmIrVzOFwhw/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · মার্চ ২০২৫</p><p class="yt-t">Day 17: Error Handling in Python | Exception Handling Explained | Python Live Tutorial in Bangla</p><p class="yt-c">Inception BD · <a href="https://www.youtube.com/watch?v=cmIrVzOFwhw" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p>Python-এ অনেকগুলো exception আগে থেকেই তৈরি করা আছে — এদের বলে <strong>built-in exception</strong>। সবচেয়ে বেশি যেগুলোর মুখোমুখি হবে:</p>
+<div class="tbl"><table><thead><tr><th>Exception</th><th>কখন ঘটে</th><th>উদাহরণ কোড</th></tr></thead><tbody><tr><td class="m">ZeroDivisionError</td><td class="">শূন্য দিয়ে ভাগ</td><td class="m">10 / 0</td></tr><tr><td class="m">ValueError</td><td class="">type ঠিক, কিন্তু মান অগ্রহণযোগ্য</td><td class="m">int("abc")</td></tr><tr><td class="m">TypeError</td><td class="">ভুল type-এর উপর কাজ</td><td class="m">"5" + 3</td></tr><tr><td class="m">NameError</td><td class="">অসংজ্ঞায়িত নাম ব্যবহার</td><td class="m">print(totl)</td></tr><tr><td class="m">IndexError</td><td class="">list-এর সীমার বাইরের index</td><td class="m">[1, 2][5]</td></tr><tr><td class="m">KeyError</td><td class="">dictionary-তে নেই এমন key</td><td class="m">{"a": 1}["b"]</td></tr><tr><td class="m">AttributeError</td><td class="">object-এ নেই এমন attribute/method</td><td class="m">"hi".push()</td></tr><tr><td class="m">FileNotFoundError</td><td class="">নেই এমন file খোলা</td><td class="m">open("x.txt")</td></tr><tr><td class="m">ModuleNotFoundError</td><td class="">নেই এমন module import</td><td class="m">import mathh</td></tr><tr><td class="m">KeyboardInterrupt</td><td class="">ব্যবহারকারী Ctrl + C চাপলে</td><td class="m">—</td></tr></tbody></table></div>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 7.2</span>একসাথে কয়েকটা Built-in Exception দেখা</p><p class="problem"><strong>সমস্যা:</strong> কয়েকটা ভুল কোড একটা একটা করে চালিয়ে কোনটা কোন exception দেয় দেখো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>tests = [
+<span class="ln">2</span>    "10 / 0",
+<span class="ln">3</span>    "int('abc')",
+<span class="ln">4</span>    "'5' + 3",
+<span class="ln">5</span>    "[1, 2][5]",
+<span class="ln">6</span>    "{'a': 1}['b']",
+<span class="ln">7</span>    "'hi'.push()",
+<span class="ln">8</span>]
+<span class="ln">9</span>for t in tests:
+<span class="ln">10</span>    try:
+<span class="ln">11</span>        eval(t)
+<span class="ln">12</span>    except Exception as e:
+<span class="ln">13</span>        print(f"{t:&lt;15} -&gt; {type(e).__name__}: {e}")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>10 / 0          -&gt; ZeroDivisionError: division by zero
+int('abc')      -&gt; ValueError: invalid literal for int() with base 10: 'abc'
+'5' + 3         -&gt; TypeError: can only concatenate str (not "int") to str
+[1, 2][5]       -&gt; IndexError: list index out of range
+{'a': 1}['b']   -&gt; KeyError: 'b'
+'hi'.push()     -&gt; AttributeError: 'str' object has no attribute 'push'</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1–8</td><td class="snip"><pre>tests = [
+    "10 / 0",
+    "int('abc')",
+    "'5' + 3",
+    "[1, 2][5]",
+    "{'a': 1}['b']",
+    "'hi'.push()",
+]</pre></td><td>ভুল কোডগুলো string আকারে একটা list-এ।</td></tr><tr><td class="lab">11</td><td class="snip"><pre>        eval(t)</pre></td><td><code>eval()</code> একটা string-কে Python expression হিসেবে চালায় — এখানে শুধু প্রদর্শনের জন্য ব্যবহার করেছি। সাধারণ program-এ eval এড়িয়ে চলো।</td></tr><tr><td class="lab">12–13</td><td class="snip"><pre>    except Exception as e:
+        print(f"{t:&lt;15} -&gt; {type(e).__name__}: {e}")</pre></td><td>exception ধরে তার class-এর নাম আর বার্তা দেখানো। try-except নিয়ে বিস্তারিত 7.4-এ।</td></tr></tbody></table></div></details>
+<h3>Exception-এর পারিবারিক গাছ (Hierarchy)</h3>
+<p>সব exception আসলে class, এবং তারা inheritance-এর একটা গাছে সাজানো। এর ব্যবহারিক মানে হলো: parent exception ধরলে তার সব child-ও ধরা পড়ে।</p>
+<figure class="code text"><figcaption><span>Text</span><span class="fn">Exception hierarchy</span></figcaption><pre><code>BaseException
+ +-- KeyboardInterrupt
+ +-- Exception
+      +-- ArithmeticError
+      |    +-- ZeroDivisionError
+      +-- LookupError
+      |    +-- IndexError
+      |    +-- KeyError
+      +-- OSError
+      |    +-- FileNotFoundError
+      +-- ValueError
+      +-- TypeError
+      +-- NameError
+</code></pre></figure>
+<p>তাই <code>except LookupError</code> লিখলে IndexError আর KeyError দুটোই ধরা পড়বে, আর <code>except Exception</code> প্রায় সব সাধারণ exception ধরবে।</p>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Python-এর পাঁচটি built-in exception উদাহরণসহ উল্লেখ করো। (3-4 নম্বর)</li></ul><p>টেবিল আকারে exception-এর নাম, কখন ঘটে আর এক লাইনের উদাহরণ কোড লেখো।</p></aside>
+<h2 id="s3">7.3 Exception Raise করা</h2><div class="yt" data-id="pyLcFZkDliM"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Day 18: Error Handling in Python - Part 2 | Exception Handling Explained | Python Live in Bangla"><img src="https://i.ytimg.com/vi/pyLcFZkDliM/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · মার্চ ২০২৫</p><p class="yt-t">Day 18: Error Handling in Python - Part 2 | Exception Handling Explained | Python Live in Bangla</p><p class="yt-c">Inception BD · <a href="https://www.youtube.com/watch?v=pyLcFZkDliM" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p>Python নিজে থেকে exception তোলে যখন কোনো কাজ অসম্ভব হয়। কিন্তু অনেক সময় কাজটা Python-এর কাছে বৈধ, অথচ আমাদের নিয়মে অবৈধ — যেমন মার্কস -20 বা 150। Python এতে আপত্তি করবে না। তখন আমরা নিজেরাই <code>raise</code> keyword দিয়ে exception তুলি।</p>
+<div class="syntax"><p class="box-title">Syntax</p><figure class="code mini"><figcaption><span>Syntax</span><span class="fn"></span></figcaption><pre><code>raise ExceptionName("কারণ বর্ণনা করে বার্তা")
+</code></pre></figure></div>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 7.3</span>মার্কস যাচাই</p><p class="problem"><strong>সমস্যা:</strong> একটা function লেখো, যেটা মার্কস 0 থেকে 100-এর বাইরে হলে ValueError আর সংখ্যা না হলে TypeError raise করবে।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>def set_marks(marks):
+<span class="ln">2</span>    if not isinstance(marks, (int, float)):
+<span class="ln">3</span>        raise TypeError("Marks must be a number")
+<span class="ln">4</span>    if marks &lt; 0 or marks &gt; 100:
+<span class="ln">5</span>        raise ValueError(f"Marks must be 0-100, got {marks}")
+<span class="ln">6</span>    return marks
+<span class="ln">7</span> 
+<span class="ln">8</span>print(set_marks(85))
+<span class="ln">9</span>print(set_marks(150))
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>85
+Traceback (most recent call last):
+  ...
+ValueError: Marks must be 0-100, got 150</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">2</td><td class="snip"><pre>    if not isinstance(marks, (int, float)):</pre></td><td><code>isinstance(x, (int, float))</code> পরীক্ষা করে x int বা float কিনা।</td></tr><tr><td class="lab">4–5</td><td class="snip"><pre>    if marks &lt; 0 or marks &gt; 100:
+        raise ValueError(f"Marks must be 0-100, got {marks}")</pre></td><td>Python-এর কাছে 150 একদম বৈধ সংখ্যা, কিন্তু আমাদের নিয়মে অবৈধ — তাই নিজেরাই raise করলাম, স্পষ্ট বার্তাসহ।</td></tr><tr><td class="lab">9</td><td class="snip"><pre>print(set_marks(150))</pre></td><td>raise হওয়া মাত্র function থেমে গেল, return পর্যন্ত পৌঁছায়নি।</td></tr></tbody></table></div></details>
+<h3>নিজের Exception Class</h3>
+<p>Exception যেহেতু class, তাই <code>Exception</code> থেকে inherit করে নিজের exception বানানো যায়। এতে error-এর নাম দেখেই সমস্যা বোঝা যায়।</p>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 7.4</span>Custom Exception</p><p class="problem"><strong>সমস্যা:</strong> ব্যাংক থেকে balance-এর বেশি টাকা তুলতে চাইলে InsufficientBalanceError raise করো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>class InsufficientBalanceError(Exception):
+<span class="ln">2</span>    pass
+<span class="ln">3</span> 
+<span class="ln">4</span>def withdraw(balance, amount):
+<span class="ln">5</span>    if amount &gt; balance:
+<span class="ln">6</span>        raise InsufficientBalanceError(
+<span class="ln">7</span>            f"Balance {balance} Tk, requested {amount} Tk")
+<span class="ln">8</span>    return balance - amount
+<span class="ln">9</span> 
+<span class="ln">10</span>print("Left:", withdraw(5000, 1500))
+<span class="ln">11</span>try:
+<span class="ln">12</span>    withdraw(5000, 8000)
+<span class="ln">13</span>except InsufficientBalanceError as e:
+<span class="ln">14</span>    print("Failed:", e)
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Left: 3500
+Failed: Balance 5000 Tk, requested 8000 Tk</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1–2</td><td class="snip"><pre>class InsufficientBalanceError(Exception):
+    pass</pre></td><td>Exception থেকে inherit করা একটা ফাঁকা class-ই যথেষ্ট — নামটাই এর মূল পরিচয়।</td></tr><tr><td class="lab">5–7</td><td class="snip"><pre>    if amount &gt; balance:
+        raise InsufficientBalanceError(
+            f"Balance {balance} Tk, requested {amount} Tk")</pre></td><td>শর্ত পূরণ না হলে নিজের exception raise।</td></tr><tr><td class="lab">11–14</td><td class="snip"><pre>try:
+    withdraw(5000, 8000)
+except InsufficientBalanceError as e:
+    print("Failed:", e)</pre></td><td>এই exception-ও অন্য যেকোনো exception-এর মতো ধরা যায়। <code>as e</code> দিয়ে বার্তাটা পাওয়া যায়।</td></tr></tbody></table></div></details>
+<aside class="box mistake"><p class="box-title">সাধারণ ভুল</p><div class="mk"><div class="mk-col bad"><p class="mk-h">ভুল</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>def check(age):
+    if age &lt; 0:
+        raise "Age cannot be negative"
+ 
+check(-5)
+</code></pre></figure><p class="err">ফল: <code>TypeError: exceptions must derive from BaseException</code></p></div><div class="mk-col good"><p class="mk-h">সঠিক</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>def check(age):
+    if age &lt; 0:
+        raise ValueError("Age cannot be negative")
+ 
+check(25)
+</code></pre></figure></div><p class="why">raise-এর পর শুধু string দেওয়া যায় না, একটা exception class বা object লাগে।</p></div></aside>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>Python-এ exception raise করার পদ্ধতি বর্ণনা করো। (3-4 নম্বর)</li><li>Custom exception কীভাবে তৈরি করা হয়?</li></ul></aside>
+<aside class="box practice"><p class="box-title">অনুশীলন</p><p><code>set_age(age)</code> function লেখো, যেটা বয়স ঋণাত্মক বা 120-এর বেশি হলে ValueError raise করবে। তারপর try-except দিয়ে তিনটা ভিন্ন বয়স পরীক্ষা করো।</p></aside>
+<h2 id="s4">7.4 try ও except Block</h2><div class="yt" data-id="jVGWAW1fjjk"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Exception Handling in Python ONE SHOT | try-except-finally | COMS | Class 12 Sem 3 | WBCHSE Bengali"><img src="https://i.ytimg.com/vi/jVGWAW1fjjk/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · সেপ্টেম্বর ২০২৬</p><p class="yt-t">Exception Handling in Python ONE SHOT | try-except-finally | COMS | Class 12 Sem 3 | WBCHSE Bengali</p><p class="yt-c">Avijit Pramanik · <a href="https://www.youtube.com/watch?v=jVGWAW1fjjk" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p><strong>try-except</strong> হলো exception সামলানোর মূল হাতিয়ার। যে কোডে exception হতে পারে সেটা <code>try</code> block-এ রাখো; exception হলে Python সাথে সাথে try ছেড়ে মিলে যাওয়া <code>except</code> block-এ চলে যায়, program বন্ধ হয় না।</p>
+<div class="syntax"><p class="box-title">Syntax</p><figure class="code mini"><figcaption><span>Syntax</span><span class="fn"></span></figcaption><pre><code>try:
+    # যে কোডে exception হতে পারে
+except ExceptionName:
+    # সেই exception হলে এখানে আসবে
+</code></pre></figure></div>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 7.5</span>ব্যবহারকারীর ভুল ইনপুট সামলানো</p><p class="problem"><strong>সমস্যা:</strong> ব্যবহারকারীর কাছ থেকে একটা সংখ্যা নাও; সংখ্যা না দিলে বন্ধ না হয়ে আবার চাও।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>while True:
+<span class="ln">2</span>    try:
+<span class="ln">3</span>        n = int(input("Enter your roll: "))
+<span class="ln">4</span>        break
+<span class="ln">5</span>    except ValueError:
+<span class="ln">6</span>        print("Please enter digits only!")
+<span class="ln">7</span> 
+<span class="ln">8</span>print("Your roll is", n)
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Enter your roll: <span class="in">abc</span>
+Please enter digits only!
+Enter your roll: <span class="in">12x</span>
+Please enter digits only!
+Enter your roll: <span class="in">105</span>
+Your roll is 105</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">3</td><td class="snip"><pre>        n = int(input("Enter your roll: "))</pre></td><td>int() সংখ্যা ছাড়া অন্য কিছু পেলে ValueError তোলে।</td></tr><tr><td class="lab">4</td><td class="snip"><pre>        break</pre></td><td>exception না হলে তবেই এই লাইনে পৌঁছায় — loop থেকে বের হয়।</td></tr><tr><td class="lab">5–6</td><td class="snip"><pre>    except ValueError:
+        print("Please enter digits only!")</pre></td><td>ValueError হলে বার্তা দেখিয়ে loop আবার ঘোরে। ব্যবহারকারী তিনবার চেষ্টা করেছে, program একবারও বন্ধ হয়নি।</td></tr></tbody></table></div></details>
+<h3>একাধিক except এবং as</h3>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 7.6</span>ভিন্ন exception, ভিন্ন সমাধান</p><p class="problem"><strong>সমস্যা:</strong> দুটো সংখ্যা নিয়ে ভাগ করো। সংখ্যা না দিলে এক বার্তা, শূন্য দিলে আরেক বার্তা।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>def safe_divide(a_text, b_text):
+<span class="ln">2</span>    try:
+<span class="ln">3</span>        a = float(a_text)
+<span class="ln">4</span>        b = float(b_text)
+<span class="ln">5</span>        result = a / b
+<span class="ln">6</span>        print(f"{a} / {b} = {result}")
+<span class="ln">7</span>    except ValueError:
+<span class="ln">8</span>        print("Error: please give numbers")
+<span class="ln">9</span>    except ZeroDivisionError as e:
+<span class="ln">10</span>        print("Error:", e)
+<span class="ln">11</span> 
+<span class="ln">12</span>safe_divide("20", "4")
+<span class="ln">13</span>safe_divide("20", "abc")
+<span class="ln">14</span>safe_divide("20", "0")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>20.0 / 4.0 = 5.0
+Error: please give numbers
+Error: float division by zero</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">7–8</td><td class="snip"><pre>    except ValueError:
+        print("Error: please give numbers")</pre></td><td>Python উপর থেকে except-গুলো মিলিয়ে দেখে, প্রথম যেটা মেলে শুধু সেটাই চলে।</td></tr><tr><td class="lab">9–10</td><td class="snip"><pre>    except ZeroDivisionError as e:
+        print("Error:", e)</pre></td><td><code>as e</code> দিয়ে exception object পাওয়া যায়; print করলে Python-এর নিজের বার্তা আসে।</td></tr><tr><td class="lab">12–14</td><td class="snip"><pre>safe_divide("20", "4")
+safe_divide("20", "abc")
+safe_divide("20", "0")</pre></td><td>তিনটা ক্ষেত্রে তিন রকম আচরণ, কিন্তু program একবারও থামেনি।</td></tr></tbody></table></div></details>
+<p>একই কাজে একাধিক exception ধরতে tuple ব্যবহার করা যায়: <code>except (ValueError, TypeError):</code>। আর সব ধরনের exception ধরতে <code>except Exception as e:</code> — তবে এটা শেষ except হিসেবে রাখো।</p>
+<aside class="box mistake"><p class="box-title">সাধারণ ভুল</p><div class="mk"><div class="mk-col bad"><p class="mk-h">ভুল</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>try:
+    x = int("abc")
+except:
+    pass
+print("Done")
+</code></pre></figure><p class="err">ফল: <code>Done</code></p></div><div class="mk-col good"><p class="mk-h">সঠিক</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>try:
+    x = int("abc")
+except ValueError as e:
+    print("Invalid number:", e)
+print("Done")
+</code></pre></figure></div><p class="why">খালি <code>except:</code> আর <code>pass</code> মানে সব error চুপচাপ গিলে ফেলা — ভুল হলো কিনা কেউ জানতেই পারবে না, debugging দুঃস্বপ্ন হয়ে যাবে। সবসময় নির্দিষ্ট exception ধরো, আর অন্তত একটা বার্তা দাও।</p></div></aside>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>try ও except block উদাহরণসহ ব্যাখ্যা করো। (4-5 নম্বর)</li><li>একাধিক except block কীভাবে কাজ করে?</li></ul></aside>
+<aside class="box practice"><p class="box-title">অনুশীলন</p><p>একটা list <code>[10, 20, 30]</code> থেকে ব্যবহারকারীর দেওয়া index-এর মান দেখাও। সংখ্যা না দিলে ValueError, সীমার বাইরে হলে IndexError — দুটোই আলাদা বার্তা দিয়ে সামলাও।</p></aside>
+<h2 id="s5">7.5 else ও finally Clause</h2><div class="yt" data-id="356iinFnFhY"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: Python Error Handling in Bangla | try, except, finally, raise Explained! Python in Bangla 2026"><img src="https://i.ytimg.com/vi/356iinFnFhY/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · মার্চ ২০২৬</p><p class="yt-t">Python Error Handling in Bangla | try, except, finally, raise Explained! Python in Bangla 2026</p><p class="yt-c">Nine AI · <a href="https://www.youtube.com/watch?v=356iinFnFhY" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<p>try-except-এর সাথে আরও দুটো ঐচ্ছিক block যোগ করা যায়:</p>
+<ul><li><strong>else:</strong> try block-এ <strong>কোনো exception না হলে</strong> চলে। সফল হলে যা করতে চাও, সেটা এখানে রাখো।</li><li><strong>finally:</strong> exception হোক বা না হোক, <strong>সবসময়</strong> চলে — এমনকি return থাকলেও। File বন্ধ করা, connection ছেড়ে দেওয়ার মতো পরিষ্কারের কাজ এখানে রাখা হয়।</li></ul>
+<div class="syntax"><p class="box-title">Syntax</p><figure class="code mini"><figcaption><span>Syntax</span><span class="fn"></span></figcaption><pre><code>try:
+    # ঝুঁকিপূর্ণ কোড
+except ExceptionName:
+    # exception হলে
+else:
+    # exception না হলে
+finally:
+    # সবসময়
+</code></pre></figure></div>
+<figure class="pic"><img src="../img/tryflow.png" alt="চিত্র 7.1: try, except, else ও finally-এর প্রবাহ" loading="lazy"><figcaption>চিত্র 7.1: try, except, else ও finally-এর প্রবাহ</figcaption></figure>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 7.7</span>else ও finally দেখা</p><p class="problem"><strong>সমস্যা:</strong> একই function দুবার ডাকো — একবার সফলভাবে, একবার exception-সহ। কোন block কখন চলে দেখো।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>def read_marks(text):
+<span class="ln">2</span>    try:
+<span class="ln">3</span>        marks = int(text)
+<span class="ln">4</span>    except ValueError:
+<span class="ln">5</span>        print("  except : not a number")
+<span class="ln">6</span>    else:
+<span class="ln">7</span>        print("  else   : marks =", marks)
+<span class="ln">8</span>    finally:
+<span class="ln">9</span>        print("  finally: check complete")
+<span class="ln">10</span> 
+<span class="ln">11</span>print("Case 1:")
+<span class="ln">12</span>read_marks("78")
+<span class="ln">13</span>print("Case 2:")
+<span class="ln">14</span>read_marks("seventy")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Case 1:
+  else   : marks = 78
+  finally: check complete
+Case 2:
+  except : not a number
+  finally: check complete</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">6–7</td><td class="snip"><pre>    else:
+        print("  else   : marks =", marks)</pre></td><td>Case 1-এ exception হয়নি, তাই else চলল; except বাদ।</td></tr><tr><td class="lab">4–5</td><td class="snip"><pre>    except ValueError:
+        print("  except : not a number")</pre></td><td>Case 2-এ ValueError, তাই except চলল; else বাদ।</td></tr><tr><td class="lab">8–9</td><td class="snip"><pre>    finally:
+        print("  finally: check complete")</pre></td><td>দুই ক্ষেত্রেই finally চলেছে।</td></tr></tbody></table></div></details>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 7.8</span>finally দিয়ে file বন্ধ নিশ্চিত করা</p><p class="problem"><strong>সমস্যা:</strong> একটা file খুলে সংখ্যা পড়ো; file-এ ভুল data থাকলেও file যেন অবশ্যই বন্ধ হয়।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>with open("scores.txt", "w") as f:
+<span class="ln">2</span>    f.write("78\n91\nabsent\n66\n")
+<span class="ln">3</span> 
+<span class="ln">4</span>f = open("scores.txt")
+<span class="ln">5</span>try:
+<span class="ln">6</span>    total = 0
+<span class="ln">7</span>    for line in f:
+<span class="ln">8</span>        total += int(line)
+<span class="ln">9</span>    print("Total:", total)
+<span class="ln">10</span>except ValueError as e:
+<span class="ln">11</span>    print("Bad data in file -&gt;", e)
+<span class="ln">12</span>finally:
+<span class="ln">13</span>    f.close()
+<span class="ln">14</span>    print("File closed?", f.closed)
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Bad data in file -&gt; invalid literal for int() with base 10: 'absent\n'
+File closed? True</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1–2</td><td class="snip"><pre>with open("scores.txt", "w") as f:
+    f.write("78\n91\nabsent\n66\n")</pre></td><td>উদাহরণের জন্য একটা file বানালাম, যার তৃতীয় লাইনে ভুল data ("absent")।</td></tr><tr><td class="lab">6–9</td><td class="snip"><pre>    total = 0
+    for line in f:
+        total += int(line)
+    print("Total:", total)</pre></td><td>"absent" পড়ার সময় int() ValueError তুলল, loop মাঝপথে থেমে গেল।</td></tr><tr><td class="lab">12–14</td><td class="snip"><pre>finally:
+    f.close()
+    print("File closed?", f.closed)</pre></td><td>তবু finally চলল, file বন্ধ হলো। with statement ভেতরে ভেতরে ঠিক এই কাজটাই করে।</td></tr></tbody></table></div></details>
+<div class="tbl"><table><thead><tr><th>Block</th><th>কখন চলে</th><th>বাধ্যতামূলক?</th></tr></thead><tbody><tr><td class="m">try</td><td class="">সবসময় প্রথমে</td><td class="">হ্যাঁ</td></tr><tr><td class="m">except</td><td class="">try-এ মিলে যাওয়া exception হলে</td><td class="">except বা finally — অন্তত একটা লাগবে</td></tr><tr><td class="m">else</td><td class="">try-এ কোনো exception না হলে</td><td class="">না</td></tr><tr><td class="m">finally</td><td class="">সবসময়, শেষে</td><td class="">না</td></tr></tbody></table></div>
+<aside class="box exam"><p class="box-title">সম্ভাব্য পরীক্ষার প্রশ্ন</p><ul><li>try-except-এর সাথে else ও finally clause-এর ব্যবহার চিত্রসহ দেখাও। (5 নম্বর)</li></ul><p>"Illustrate" প্রশ্ন, তাই চিত্র 7.1-এর মতো প্রবাহচিত্র আঁকো আর একটা program-এ দুই ক্ষেত্রের (exception হলে/না হলে) output দেখাও।</p></aside>
+<h2 id="s6">7.6 Exception ও Error Handling-এর Program</h2><div class="yt" data-id="1bgtE62gY4o"><button type="button" class="yt-play" aria-label="ভিডিও চালাও: User define function তৈরি করে try, except ও else ব্যবহার করে প্রোগ্রাম #python #diploma #polytechnic"><img src="https://i.ytimg.com/vi/1bgtE62gY4o/mqdefault.jpg" alt="" loading="lazy" width="320" height="180"><span class="yt-icon" aria-hidden="true"></span></button><div class="yt-meta"><p class="yt-k"><span class="yt-lang bn">বাংলা</span>এই টপিকের ভিডিও · জুলাই ২০২৩</p><p class="yt-t">User define function তৈরি করে try, except ও else ব্যবহার করে প্রোগ্রাম #python #diploma #polytechnic</p><p class="yt-c">EduCity - এডুসিটি · <a href="https://www.youtube.com/watch?v=1bgtE62gY4o" target="_blank" rel="noopener">YouTube-এ দেখো ↗</a></p></div></div>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 7.9</span>নিরাপদ Result Calculator</p><p class="problem"><strong>সমস্যা:</strong> ব্যবহারকারীর কাছ থেকে তিন বিষয়ের মার্কস নাও। সংখ্যা না দিলে বা 0-100-এর বাইরে দিলে আবার চাও। শেষে গড় দেখাও।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>class InvalidMarksError(Exception):
+<span class="ln">2</span>    pass
+<span class="ln">3</span> 
+<span class="ln">4</span>def get_marks(subject):
+<span class="ln">5</span>    while True:
+<span class="ln">6</span>        try:
+<span class="ln">7</span>            m = float(input(f"{subject} marks: "))
+<span class="ln">8</span>            if not 0 &lt;= m &lt;= 100:
+<span class="ln">9</span>                raise InvalidMarksError("must be between 0 and 100")
+<span class="ln">10</span>        except ValueError:
+<span class="ln">11</span>            print("  Not a number, try again.")
+<span class="ln">12</span>        except InvalidMarksError as e:
+<span class="ln">13</span>            print("  Invalid:", e)
+<span class="ln">14</span>        else:
+<span class="ln">15</span>            return m
+<span class="ln">16</span> 
+<span class="ln">17</span>marks = [get_marks(s) for s in ["Python", "Math", "Physics"]]
+<span class="ln">18</span>print(f"Average: {sum(marks) / len(marks):.2f}")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Python marks: <span class="in">85</span>
+Math marks: <span class="in">ninety</span>
+  Not a number, try again.
+Math marks: <span class="in">120</span>
+  Invalid: must be between 0 and 100
+Math marks: <span class="in">78</span>
+Physics marks: <span class="in">64.5</span>
+Average: 75.83</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1–2</td><td class="snip"><pre>class InvalidMarksError(Exception):
+    pass</pre></td><td>নিজের exception (7.3)।</td></tr><tr><td class="lab">7–9</td><td class="snip"><pre>            m = float(input(f"{subject} marks: "))
+            if not 0 &lt;= m &lt;= 100:
+                raise InvalidMarksError("must be between 0 and 100")</pre></td><td>দুই ধরনের সমস্যা: float() সংখ্যা না পেলে Python নিজে ValueError তোলে; সীমার বাইরে হলে আমরা নিজেরা raise করি।</td></tr><tr><td class="lab">10–13</td><td class="snip"><pre>        except ValueError:
+            print("  Not a number, try again.")
+        except InvalidMarksError as e:
+            print("  Invalid:", e)</pre></td><td>দুটো আলাদা except, আলাদা বার্তা (7.4)।</td></tr><tr><td class="lab">14–15</td><td class="snip"><pre>        else:
+            return m</pre></td><td>সব ঠিক থাকলে else — মান return করে loop থেকে বের হয় (7.5)।</td></tr><tr><td class="lab">17</td><td class="snip"><pre>marks = [get_marks(s) for s in ["Python", "Math", "Physics"]]</pre></td><td>তিন বিষয়ের জন্য function তিনবার ডাকা হলো।</td></tr></tbody></table></div></details>
+<div class="example"><p class="ex-title"><span class="ex-label">উদাহরণ 7.10</span>File থেকে নিরাপদে Data পড়া</p><p class="problem"><strong>সমস্যা:</strong> একটা function লেখো যেটা file থেকে ছাত্রের মার্কস পড়বে: file না থাকলে বার্তা দেবে, ভুল লাইন বাদ দিয়ে বাকিগুলো দিয়ে গড় বের করবে।</p></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>def class_average(filename):
+<span class="ln">2</span>    try:
+<span class="ln">3</span>        f = open(filename)
+<span class="ln">4</span>    except FileNotFoundError:
+<span class="ln">5</span>        print(f"'{filename}' not found")
+<span class="ln">6</span>        return None
+<span class="ln">7</span>    valid, skipped = [], 0
+<span class="ln">8</span>    try:
+<span class="ln">9</span>        for line in f:
+<span class="ln">10</span>            try:
+<span class="ln">11</span>                valid.append(float(line))
+<span class="ln">12</span>            except ValueError:
+<span class="ln">13</span>                skipped += 1
+<span class="ln">14</span>    finally:
+<span class="ln">15</span>        f.close()
+<span class="ln">16</span>    print(f"Read {len(valid)} values, skipped {skipped}")
+<span class="ln">17</span>    return sum(valid) / len(valid)
+<span class="ln">18</span> 
+<span class="ln">19</span>print(class_average("missing.txt"))
+<span class="ln">20</span>print(round(class_average("scores.txt"), 2))
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>'missing.txt' not found
+None
+Read 3 values, skipped 1
+78.33</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">2–6</td><td class="snip"><pre>    try:
+        f = open(filename)
+    except FileNotFoundError:
+        print(f"'{filename}' not found")
+        return None</pre></td><td>file না থাকলে বার্তা দিয়ে None return।</td></tr><tr><td class="lab">10–13</td><td class="snip"><pre>            try:
+                valid.append(float(line))
+            except ValueError:
+                skipped += 1</pre></td><td>ভেতরের try-except শুধু একটা লাইনের সমস্যা সামলায় — ভুল লাইন বাদ পড়ে, বাকি লাইন পড়া চলতে থাকে। এখানে exception গিলে ফেলা হচ্ছে না, গুনে রাখা হচ্ছে।</td></tr><tr><td class="lab">14–15</td><td class="snip"><pre>    finally:
+        f.close()</pre></td><td>যা-ই হোক, file বন্ধ।</td></tr><tr><td class="lab">20</td><td class="snip"><pre>print(round(class_average("scores.txt"), 2))</pre></td><td>7.5-এর scores.txt: "absent" বাদ পড়ল, বাকি তিনটার গড়।</td></tr></tbody></table></div></details>
+<aside class="box tip"><p class="box-title">Exam Tip</p><p>Exception handling-এর program-এ অন্তত দুটো আলাদা except, একটা else বা finally, আর সম্ভব হলে একটা raise রাখো। Output-এ সফল ও ব্যর্থ দুই ধরনের ক্ষেত্রই দেখাও।</p></aside>
+<aside class="box practice"><p class="box-title">অনুশীলন</p><p>একটা menu-চালিত calculator লেখো, যেটা ভুল ইনপুট, শূন্য দিয়ে ভাগ আর অজানা menu অপশন — তিন ধরনের সমস্যাই সামলাবে এবং কখনো বন্ধ হবে না (শুধু 0 দিলে বের হবে)।</p></aside>
+<h2 id="s7">অধ্যায়ের সারসংক্ষেপ</h2>
+<div class="tbl"><table><thead><tr><th>বিষয়</th><th>মূল কথা</th></tr></thead><tbody><tr><td class="">Exception</td><td class="">চলার সময় ঘটা অস্বাভাবিক ঘটনা; সামলানো না হলে program থামে ও traceback দেখায়।</td></tr><tr><td class="">Built-in</td><td class="">ZeroDivisionError, ValueError, TypeError, NameError, IndexError, KeyError, FileNotFoundError ইত্যাদি; সব Exception class-এর বংশধর।</td></tr><tr><td class="">raise</td><td class="">নিজে exception তোলা: raise ValueError("বার্তা"); Exception থেকে inherit করে custom exception।</td></tr><tr><td class="">try-except</td><td class="">ঝুঁকিপূর্ণ কোড try-এ; মিলে যাওয়া প্রথম except চলে; as e দিয়ে বার্তা।</td></tr><tr><td class="">else / finally</td><td class="">else: exception না হলে; finally: সবসময়, পরিষ্কারের কাজে।</td></tr></tbody></table></div>
+<h2 id="s8">অনুশীলনী · অধ্যায় ৭ (বোর্ড প্রশ্ন ও উত্তর)</h2>
+<p>এই অনুশীলনীতে অধ্যায় ৭ থেকে বিগত বছরগুলোতে বোর্ডে আসা সব প্রশ্ন, পরীক্ষার খাতায় লেখার উপযোগী উত্তরসহ দেওয়া হলো। শেষে আছে বোর্ডে এখনো সরাসরি না আসা একটি গুরুত্বপূর্ণ প্রশ্ন।</p>
+<p>উত্তরগুলো নম্বর অনুযায়ী মাপা: ১ নম্বরের প্রশ্নে দুই-তিন লাইন, ২ নম্বরে মূল পয়েন্টসহ সংক্ষিপ্ত উত্তর, আর ৬ নম্বরে সংজ্ঞা, ব্যাখ্যা, program ও output — পূর্ণ উত্তর। Program-গুলোর output কোড চালিয়ে যাচাই করা।</p>
+<h3>ক. অতি সংক্ষিপ্ত প্রশ্ন (মান: ১)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>Bug কী?</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৩, ২০২৩ (পরি), ২০২৫ (পরি) · বই: 7.1</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>Program-এর যে ভুল বা ত্রুটির কারণে program ভুল ফলাফল দেয়, অপ্রত্যাশিত আচরণ করে বা চলতে চলতে বন্ধ হয়ে যায়, তাকে bug বলে। Bug খুঁজে বের করে সংশোধন করার প্রক্রিয়াকে <strong>debugging</strong> বলে।</p></aside>
+<div class="q"><span class="qn">২</span><div class="qt"><strong>Built-in Exception বলতে কী বুঝায়?</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২২, ২০২৩ (পরি) · বই: 7.2</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>Python-এ আগে থেকেই তৈরি করে দেওয়া exception class-গুলোকে built-in exception বলে। নির্দিষ্ট ধরনের ভুল ঘটলে Python নিজে থেকেই এগুলো raise করে। যেমন: <code>ZeroDivisionError</code> (শূন্য দিয়ে ভাগ), <code>ValueError</code> (অগ্রহণযোগ্য মান), <code>TypeError</code>, <code>NameError</code>, <code>IndexError</code>, <code>FileNotFoundError</code>।</p></aside>
+<div class="q"><span class="qn">৩</span><div class="qt"><strong>Error কত প্রকার ও কী কী?</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৪ · বই: 7.1</span></span><span class="stars s2" title="গুরুত্ব 2/3" aria-label="গুরুত্ব 2 তারকা">★★☆</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>Error প্রধানত তিন প্রকার:</p><ul><li><strong>Syntax Error:</strong> কোডের ব্যাকরণগত ভুল (যেমন colon বাদ পড়া); program চালানোর আগেই ধরা পড়ে।</li><li><strong>Runtime Error (Exception):</strong> program চলার সময় ঘটে (যেমন শূন্য দিয়ে ভাগ, নেই এমন file খোলা)।</li><li><strong>Logical Error:</strong> program চলে কিন্তু ভুল ফল দেয় (যেমন সূত্রে ভুল); নিজে থেকে ধরা পড়ে না।</li></ul></aside>
+<div class="q"><span class="qn">৪</span><div class="qt"><strong>try ও except Exception-এর উদাহরণ লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৪ · বই: 7.4</span></span><span class="stars s2" title="গুরুত্ব 2/3" aria-label="গুরুত্ব 2 তারকা">★★☆</span></div>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>try:
+<span class="ln">2</span>    result = 10 / 0
+<span class="ln">3</span>except ZeroDivisionError:
+<span class="ln">4</span>    print("Cannot divide by zero")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Cannot divide by zero</pre></figure>
+<h3>খ. সংক্ষিপ্ত প্রশ্ন (মান: ২)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>Python-এর try ও except Expressions সংক্ষেপে লেখ। (try ও except ব্যবহার করে একটি Python Program লেখ।)</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৩, ২০২৪ (পরি), ২০২৫ · বই: 7.4</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>Program চলার সময় exception ঘটলে program যাতে বন্ধ না হয়, সেজন্য try ও except ব্যবহার করা হয়:</p><ul><li><strong>try block:</strong> যে কোডে exception ঘটার সম্ভাবনা আছে, সেটা try-এর ভেতরে রাখা হয়।</li><li><strong>except block:</strong> try-এ exception ঘটলে Python সাথে সাথে মিলে যাওয়া except block-এ চলে যায় এবং সেখানের কোড চালায়; program বন্ধ হয় না।</li><li>একাধিক except দিয়ে ভিন্ন exception আলাদাভাবে সামলানো যায়; <code>as e</code> দিয়ে exception-এর বার্তা পাওয়া যায়।</li></ul></aside>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>try:
+<span class="ln">2</span>    a = int(input("First number : "))
+<span class="ln">3</span>    b = int(input("Second number: "))
+<span class="ln">4</span>    print("Result =", a / b)
+<span class="ln">5</span>except ValueError:
+<span class="ln">6</span>    print("Please enter numbers only")
+<span class="ln">7</span>except ZeroDivisionError:
+<span class="ln">8</span>    print("Second number cannot be zero")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>First number : <span class="in">20</span>
+Second number: <span class="in">0</span>
+Second number cannot be zero</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1–4</td><td class="snip"><pre>try:
+    a = int(input("First number : "))
+    b = int(input("Second number: "))
+    print("Result =", a / b)</pre></td><td>ইনপুট নেওয়া ও ভাগ — দুই জায়গাতেই exception হতে পারে, তাই try-এর ভেতরে।</td></tr><tr><td class="lab">5–6</td><td class="snip"><pre>except ValueError:
+    print("Please enter numbers only")</pre></td><td>সংখ্যার বদলে লেখা দিলে int() ValueError দেয়।</td></tr><tr><td class="lab">7–8</td><td class="snip"><pre>except ZeroDivisionError:
+    print("Second number cannot be zero")</pre></td><td>এখানে 0 দেওয়ায় ZeroDivisionError; program বন্ধ না হয়ে বার্তা দেখিয়েছে।</td></tr></tbody></table></div></details>
+<div class="q"><span class="qn">২</span><div class="qt"><strong>Error Handling কী?</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২২ · বই: 7.4–7.5</span></span><span class="stars s2" title="গুরুত্ব 2/3" aria-label="গুরুত্ব 2 তারকা">★★☆</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>Program চলার সময় সম্ভাব্য ভুল বা exception আগে থেকে অনুমান করে সেগুলো ধরা ও সামলানোর প্রক্রিয়াকে error handling বলে, যাতে program হঠাৎ বন্ধ না হয়ে ব্যবহারকারীকে উপযুক্ত বার্তা দেয় বা বিকল্প পথে চলে। Python-এ error handling-এর উপায়:</p><ul><li><code>try</code> ও <code>except</code> — exception ধরা ও সামলানো</li><li><code>else</code> ও <code>finally</code> — সফল হলে কাজ এবং সবসময় পরিষ্কারের কাজ</li><li><code>raise</code> — নিজের নিয়ম ভাঙলে ইচ্ছাকৃতভাবে exception তোলা</li></ul></aside>
+<div class="q"><span class="qn">৩</span><div class="qt"><strong>পাইথন-এর Raising Exception সংক্ষেপে লেখ।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৪ · বই: 7.3</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p>Program-এ কোনো অবৈধ অবস্থা বা ভুল মান ধরা পড়লে programmer নিজে ইচ্ছাকৃতভাবে <code>raise</code> keyword দিয়ে exception তুলতে পারেন — একে raising exception বলে। Python-এর কাছে বৈধ কিন্তু আমাদের নিয়মে অবৈধ মান (যেমন মার্কস 150) আটকাতে এটা ব্যবহার হয়।</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>raise ExceptionName("error message")
+</code></pre></figure></aside>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>def set_marks(marks):
+<span class="ln">2</span>    if marks &lt; 0 or marks &gt; 100:
+<span class="ln">3</span>        raise ValueError("Marks must be between 0 and 100")
+<span class="ln">4</span>    return marks
+<span class="ln">5</span> 
+<span class="ln">6</span>try:
+<span class="ln">7</span>    print(set_marks(85))
+<span class="ln">8</span>    print(set_marks(150))
+<span class="ln">9</span>except ValueError as e:
+<span class="ln">10</span>    print("Error:", e)
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>85
+Error: Marks must be between 0 and 100</pre></figure>
+<h3>গ. রচনামূলক প্রশ্ন (মান: ৬)</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>পাইথন Exception কী? Raising Exception বর্ণনা কর। (Raising Exception ব্যবহারপূর্বক Python-এ একটি Program লেখ।)</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২২ · বই: 7.1, 7.3</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p><strong>Exception:</strong> program চলার সময় ঘটা এমন অস্বাভাবিক ঘটনা, যা program-এর স্বাভাবিক প্রবাহ বাধাগ্রস্ত করে। Exception ঘটলে Python একটি exception object তৈরি করে; সেটা সামলানো না হলে program থেমে যায় এবং traceback দেখায়। যেমন: শূন্য দিয়ে ভাগ করলে ZeroDivisionError।</p><p><strong>Raising Exception:</strong> Python নিজে থেকে শুধু তখনই exception তোলে যখন কাজটা অসম্ভব। কিন্তু অনেক মান Python-এর কাছে বৈধ, অথচ আমাদের নিয়মে অবৈধ — যেমন ঋণাত্মক বয়স বা balance-এর বেশি উত্তোলন। তখন programmer <code>raise</code> keyword দিয়ে নিজেই exception তোলেন।</p><ul><li><strong>Syntax:</strong> <code>raise ExceptionName("message")</code></li><li>Built-in exception raise করা যায় — যেমন <code>ValueError</code>, <code>TypeError</code>।</li><li><code>Exception</code> class থেকে inherit করে নিজের (custom) exception তৈরি করা যায়।</li><li>raise হওয়া মাত্র বর্তমান কাজ থেমে যায়; exception-টি try-except দিয়ে ধরা যায়।</li></ul></aside>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>class InsufficientBalanceError(Exception):
+<span class="ln">2</span>    pass
+<span class="ln">3</span> 
+<span class="ln">4</span>class BankAccount:
+<span class="ln">5</span>    def __init__(self, balance):
+<span class="ln">6</span>        self.balance = balance
+<span class="ln">7</span> 
+<span class="ln">8</span>    def withdraw(self, amount):
+<span class="ln">9</span>        if amount &lt;= 0:
+<span class="ln">10</span>            raise ValueError("Amount must be positive")
+<span class="ln">11</span>        if amount &gt; self.balance:
+<span class="ln">12</span>            raise InsufficientBalanceError(
+<span class="ln">13</span>                f"Balance {self.balance} Tk, requested {amount} Tk")
+<span class="ln">14</span>        self.balance -= amount
+<span class="ln">15</span>        return self.balance
+<span class="ln">16</span> 
+<span class="ln">17</span>acc = BankAccount(5000)
+<span class="ln">18</span>for amount in [1500, -200, 8000]:
+<span class="ln">19</span>    try:
+<span class="ln">20</span>        left = acc.withdraw(amount)
+<span class="ln">21</span>        print(f"Withdrew {amount} Tk, left {left} Tk")
+<span class="ln">22</span>    except ValueError as e:
+<span class="ln">23</span>        print("Invalid:", e)
+<span class="ln">24</span>    except InsufficientBalanceError as e:
+<span class="ln">25</span>        print("Failed:", e)
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Withdrew 1500 Tk, left 3500 Tk
+Invalid: Amount must be positive
+Failed: Balance 3500 Tk, requested 8000 Tk</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">1–2</td><td class="snip"><pre>class InsufficientBalanceError(Exception):
+    pass</pre></td><td>Exception থেকে inherit করে নিজের exception class।</td></tr><tr><td class="lab">9–10</td><td class="snip"><pre>        if amount &lt;= 0:
+            raise ValueError("Amount must be positive")</pre></td><td>ঋণাত্মক বা শূন্য পরিমাণ হলে built-in ValueError raise।</td></tr><tr><td class="lab">11–13</td><td class="snip"><pre>        if amount &gt; self.balance:
+            raise InsufficientBalanceError(
+                f"Balance {self.balance} Tk, requested {amount} Tk")</pre></td><td>balance-এর বেশি হলে custom exception raise।</td></tr><tr><td class="lab">17–25</td><td class="snip"><pre>acc = BankAccount(5000)
+for amount in [1500, -200, 8000]:
+    try:
+        left = acc.withdraw(amount)
+        print(f"Withdrew {amount} Tk, left {left} Tk")
+    except ValueError as e:
+        print("Invalid:", e)
+    except InsufficientBalanceError as e:
+        print("Failed:", e)</pre></td><td>তিনটি ভিন্ন পরিমাণে চেষ্টা; প্রতিটি exception আলাদা except-এ ধরা হলো, program বন্ধ হয়নি।</td></tr></tbody></table></div></details>
+<div class="q"><span class="qn">২</span><div class="qt"><strong>পাইথন-এর try ও except Exception ব্যাখ্যা কর।</strong></div><span class="qr"><span class="qref">বাকাশিবো: ২০২৫ (পরি) · বই: 7.4–7.5</span></span><span class="stars s3" title="গুরুত্ব 3/3" aria-label="গুরুত্ব 3 তারকা">★★★</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><p><strong>try ও except:</strong> exception সামলানোর মূল ব্যবস্থা। ঝুঁকিপূর্ণ কোড <code>try</code> block-এ রাখা হয়; সেখানে exception ঘটলে Python বাকি try কোড বাদ দিয়ে মিলে যাওয়া <code>except</code> block-এ চলে যায়। exception না ঘটলে except বাদ পড়ে।</p><figure class="code mini"><figcaption><span>Python</span><span class="fn"></span></figcaption><pre><code>try:
+    # ঝুঁকিপূর্ণ কোড
+except ExceptionName as e:
+    # exception ঘটলে
+else:
+    # exception না ঘটলে (ঐচ্ছিক)
+finally:
+    # সবসময় (ঐচ্ছিক)
+</code></pre></figure><p><strong>কার্যপদ্ধতি ও নিয়ম:</strong></p><ul><li>Python উপর থেকে except-গুলো মিলিয়ে দেখে; প্রথম যেটা মেলে শুধু সেটাই চলে।</li><li>এক except-এ একাধিক exception ধরা যায়: <code>except (ValueError, TypeError):</code></li><li><code>as e</code> দিয়ে exception object পাওয়া যায়, print করলে বার্তা দেখায়।</li><li><code>except Exception:</code> প্রায় সব exception ধরে — এটা সবার শেষে রাখা উচিত।</li><li>খালি <code>except:</code> দিয়ে সব error চুপচাপ গিলে ফেলা খারাপ অভ্যাস।</li></ul></aside>
+<figure class="pic"><img src="../img/tryflow.png" alt="চিত্র: try, except, else ও finally-এর প্রবাহ" loading="lazy"><figcaption>চিত্র: try, except, else ও finally-এর প্রবাহ</figcaption></figure>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>def safe_divide(a_text, b_text):
+<span class="ln">2</span>    try:
+<span class="ln">3</span>        a = float(a_text)
+<span class="ln">4</span>        b = float(b_text)
+<span class="ln">5</span>        result = a / b
+<span class="ln">6</span>    except ValueError:
+<span class="ln">7</span>        print(f"'{a_text}' / '{b_text}': please give numbers")
+<span class="ln">8</span>    except ZeroDivisionError as e:
+<span class="ln">9</span>        print(f"'{a_text}' / '{b_text}': error -", e)
+<span class="ln">10</span>    else:
+<span class="ln">11</span>        print(f"{a} / {b} = {result}")
+<span class="ln">12</span> 
+<span class="ln">13</span>safe_divide("20", "4")
+<span class="ln">14</span>safe_divide("20", "abc")
+<span class="ln">15</span>safe_divide("20", "0")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>20.0 / 4.0 = 5.0
+'20' / 'abc': please give numbers
+'20' / '0': error - float division by zero</pre></figure>
+<details class="explain" open><summary>লাইন-বাই-লাইন ব্যাখ্যা</summary><div class="tbl"><table><tbody><tr><td class="lab">2–5</td><td class="snip"><pre>    try:
+        a = float(a_text)
+        b = float(b_text)
+        result = a / b</pre></td><td>ইনপুট রূপান্তর ও ভাগ try-এর ভেতরে।</td></tr><tr><td class="lab">6–9</td><td class="snip"><pre>    except ValueError:
+        print(f"'{a_text}' / '{b_text}': please give numbers")
+    except ZeroDivisionError as e:
+        print(f"'{a_text}' / '{b_text}': error -", e)</pre></td><td>দুটি আলাদা except — ভুল ইনপুট ও শূন্য দিয়ে ভাগ।</td></tr><tr><td class="lab">10–11</td><td class="snip"><pre>    else:
+        print(f"{a} / {b} = {result}")</pre></td><td>কোনো exception না হলে else-এ ফল দেখানো।</td></tr><tr><td class="lab">13–15</td><td class="snip"><pre>safe_divide("20", "4")
+safe_divide("20", "abc")
+safe_divide("20", "0")</pre></td><td>তিন ক্ষেত্রে তিন আচরণ, কিন্তু program একবারও বন্ধ হয়নি।</td></tr></tbody></table></div></details>
+<h3>ঘ. অতিরিক্ত গুরুত্বপূর্ণ প্রশ্ন</h3>
+<div class="q"><span class="qn">১</span><div class="qt"><strong>Python-এর else ও finally clause-এর Syntax ও উদাহরণ লেখ।</strong></div><span class="qr"><span class="qref">বই: 7.5</span></span><span class="stars s2" title="গুরুত্ব 2/3" aria-label="গুরুত্ব 2 তারকা">★★☆</span></div>
+<aside class="box answer"><p class="box-title">উত্তর</p><ul><li><strong>else:</strong> try block-এ কোনো exception না ঘটলে চলে।</li><li><strong>finally:</strong> exception ঘটুক বা না ঘটুক, সবসময় চলে — file বন্ধ করার মতো পরিষ্কারের কাজে ব্যবহৃত হয়।</li></ul></aside>
+<figure class="code "><figcaption><span>Python</span><span class="fn">main.py</span></figcaption><pre><code><span class="ln">1</span>def read_marks(text):
+<span class="ln">2</span>    try:
+<span class="ln">3</span>        marks = int(text)
+<span class="ln">4</span>    except ValueError:
+<span class="ln">5</span>        print("Not a number")
+<span class="ln">6</span>    else:
+<span class="ln">7</span>        print("Marks =", marks)
+<span class="ln">8</span>    finally:
+<span class="ln">9</span>        print("Check complete")
+<span class="ln">10</span> 
+<span class="ln">11</span>read_marks("78")
+<span class="ln">12</span>read_marks("seventy")
+</code></pre></figure>
+<figure class="output"><figcaption><span>Output</span></figcaption><pre>Marks = 78
+Check complete
+Not a number
+Check complete</pre></figure><section class="quick" id="quick"><h2>এই অধ্যায় কেমন লাগল?</h2><p>তোমার মতামত সরাসরি লেখকের কাছে যাবে। ভুল পেলে কোন section-এ, সেটাও লিখে দিও।</p>
+<form class="fb-form" data-kind="অধ্যায়ের মতামত"><input type="hidden" name="chapter" value="অধ্যায় ৭ — Exception and Error Handling in Python">
+<div class="rate" role="radiogroup" aria-label="রেটিং"><label><input type="radio" name="rating" value="1" required><span>★</span><em>1</em></label><label><input type="radio" name="rating" value="2" ><span>★</span><em>2</em></label><label><input type="radio" name="rating" value="3" ><span>★</span><em>3</em></label><label><input type="radio" name="rating" value="4" ><span>★</span><em>4</em></label><label><input type="radio" name="rating" value="5" ><span>★</span><em>5</em></label></div>
+<label class="fld"><span>তোমার নাম (ঐচ্ছিক)</span><input name="name" autocomplete="name"></label>
+<label class="fld"><span>মতামত বা যে ভুল পেয়েছ</span><textarea name="message" rows="4" required placeholder="যেমন: 4.5-এর উদাহরণটা বুঝতে কষ্ট হয়েছে, কারণ…"></textarea></label>
+<input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off"><button type="submit">মতামত পাঠাও</button><p class="status" role="status"></p></form></section><nav class="pager"><a class="pn prev" href="ch06.html"><small>আগের অধ্যায়</small>Iterator, Generator ও Decorator</a><a class="pn next" href="ch08.html"><small>পরের অধ্যায়</small>Logging</a></nav></main><aside class="mini"><p>এই অধ্যায়ে</p><ol><li><a href="#s1">7.1 Exception কী?</a></li><li><a href="#s2">7.2 Built-in Exception</a></li><li><a href="#s3">7.3 Exception Raise করা</a></li><li><a href="#s4">7.4 try ও except Block</a></li><li><a href="#s5">7.5 else ও finally Clause</a></li><li><a href="#s6">7.6 Exception ও Error Handling-এর Program</a></li><li><a href="#s7">অধ্যায়ের সারসংক্ষেপ</a></li><li><a href="#s8">অনুশীলনী · অধ্যায় ৭ (বোর্ড প্রশ্ন ও উত্তর)</a></li></ol><a class="report" href="#quick">ভুল পেয়েছ? জানাও</a></aside></div><nav class="bnav" aria-label="মোবাইল মেনু"><a href="../index.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>হোম</span></a><button type="button" class="bn-toc on" aria-expanded="false" aria-controls="sheet"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5zM4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3"/><path d="M8 7h7M8 10.5h5"/></svg><span>অধ্যায়</span></button><a href="../runner.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m8 9 3 3-3 3M13 15h3"/></svg><span>কোড রানার</span></a><a href="../feedback.html"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 11h7M8.5 14h4.5"/></svg><span>মতামত</span></a></nav><div class="sheet" id="sheet" hidden><div class="sheet-backdrop" data-close></div><div class="sheet-panel" role="dialog" aria-modal="true" aria-label="বিষয়সূচি"><div class="sheet-grip" data-close></div><div class="sheet-head"><strong>বিষয়সূচি</strong><button type="button" data-close aria-label="বন্ধ করো">✕</button></div><div class="sheet-body"><p class="sheet-h">এই অধ্যায়ে</p><ol class="sheet-sec"><li><a href="#s1">7.1 Exception কী?</a></li><li><a href="#s2">7.2 Built-in Exception</a></li><li><a href="#s3">7.3 Exception Raise করা</a></li><li><a href="#s4">7.4 try ও except Block</a></li><li><a href="#s5">7.5 else ও finally Clause</a></li><li><a href="#s6">7.6 Exception ও Error Handling-এর Program</a></li><li><a href="#s7">অধ্যায়ের সারসংক্ষেপ</a></li><li><a href="#s8">অনুশীলনী · অধ্যায় ৭ (বোর্ড প্রশ্ন ও উত্তর)</a></li></ol><p class="sheet-h">সব অধ্যায়</p><ol class="sheet-ch"><li><a href="../chapters/ch01.html"><span class="u">১</span>Python Functions</a></li><li><a href="../chapters/ch02.html"><span class="u">২</span>File Operation</a></li><li><a href="../chapters/ch03.html"><span class="u">৩</span>Module, Package ও Application Software</a></li><li><a href="../chapters/ch04.html"><span class="u">৪</span>Basics of OOP</a></li><li><a href="../chapters/ch05.html"><span class="u">৫</span>Four Pillars of OOP</a></li><li><a href="../chapters/ch06.html"><span class="u">৬</span>Iterator, Generator ও Decorator</a></li><li><a href="../chapters/ch07.html" class=on aria-current=page><span class="u">৭</span>Exception ও Error Handling</a></li><li><a href="../chapters/ch08.html"><span class="u">৮</span>Logging</a></li><li><a href="../chapters/ch09.html"><span class="u">৯</span>Unit Testing</a></li><li><a href="../chapters/ch10.html"><span class="u">১০</span>RegEx</a></li><li><a href="../chapters/ch11.html"><span class="u">১১</span>Application Software</a></li><li><a href="../chapters/ch12.html"><span class="u">পরি</span>বোর্ড প্রশ্ন ও সাজেশন</a></li></ol></div></div></div><footer class="foot"><p><strong>Application Development Using Python</strong> · লেখক: Kazi Tauhid Rana, Computer Science and Technology, Rajshahi Polytechnic Institute</p><p class="copy-note">© ২০২৬ Kazi Tauhid Rana · সর্বস্বত্ব সংরক্ষিত · <a href="../copyright.html">কপিরাইট নোটিশ</a> · <a href="../pdf.html">বইয়ের PDF</a></p><p>MIU Platform · Learn Grow Succeed</p></footer>
+<script src="../assets/config.js"></script><script src="../assets/app.js"></script><script src="../assets/runner.js"></script></body></html>
