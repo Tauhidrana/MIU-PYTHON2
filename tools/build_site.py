@@ -32,18 +32,55 @@ def encrypt(text):
                         input=b"MIU1" + text.encode("utf-8"), capture_output=True, check=True).stdout
     return base64.b64encode(iv).decode(), base64.b64encode(ct).decode()
 
+FREE_CHAPTERS = {1, 2}   # এই অধ্যায়গুলোর অনুশীলনী সবার জন্য খোলা
+
+# লক করা অংশের ঝাপসা preview: আসল HTML-এর গঠন (heading, প্রশ্ন, কোড box) রেখে লেখাগুলো এলোমেলো অক্ষরে বদলানো হয়,
+# তাই CSS-এর blur সরালেও আসল লেখা পড়া যায় না — শুধু বোঝা যায় এখানে content আছে
+_BN_POOL, _EN_POOL = "কখগচজটডতদনপবমরলসহ", "abcdefghiklmnoprstuvwy"
+_rng = __import__("random").Random(7)
+def _scramble(txt):
+    out = []
+    for c in html.unescape(txt):
+        if c.isspace(): out.append(c)
+        elif "\u0980" <= c <= "\u09ff":
+            if not ("\u09bc" <= c <= "\u09d7" or "\u0981" <= c <= "\u0983"):
+                out.append(_rng.choice(_BN_POOL) + (_rng.choice("ািে") if _rng.random() < .35 else ""))
+        elif c.isdigit(): out.append(str(_rng.randrange(10)))
+        elif c.isalpha(): out.append(_rng.choice(_EN_POOL))
+        else: out.append(c)
+    return esc("".join(out))
+def decoy_html(text, limit):
+    text = re.sub(r"<img\b[^>]*>", "", text)
+    text = re.sub(r'\s(id|href|src|data-[\w-]+)="[^"]*"', "", text)
+    text = text.replace('class="code', 'class="dcode')        # runner.js যেন "চালাও" বোতাম না বসায়
+    parts, n = [], 0
+    for tok in re.split(r"(<[^>]+>)", text):
+        if tok.startswith("<"): parts.append(tok); continue
+        if n >= limit: continue
+        n += len(tok.strip()); parts.append(_scramble(tok))
+    return "".join(parts)
+
+LOCK_SVG = ('<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+            'stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10.5" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>'
+            '<circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg>')
+
 def locked_html(text, first):
     iv, ct = encrypt(text)
+    preview = f'<div class="lock-preview" aria-hidden="true" inert>{decoy_html(text, 900 if first else 380)}</div>'
     if first:
-        card = ('<div class="lock-card" id="unlock"><p class="lock-h"><span aria-hidden="true">🔒</span> অনুশীলনী ও বোর্ড প্রশ্নের উত্তর লক করা</p>'
-                '<p>এই অংশ শুধু বইয়ের <strong>PDF ক্রেতাদের</strong> জন্য। PDF কিনলে একটা <strong>আনলক কোড</strong> পাবে — কোডটা এখানে দিলেই '
-                'পুরো বইয়ের সব অনুশীলনী আর বোর্ড প্রশ্নের উত্তর খুলে যাবে, প্রতিবার আর দিতে হবে না।</p>'
-                '<form class="lock-form"><input name="code" inputmode="numeric" autocomplete="off" placeholder="আনলক কোড" aria-label="আনলক কোড" required>'
-                '<button type="submit">খোলো</button></form><p class="lock-status" role="status"></p>'
-                f'<p class="lock-buy">PDF কিনতে Facebook-এ মেসেজ দাও: <a href="{FB_URL}" target="_blank" rel="noopener">facebook.com/kazitauhidrana ↗</a></p></div>')
+        card = (f'<div class="lock-card" id="unlock"><div class="lock-icon">{LOCK_SVG}</div>'
+                '<p class="lock-badge">PDF ক্রেতাদের জন্য</p>'
+                '<p class="lock-h">অনুশীলনী ও বোর্ড প্রশ্নের উত্তর লক করা</p>'
+                '<p class="lock-text">PDF কিনলে একটা <strong>আনলক কোড</strong> পাবে — কোডটা একবার দিলেই পুরো বইয়ের সব অনুশীলনী আর বোর্ড প্রশ্নের উত্তর '
+                'খুলে যাবে, প্রতিবার আর দিতে হবে না।</p>'
+                '<form class="lock-form"><input name="code" inputmode="numeric" autocomplete="off" placeholder="আনলক কোড লেখো" aria-label="আনলক কোড" required>'
+                '<button type="submit">আনলক করো</button></form><p class="lock-status" role="status"></p>'
+                '<ul class="lock-perks"><li>সব অধ্যায়ের অনুশীলনী</li><li>বোর্ড প্রশ্নের উত্তর</li><li>একবারেই সব খোলে</li></ul>'
+                f'<p class="lock-buy">PDF কিনতে Facebook-এ মেসেজ দাও · <a href="{FB_URL}" target="_blank" rel="noopener">facebook.com/kazitauhidrana ↗</a></p>'
+                '<p class="lock-free">প্রথম ২টি অধ্যায়ের অনুশীলনী সবার জন্য খোলা</p></div>')
     else:
-        card = '<div class="lock-card slim"><span aria-hidden="true">🔒</span> এই অংশ লক করা — <a href="#unlock">আনলক কোড দাও</a></div>'
-    return f'<div class="locked" data-iv="{iv}" data-enc="{ct}">{card}</div>'
+        card = f'<a class="lock-card slim" href="#unlock"><span class="lock-icon">{LOCK_SVG}</span><span>এই অংশ লক করা — <u>আনলক কোড দাও</u></span></a>'
+    return f'<div class="locked{" first" if first else ""}" data-iv="{iv}" data-enc="{ct}">{preview}{card}</div>'
 
 VIDEOS = json.load(open(os.path.join(SRC, "videos.json"), encoding="utf-8")) if os.path.exists(os.path.join(SRC, "videos.json")) else {}
 MONTHS = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"]
@@ -93,11 +130,11 @@ LOCK_ON, LOCK_OFF = object(), object()
 def render(B, ch):
     h, toc, last = [], [], ""
     sec_id = 0
-    # পরিশিষ্টে (ch12) heading ছাড়া সব লক; বাকি অধ্যায়ে "অনুশীলনী" heading-এর পরের সব লক
+    # পরিশিষ্টে (ch12) heading ছাড়া সব লক; বাকি অধ্যায়ে (FREE_CHAPTERS বাদে) "অনুশীলনী" heading-এর পরের সব লক
     locking = False
     for b in B:
         t = b["t"]
-        if t == "h2" and b["text"].startswith("অনুশীলনী"): locking = True
+        if t == "h2" and b["text"].startswith("অনুশীলনী") and ch not in FREE_CHAPTERS: locking = True
         h.append(LOCK_ON if (locking and t != "h2") or (ch == 12 and t not in ("chapter", "h2")) else LOCK_OFF)
         if t == "chapter":
             h.append(f'<header class="chap-head"><p class="chap-num">{esc(b["num"])}</p><h1>{esc(b["title"])}</h1>'
