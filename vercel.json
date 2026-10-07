@@ -1,12 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "outputDirectory": "site",
-  "functions": {
-    "api/exercise.js": {
-      "includeFiles": "content/locked/**"
-    }
-  },
+  "framework": "nextjs",
   "headers": [
     {
       "source": "/(.*)",

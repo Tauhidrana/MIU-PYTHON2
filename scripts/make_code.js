@@ -9,7 +9,7 @@ if (!process.env.UNLOCK_SECRET) {
   const f = path.join(__dirname, "..", "tools", "private", "unlock_secret.txt");
   if (fs.existsSync(f)) process.env.UNLOCK_SECRET = fs.readFileSync(f, "utf8").trim();
 }
-const { makeCode } = require("../api/_lib");
+const { makeCode } = require("../lib/unlock");
 
 const ids = process.argv.slice(2);
 if (!ids.length) {
