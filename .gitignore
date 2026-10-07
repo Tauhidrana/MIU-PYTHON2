@@ -9,3 +9,7 @@ node_modules/
 __pycache__/
 .vercel
 .env*
+content/generated/
+.next/
+next-env.d.ts
+*.tsbuildinfo

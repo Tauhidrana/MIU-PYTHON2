@@ -1,8 +1,8 @@
-# Vercel-এ শুধু website (site/), API (api/), লক করা অনুশীলনী (content/locked/) আর vercel.json যায়
-/*
-!site
-!api
-!content
-/content/*
-!/content/locked
-!vercel.json
+# Vercel-এ PDF, graphify আর পুরনো build tool যায় না
+tools/private
+graphify-out
+videos_review.csv
+.env*
+node_modules
+.next
+content/generated
