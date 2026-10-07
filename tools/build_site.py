@@ -71,11 +71,11 @@ def locked_html(text, first):
         card = (f'<div class="lock-card" id="unlock"><div class="lock-icon">{LOCK_SVG}</div>'
                 '<p class="lock-badge">PDF ক্রেতাদের জন্য</p>'
                 '<p class="lock-h">অনুশীলনী ও বোর্ড প্রশ্নের উত্তর লক করা</p>'
-                '<p class="lock-text">PDF কিনলে একটা <strong>আনলক কোড</strong> পাবে — কোডটা একবার দিলেই পুরো বইয়ের সব অনুশীলনী আর বোর্ড প্রশ্নের উত্তর '
-                'খুলে যাবে, প্রতিবার আর দিতে হবে না।</p>'
+                '<p class="lock-text">PDF কিনলে একটা <strong>আনলক কোড</strong> পাবে — কোডটা দিলেই এই পাতার অনুশীলনী আর বোর্ড প্রশ্নের উত্তর '
+                'খুলে যাবে। প্রতিবার পাতা খুললে কোডটা দিতে হবে।</p>'
                 '<form class="lock-form"><input name="code" inputmode="numeric" autocomplete="off" placeholder="আনলক কোড লেখো" aria-label="আনলক কোড" required>'
                 '<button type="submit">আনলক করো</button></form><p class="lock-status" role="status"></p>'
-                '<ul class="lock-perks"><li>সব অধ্যায়ের অনুশীলনী</li><li>বোর্ড প্রশ্নের উত্তর</li><li>একবারেই সব খোলে</li></ul>'
+                '<ul class="lock-perks"><li>সব অধ্যায়ের অনুশীলনী</li><li>বোর্ড প্রশ্নের উত্তর</li><li>কোড ছাড়া খোলে না</li></ul>'
                 f'<p class="lock-buy">PDF কিনতে Facebook-এ মেসেজ দাও · <a href="{FB_URL}" target="_blank" rel="noopener">facebook.com/kazitauhidrana ↗</a></p>'
                 '<p class="lock-free">প্রথম ২টি অধ্যায়ের অনুশীলনী সবার জন্য খোলা</p></div>')
     else:
