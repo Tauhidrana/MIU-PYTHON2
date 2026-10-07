@@ -1,4 +1,4 @@
-import json, html, re, os, shutil, base64, hashlib, subprocess
+import json, html, re, os, shutil
 SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "source")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "site")
 BN = str.maketrans("0123456789", "০১২৩৪৫৬৭৮৯")
@@ -17,70 +17,40 @@ SHORT = {1: "Python Functions", 2: "File Operation", 3: "Module, Package ও App
 YEAR = "২০২৬"
 
 # ===== অনুশীলনী ও বোর্ড প্রশ্ন লক — PDF ক্রেতারা আনলক কোড দিয়ে খুলবে =====
-# কোডটা GitHub-এ যায় না: tools/private/unlock_code.txt (gitignored) অথবা UNLOCK_CODE env থেকে আসে।
-# লক করা অংশ AES-256-CBC দিয়ে encrypt হয়ে পাতায় বসে; browser-এ assets/lock.js কোড থেকে একই key বানিয়ে খোলে।
-LOCK_SALT, LOCK_ITER = b"miu-python-book/unlock/v1", 200000   # assets/lock.js-এর SALT, ITER-এর সাথে মিল থাকতে হবে
+# লক করা অংশের আসল লেখা পাতার HTML-এ থাকে না: সেটা content/locked/chNN.json-এ যায় (site/-এর বাইরে, তাই public URL নেই)।
+# পাতায় থাকে শুধু লেখা ছাড়া skeleton আর unlock box; কোড ঠিক হলে api/unlock.js token দেয়, api/exercise.js সেই token দেখে লেখাটা পাঠায়।
 FB_URL = "https://www.facebook.com/kazitauhidrana"
-_code_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "private", "unlock_code.txt")
-UNLOCK_CODE = os.environ.get("UNLOCK_CODE") or (open(_code_file, encoding="utf-8").read().strip() if os.path.exists(_code_file) else "")
-if not UNLOCK_CODE: raise SystemExit("আনলক কোড নেই — tools/private/unlock_code.txt-এ কোডটা লেখো (অথবা UNLOCK_CODE env দাও)")
-LOCK_KEY = hashlib.pbkdf2_hmac("sha256", UNLOCK_CODE.encode(), LOCK_SALT, LOCK_ITER, 32)
-
-def encrypt(text):
-    iv = os.urandom(16)
-    ct = subprocess.run(["openssl", "enc", "-aes-256-cbc", "-K", LOCK_KEY.hex(), "-iv", iv.hex()],
-                        input=b"MIU1" + text.encode("utf-8"), capture_output=True, check=True).stdout
-    return base64.b64encode(iv).decode(), base64.b64encode(ct).decode()
-
-FREE_CHAPTERS = {1, 2}   # এই অধ্যায়গুলোর অনুশীলনী সবার জন্য খোলা
-
-# লক করা অংশের ঝাপসা preview: আসল HTML-এর গঠন (heading, প্রশ্ন, কোড box) রেখে লেখাগুলো এলোমেলো অক্ষরে বদলানো হয়,
-# তাই CSS-এর blur সরালেও আসল লেখা পড়া যায় না — শুধু বোঝা যায় এখানে content আছে
-_BN_POOL, _EN_POOL = "কখগচজটডতদনপবমরলসহ", "abcdefghiklmnoprstuvwy"
-_rng = __import__("random").Random(7)
-def _scramble(txt):
-    out = []
-    for c in html.unescape(txt):
-        if c.isspace(): out.append(c)
-        elif "\u0980" <= c <= "\u09ff":
-            if not ("\u09bc" <= c <= "\u09d7" or "\u0981" <= c <= "\u0983"):
-                out.append(_rng.choice(_BN_POOL) + (_rng.choice("ািে") if _rng.random() < .35 else ""))
-        elif c.isdigit(): out.append(str(_rng.randrange(10)))
-        elif c.isalpha(): out.append(_rng.choice(_EN_POOL))
-        else: out.append(c)
-    return esc("".join(out))
-def decoy_html(text, limit):
-    text = re.sub(r"<img\b[^>]*>", "", text)
-    text = re.sub(r'\s(id|href|src|data-[\w-]+)="[^"]*"', "", text)
-    text = text.replace('class="code', 'class="dcode')        # runner.js যেন "চালাও" বোতাম না বসায়
-    parts, n = [], 0
-    for tok in re.split(r"(<[^>]+>)", text):
-        if tok.startswith("<"): parts.append(tok); continue
-        if n >= limit: continue
-        n += len(tok.strip()); parts.append(_scramble(tok))
-    return "".join(parts)
+PDF_PRICE = 50   # PDF-এর দাম (টাকা) — unlock box আর description-এ এখান থেকেই বসে
+LOCKED_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "content", "locked")
+FREE_CHAPTERS = {1, 2}   # এই অধ্যায়গুলোর অনুশীলনী সবার জন্য খোলা (api/_lib.js-এর LOCKED_CHAPTERS-এর সাথে মিল থাকতে হবে)
 
 LOCK_SVG = ('<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
             'stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10.5" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>'
             '<circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg>')
 
-def locked_html(text, first):
-    iv, ct = encrypt(text)
-    preview = f'<div class="lock-preview" aria-hidden="true" inert>{decoy_html(text, 900 if first else 380)}</div>'
+# লেখা ছাড়া ঝাপসা skeleton — শুধু বোঝায় এখানে প্রশ্ন, উত্তর আর কোড আছে
+SKEL_FIRST = "h l l s c l s l l s c l".split()
+SKEL_SLIM = "h l s c".split()
+def skeleton(first):
+    return ('<div class="lock-preview" aria-hidden="true">'
+            + "".join(f'<span class="sk sk-{k}"></span>' for k in (SKEL_FIRST if first else SKEL_SLIM)) + "</div>")
+
+def locked_html(ch, first):
     if first:
         card = (f'<div class="lock-card" id="unlock"><div class="lock-icon">{LOCK_SVG}</div>'
                 '<p class="lock-badge">PDF ক্রেতাদের জন্য</p>'
                 '<p class="lock-h">অনুশীলনী ও বোর্ড প্রশ্নের উত্তর লক করা</p>'
-                '<p class="lock-text">PDF কিনলে একটা <strong>আনলক কোড</strong> পাবে — কোডটা দিলেই এই পাতার অনুশীলনী আর বোর্ড প্রশ্নের উত্তর '
-                'খুলে যাবে। প্রতিবার পাতা খুললে কোডটা দিতে হবে।</p>'
-                '<form class="lock-form"><input name="code" inputmode="numeric" autocomplete="off" placeholder="আনলক কোড লেখো" aria-label="আনলক কোড" required>'
+                '<p class="lock-text">PDF কিনলে একটা <strong>আনলক কোড</strong> পাবে — কোডটা একবার দিলেই এই browser-এ সব অধ্যায়ের অনুশীলনী আর '
+                'বোর্ড প্রশ্নের উত্তর খুলে যাবে।</p>'
+                f'<p class="lock-price">PDF-এর দাম: <strong>{str(PDF_PRICE).translate(BN)} টাকা</strong></p>'
+                '<form class="lock-form"><input name="code" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="আনলক কোড লেখো" aria-label="আনলক কোড" required>'
                 '<button type="submit">আনলক করো</button></form><p class="lock-status" role="status"></p>'
-                '<ul class="lock-perks"><li>সব অধ্যায়ের অনুশীলনী</li><li>বোর্ড প্রশ্নের উত্তর</li><li>কোড ছাড়া খোলে না</li></ul>'
+                '<ul class="lock-perks"><li>সব অধ্যায়ের অনুশীলনী</li><li>বোর্ড প্রশ্নের উত্তর</li><li>একবারেই সব খোলে</li></ul>'
                 f'<p class="lock-buy">PDF কিনতে Facebook-এ মেসেজ দাও · <a href="{FB_URL}" target="_blank" rel="noopener">facebook.com/kazitauhidrana ↗</a></p>'
                 '<p class="lock-free">প্রথম ২টি অধ্যায়ের অনুশীলনী সবার জন্য খোলা</p></div>')
     else:
         card = f'<a class="lock-card slim" href="#unlock"><span class="lock-icon">{LOCK_SVG}</span><span>এই অংশ লক করা — <u>আনলক কোড দাও</u></span></a>'
-    return f'<div class="locked{" first" if first else ""}" data-iv="{iv}" data-enc="{ct}">{preview}{card}</div>'
+    return f'<div class="locked{" first" if first else ""}" data-ch="{ch}">{skeleton(first)}{card}</div>'
 
 VIDEOS = json.load(open(os.path.join(SRC, "videos.json"), encoding="utf-8")) if os.path.exists(os.path.join(SRC, "videos.json")) else {}
 MONTHS = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"]
@@ -204,20 +174,47 @@ def render(B, ch):
                      + f'<p class="pmeta"><span>{esc(b["left"])}</span><span>{esc(b["right"])}</span></p><p class="pinst">{esc(b["instr"])}</p></div>')
         elif t == "pagebreak": pass
         else: raise ValueError(t)
-    out, buf, first = [], [], True
+    out, buf, locked = [], [], []
     for x in h + [LOCK_OFF]:
         if x is LOCK_ON or x is LOCK_OFF:
-            if x is LOCK_OFF and buf: out.append(locked_html("\n".join(buf), first)); buf, first = [], False
+            if x is LOCK_OFF and buf: out.append(locked_html(ch, not locked)); locked.append("\n".join(buf)); buf = []
             on = x is LOCK_ON
         elif on: buf.append(x)
         else: out.append(x)
-    return "\n".join(out), toc
+    return "\n".join(out), toc, locked
 
 HEAD = '''<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#FBFCFE"><meta name="format-detection" content="telephone=no">
-<title>{title}</title><meta name="description" content="Application Development Using Python — Polytechnic ছাত্রদের জন্য বাংলায় সম্পূর্ণ বই, বোর্ড প্রশ্নের উত্তরসহ।">
+<title>{title}</title><meta name="description" content="{desc}">
+<link rel="canonical" href="{url}"><meta property="og:type" content="{ogtype}"><meta property="og:site_name" content="Python বই — Application Development Using Python">
+<meta property="og:title" content="{title}"><meta property="og:description" content="{desc}"><meta property="og:url" content="{url}"><meta property="og:locale" content="bn_BD">
+<meta property="og:image" content="{site}/img/og-cover.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Application Development Using Python — বইয়ের প্রচ্ছদ">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="{root}img/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <meta name="robots" content="noarchive"><link rel="stylesheet" href="{root}assets/style.css"><script src="{root}assets/protect.js"></script><script>try{{if(localStorage.getItem("theme")==="dark")document.documentElement.dataset.theme="dark"}}catch(e){{}}</script></head>'''
+SITE_URL = "https://miu-python2.vercel.app"
+SITE_DESC = (f"Polytechnic ছাত্রদের জন্য বাংলায় Python বই। পুরো বই ফ্রি; প্রথম দুই অধ্যায়ের অনুশীলনী ফ্রি, "
+             f"বাকি অনুশীলনীর উত্তর PDF-এর সাথে ({str(PDF_PRICE).translate(BN)} টাকা)।")
+# প্রতিটা অধ্যায়ের meta description ও og:description — ১৫০ অক্ষরের মধ্যে, অধ্যায়ের মূল টপিকসহ
+CH_DESC = {
+    1: "অধ্যায় ১: Python Function — def, argument, return, pass by value ও reference আর datetime, চালানো যায় এমন কোডসহ সহজ বাংলায়।",
+    2: "অধ্যায় ২: Python-এ File Operation — file mode, open ও close, read ও write দিয়ে file-এ তথ্য রাখা ও পড়া, উদাহরণসহ সহজ বাংলায়।",
+    3: "অধ্যায় ৩: Python Module ও Package — নিজের module ও package বানানো, import, আর Application Software-এর পরিচয় সহজ বাংলায়।",
+    4: "অধ্যায় ৪: OOP-এর মূল কথা — class, object, constructor (__init__) ও self, Python উদাহরণ ও কোডসহ সহজ বাংলায়।",
+    5: "অধ্যায় ৫: OOP-এর চার স্তম্ভ — inheritance, encapsulation, polymorphism ও abstraction, Python কোড ও উদাহরণসহ সহজ বাংলায়।",
+    6: "অধ্যায় ৬: Python Iterator, Generator ও Decorator — iter ও next, yield আর @decorator কীভাবে কাজ করে, উদাহরণসহ সহজ বাংলায়।",
+    7: "অধ্যায় ৭: Python-এ Exception ও Error Handling — try, except, else, finally ও raise, উদাহরণ ও কোডসহ সহজ বাংলায়।",
+    8: "অধ্যায় ৮: Python Logging — log level, handler, formatter ও basicConfig দিয়ে program-এর log রাখা, উদাহরণসহ সহজ বাংলায়।",
+    9: "অধ্যায় ৯: Python-এ Unit Testing — unittest, TestCase ও assertion দিয়ে test লেখা ও চালানো, উদাহরণসহ সহজ বাংলায়।",
+    10: "অধ্যায় ১০: Python RegEx — pattern, metacharacter, search, findall ও sub দিয়ে লেখায় শব্দ খোঁজা ও বদলানো, সহজ বাংলায়।",
+    11: "অধ্যায় ১১: Application Software — প্রকারভেদ, বৈশিষ্ট্য ও কাজ, আর Python ও Flask দিয়ে Student Result Management System প্রকল্প।",
+    12: "পরিশিষ্ট: Application Development Using Python-এর ২০২২–২০২৫ সালের বোর্ড প্রশ্নপত্র, প্রশ্ন বিশ্লেষণ ও সাজেশন।",
+}
+for _k, _d in CH_DESC.items(): assert len(_d) <= 150, (_k, len(_d))
+
+def head(title, root, path, desc=SITE_DESC, ogtype="website"):
+    a = lambda t: html.escape(t, quote=True)
+    return HEAD.format(title=a(title), root=root, desc=a(desc), url=SITE_URL + "/" + path, site=SITE_URL, ogtype=ogtype)
 TOPBAR = '''<header class="topbar"><a class="brand" href="{root}index.html"><img src="{root}img/logo.png" alt="MIU"><span>Python বই</span></a>
 <nav class="topnav"><a href="{root}index.html#chapters">অধ্যায়</a><a href="{root}runner.html">কোড রানার</a><a href="{root}feedback.html">রিভিউ ও মতামত</a>
 <button class="theme" type="button" aria-label="ডার্ক মোড">◐</button></nav></header>'''
@@ -247,7 +244,10 @@ def bottom_nav(root, active, cur=0, sections=""):
             f'<div class="sheet-body">{sec}<p class="sheet-h">সব অধ্যায়</p><ol class="sheet-ch">{chs}</ol></div></div></div>')
 
 def page_chapter(i, B):
-    body, toc = render(B, i)
+    body, toc, locked = render(B, i)
+    path = os.path.join(LOCKED_DIR, f"ch{i:02d}.json")
+    if locked: json.dump(locked, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+    elif os.path.exists(path): os.remove(path)
     title = next(b for b in B if b["t"] == "chapter")
     side = "".join(f'<li><a class="{"cur" if j == i else ""}" href="ch{j:02d}.html"><span class="u">{"পরি" if j == 12 else str(j).translate(BN)}</span>{esc(SHORT[j])}</a></li>' for j in range(1, 13))
     mini = "".join(f'<li><a href="#{sid}">{inline(txt)}</a></li>' for sid, txt in toc)
@@ -259,7 +259,7 @@ def page_chapter(i, B):
 <label class="fld"><span>তোমার নাম (ঐচ্ছিক)</span><input name="name" autocomplete="name"></label>
 <label class="fld"><span>মতামত বা যে ভুল পেয়েছ</span><textarea name="message" rows="4" required placeholder="যেমন: 4.5-এর উদাহরণটা বুঝতে কষ্ট হয়েছে, কারণ…"></textarea></label>
 <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off"><button type="submit">মতামত পাঠাও</button><p class="status" role="status"></p></form></section>'''
-    return (HEAD.format(title=f"{title['num']}: {title['title']} — Python বই", root="../") + '<body class="reader">' + TOPBAR.format(root="../")
+    return (head(f"{title['num']}: {title['title']} — Python বই", "../", f"chapters/ch{i:02d}.html", CH_DESC[i], "article") + '<body class="reader">' + TOPBAR.format(root="../")
             + '<div class="progress"><span></span></div><div class="layout">'
             + f'<nav class="side" aria-label="অধ্যায়ের তালিকা"><button class="side-toggle" type="button">অধ্যায়ের তালিকা</button><ol>{side}</ol></nav>'
             + f'<main class="content">{body}{quick}<nav class="pager">{prev}{nxt}</nav></main>'
@@ -269,7 +269,7 @@ def page_chapter(i, B):
 def page_index(chapters):
     path = "".join(f'''<li><a href="chapters/ch{j:02d}.html"><span class="unit">{"পরিশিষ্ট" if j == 12 else "অধ্যায় " + str(j).translate(BN)}</span><span class="ct">{esc(t)}</span><span class="cs">{esc(TOPICS[j])}</span></a></li>'''
                    for j, t, s in chapters)
-    return (HEAD.format(title="Application Development Using Python — অনলাইন বই", root="") + '<body class="home">' + TOPBAR.format(root="") + f'''
+    return (head("Application Development Using Python — অনলাইন বই", "", "") + '<body class="home">' + TOPBAR.format(root="") + f'''
 <main>
 <section class="hero"><div class="hero-text"><p class="kicker">বাকাশিবো · ডিপ্লোমা ইন ইঞ্জিনিয়ারিং · বিষয় কোড ২৮৫৩১</p>
 <h1>Application Development<br>Using Python</h1>
@@ -302,7 +302,7 @@ print(s1.name, "joined MIU")''', "Python", "main.py")}{output_html("Rahim joined
 
 def page_feedback(chapters):
     opts = "".join(f'<option>{"পরিশিষ্ট" if j == 12 else "অধ্যায় " + str(j).translate(BN)} — {esc(t)}</option>' for j, t, s in chapters)
-    return (HEAD.format(title="রিভিউ ও মতামত — Python বই", root="") + '<body class="formpage">' + TOPBAR.format(root="") + f'''
+    return (head("রিভিউ ও মতামত — Python বই", "", "feedback.html") + '<body class="formpage">' + TOPBAR.format(root="") + f'''
 <main class="fb-wrap"><h1>রিভিউ ও মতামত</h1><p class="lead">তোমার লেখা সরাসরি লেখকের email-এ যাবে, website-এ প্রকাশ হবে না।</p>
 <div class="tabs" role="tablist"><button role="tab" aria-selected="true" data-tab="review">বইয়ের রিভিউ</button><button role="tab" aria-selected="false" data-tab="report">ভুল রিপোর্ট / পরামর্শ</button></div>
 
@@ -327,7 +327,7 @@ def page_feedback(chapters):
 </main>''' + bottom_nav("", "feedback") + FOOT.format(root="", year=YEAR))
 
 def page_copyright():
-    return (HEAD.format(title="কপিরাইট নোটিশ — Python বই", root="") + '<body class="formpage">' + TOPBAR.format(root="") + f'''
+    return (head("কপিরাইট নোটিশ — Python বই", "", "copyright.html") + '<body class="formpage">' + TOPBAR.format(root="") + f'''
 <main class="fb-wrap legal"><h1>কপিরাইট নোটিশ</h1>
 <p class="lead">© {YEAR} Kazi Tauhid Rana। <strong>Application Development Using Python</strong> বই ও এই website-এর সব লেখা, কোড উদাহরণ, ছবি, ডায়াগ্রাম, বোর্ড প্রশ্নের উত্তর ও ডিজাইনের সর্বস্বত্ব লেখকের সংরক্ষিত।</p>
 <h2>যা করতে পারবে</h2>
@@ -354,7 +354,7 @@ def page_pdf():
     want = [("হ্যাঁ, অবশ্যই নেব", "yes"), ("দাম ঠিক থাকলে নেব", "maybe"), ("এখনই না, পরে ভাবব", "later")]
     wants = "".join(f'<label class="chip wide"><input type="radio" name="interest" value="{t}" required><span>{t}</span></label>' for t, _ in want)
     pays = "".join(f'<label class="chip"><input type="checkbox" name="payment" value="{t}"><span>{t}</span></label>' for t in ["বিকাশ", "নগদ", "রকেট", "অন্য"])
-    return (HEAD.format(title="বইয়ের PDF — আগ্রহ ও দাম — Python বই", root="") + '<body class="formpage">' + TOPBAR.format(root="") + f'''
+    return (head("বইয়ের PDF — আগ্রহ ও দাম — Python বই", "", "pdf.html") + '<body class="formpage">' + TOPBAR.format(root="") + f'''
 <main class="fb-wrap pdf-wrap"><p class="pdf-tag">শীঘ্রই আসছে</p><h1>বইয়ের PDF</h1>
 <p class="lead">পুরো বইটার PDF সংস্করণ তৈরি হচ্ছে — অফলাইনে, মোবাইল বা কম্পিউটারে যেকোনো জায়গায় পড়ার জন্য। কতজন নিতে চাও আর কত দাম তোমাদের কাছে ঠিক মনে হয়, সেটা জেনেই দাম ঠিক করা হবে।</p>
 <div class="pdf-buy"><p><strong>PDF নিতে চাইলে Facebook-এ মেসেজ দাও:</strong> <a href="{FB_URL}" target="_blank" rel="noopener">facebook.com/kazitauhidrana ↗</a></p>
@@ -378,9 +378,9 @@ def page_pdf():
 
 def page_runner():
     samples = '<option value="">উদাহরণ…</option><option value="hello">Hello</option><option value="input">input() দিয়ে</option><option value="loop">for loop</option><option value="class">Class ও Object</option>'
-    return (HEAD.format(title="কোড রানার — Python বই", root="") + '<body class="runnerpage">' + TOPBAR.format(root="") + f'''
+    return (head("কোড রানার — Python বই", "", "runner.html") + '<body class="runnerpage">' + TOPBAR.format(root="") + f'''
 <main class="runner-wrap"><h1>কোড রানার</h1>
-<p class="lead">নিজে Python কোড লেখো আর চালাও। কিছু install করতে হবে না, সব তোমার browser-এই চলে। প্রথমবার চালাতে কয়েক সেকেন্ড লাগবে।</p>
+<p class="lead">নিজে Python কোড লেখো আর চালাও। কিছু install করতে হবে না, সব তোমার browser-এই চলে। প্রথমবার চালাতে ১০–২০ সেকেন্ড লাগবে।</p>
 <div class="runner">
 <section class="pane"><div class="pane-bar"><span class="pane-name">main.py</span><select id="rx-sample" aria-label="উদাহরণ বেছে নাও">{samples}</select><button type="button" id="rx-new">নতুন</button><button type="button" id="rx-run" class="go">▶ চালাও</button></div>
 <div class="keys" role="toolbar" aria-label="চিহ্ন বসাও"><button type="button" data-ins="    " aria-label="Tab — ৪টা space">⇥</button><button type="button" data-ins=":">:</button><button type="button" data-ins="()">(</button><button type="button" data-ins=")">)</button><button type="button" data-ins="&quot;&quot;">&quot;</button><button type="button" data-ins="''">'</button><button type="button" data-ins="[]">[</button><button type="button" data-ins="]">]</button><button type="button" data-ins="=">=</button><button type="button" data-ins="_">_</button><button type="button" data-ins="# ">#</button><button type="button" data-ins="+">+</button><button type="button" data-ins="-">-</button><button type="button" data-ins="*">*</button><button type="button" data-ins="/">/</button><button type="button" data-ins="<"><</button><button type="button" data-ins=">">></button><button type="button" data-ins="{{}}">{{</button><button type="button" data-ins="}}">}}</button><button type="button" data-ins=",">,</button><button type="button" data-ins=".">.</button></div><div class="editor"><pre class="gutter" aria-hidden="true">1</pre><textarea id="rx-code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="Python কোড"></textarea></div></section>
@@ -392,7 +392,7 @@ def page_runner():
 <p class="hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> = চালাও · <kbd>Tab</kbd> = ৪টা space · তোমার কোড এই browser-এ আপনা-আপনি save থাকে।</p>
 </main>''' + bottom_nav("", "runner") + FOOT.format(root="", year=YEAR))
 
-os.makedirs(OUT + "/chapters", exist_ok=True); os.makedirs(OUT + "/img", exist_ok=True); os.makedirs(OUT + "/assets", exist_ok=True)
+os.makedirs(OUT + "/chapters", exist_ok=True); os.makedirs(LOCKED_DIR, exist_ok=True); os.makedirs(OUT + "/img", exist_ok=True); os.makedirs(OUT + "/assets", exist_ok=True)
 chapters = []
 for i in range(1, 13):
     B = json.load(open(f"{SRC}/final_{i:02d}.json", encoding="utf-8"))

@@ -1,22 +1,27 @@
 // কোড রানার — বইয়ের প্রতিটা Python কোডের পাশে "চালাও" বাটন, আর runner.html-এর নিজের লেখা কোড চালানো
 (function () {
   var WORKER_URL = new URL("py-worker.js", document.currentScript.src).href;
-  var MAX_OUT = 60000, MAX_MS = 20000;
-  var worker = null, ready = false, pending = null, job = null, killTimer;
+  var MAX_OUT = 60000, MAX_MS = 20000, LOAD_MS = 60000;
+  var LOAD_FAIL = "Python লোড করা যায়নি। Internet সংযোগ দেখে আবার \"চালাও\" চাপো।";
+  var worker = null, ready = false, pending = null, job = null, killTimer, loadTimer;
 
   function boot() {
     if (worker) return;
     ready = false;
     worker = new Worker(WORKER_URL);
     worker.onmessage = onMessage;
-    worker.onerror = function () { fail("Python লোড করা যায়নি। Internet সংযোগ দেখে আবার চেষ্টা করো।"); };
+    worker.onerror = function () { fail(LOAD_FAIL); };
+    // CDN আটকে গেলে অনন্তকাল "লোড হচ্ছে" না দেখিয়ে এক মিনিট পরে error দেখাও
+    clearTimeout(loadTimer);
+    loadTimer = setTimeout(function () { if (!ready) fail("Python লোড হতে অনেক সময় লাগছে। Internet ধীর হতে পারে — একটু পরে আবার \"চালাও\" চাপো।"); }, LOAD_MS);
   }
   function fail(text) {
+    clearTimeout(loadTimer);
     if (worker) worker.terminate();
-    worker = null;
+    worker = null; ready = false;
     var j = job || (pending && pending.sink);
     job = null; pending = null;
-    if (j) j.done(false, text, true);
+    if (j) j.done(false, text);
   }
   function send(p) {
     job = p.sink; job.size = 0;
@@ -27,8 +32,8 @@
   }
   function onMessage(ev) {
     var m = ev.data;
-    if (m.type === "ready") { ready = true; if (pending) { var p = pending; pending = null; send(p); } return; }
-    if (m.type === "fail") { fail("Python লোড করা যায়নি। Internet সংযোগ দেখে আবার চেষ্টা করো।"); return; }
+    if (m.type === "ready") { ready = true; clearTimeout(loadTimer); if (pending) { var p = pending; pending = null; send(p); } return; }
+    if (m.type === "fail") { fail(LOAD_FAIL); return; }
     if (!job) return;
     if (m.type === "out" || m.type === "err" || m.type === "in") {
       job.size += m.text.length;
@@ -50,13 +55,14 @@
     var p = { code: code, stdin: stdin || "", sink: sink, files: files || {} };
     boot();
     if (ready) send(p);
-    else { if (pending) pending.sink.done(false, "", true); pending = p; sink.status("Python লোড হচ্ছে… (প্রথমবার কয়েক সেকেন্ড লাগে)"); }
+    else { if (pending) pending.sink.done(false, "", true); pending = p; sink.status("Python লোড হচ্ছে… (প্রথমবার ১০–২০ সেকেন্ড)"); }
   }
   function stop(reason) {
     clearTimeout(killTimer);
     var j = job || (pending && pending.sink);
     if (!j) return;
     job = null; pending = null;
+    clearTimeout(loadTimer);
     if (worker) worker.terminate();
     worker = null; ready = false;
     j.done(false, reason || "থামানো হয়েছে।", true);
