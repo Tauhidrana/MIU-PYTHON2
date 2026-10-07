@@ -1,4 +1,8 @@
-# Vercel-এ শুধু website (site/) আর vercel.json যায়
+# Vercel-এ শুধু website (site/), API (api/), লক করা অনুশীলনী (content/locked/) আর vercel.json যায়
 /*
 !site
+!api
+!content
+/content/*
+!/content/locked
 !vercel.json
