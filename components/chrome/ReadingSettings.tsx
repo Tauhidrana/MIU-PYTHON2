@@ -1,0 +1,95 @@
+"use client";
+// "Aa" — পড়ার সেটিং: রং (দিন/সেপিয়া/রাত), লেখার মাপ, ফন্ট। ebook app-এর মতো।
+// মান localStorage-এ থাকে আর <html>-এর data-theme / data-rsize / data-rfont-এ বসে;
+// পরের বার পাতা আঁকার আগেই app/layout.tsx-এর THEME_JS সেগুলো বসিয়ে দেয়।
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+
+const THEMES = [
+  { id: "light", label: "দিন" },
+  { id: "sepia", label: "সেপিয়া" },
+  { id: "dark", label: "রাত" },
+] as const;
+const SIZES = 5, DEFAULT_SIZE = 2;
+
+type Prefs = { theme: string; size: number; font: "sans" | "serif" };
+
+function read(): Prefs {
+  const d = document.documentElement.dataset;
+  return { theme: d.theme || "light", size: d.rsize ? Number(d.rsize) : DEFAULT_SIZE, font: d.rfont === "serif" ? "serif" : "sans" };
+}
+function save(k: string, v: string | null) {
+  try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch { /* private mode */ }
+}
+
+export function ReadingSettings() {
+  const [open, setOpen] = useState(false);
+  const [p, setP] = useState<Prefs>({ theme: "light", size: DEFAULT_SIZE, font: "sans" });
+  const panel = useRef<HTMLDivElement>(null);
+  const btn = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => { if (open) setP(read()); }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: PointerEvent) => { const t = e.target as Node; if (!panel.current?.contains(t) && !btn.current?.contains(t)) setOpen(false); };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") { setOpen(false); btn.current?.focus(); } };
+    const hide = () => setOpen(false);
+    document.addEventListener("pointerdown", away);
+    document.addEventListener("keydown", key);
+    window.addEventListener("miu:toc", hide);
+    return () => { document.removeEventListener("pointerdown", away); document.removeEventListener("keydown", key); window.removeEventListener("miu:toc", hide); };
+  }, [open]);
+
+  const d = () => document.documentElement.dataset;
+  const setTheme = (t: string) => { d().theme = t; save("theme", t); setP((x) => ({ ...x, theme: t })); };
+  const setSize = (n: number) => {
+    const s = Math.max(0, Math.min(SIZES - 1, n));
+    if (s === DEFAULT_SIZE) { delete d().rsize; save("rsize", null); } else { d().rsize = String(s); save("rsize", String(s)); }
+    setP((x) => ({ ...x, size: s }));
+  };
+  const setFont = (f: Prefs["font"]) => {
+    if (f === "serif") d().rfont = "serif"; else delete d().rfont;
+    save("rfont", f === "serif" ? "serif" : null);
+    setP((x) => ({ ...x, font: f }));
+  };
+
+  return (
+    <div className="rs">
+      <button ref={btn} type="button" className="icon-btn rs-btn" aria-expanded={open} aria-controls="rs-panel" aria-label="পড়ার সেটিং — রং, লেখার মাপ, ফন্ট" title="পড়ার সেটিং" onClick={() => setOpen((o) => !o)}>
+        <span aria-hidden="true">Aa</span>
+      </button>
+      {/* body-তে portal — নইলে topbar-এর stacking-এর ভেতরে আটকে মোবাইলের নিচের মেনুর নিচে চাপা পড়ে */}
+      {open && createPortal(<>
+        <div className="rs-scrim" aria-hidden="true" />
+        <div ref={panel} id="rs-panel" className="rs-panel" role="dialog" aria-label="পড়ার সেটিং">
+          <span className="rs-grab" aria-hidden="true" />
+          <p className="rs-h">রং</p>
+          <div className="rs-themes">
+            {THEMES.map((t) => (
+              <button key={t.id} type="button" className={`rs-theme t-${t.id}`} aria-pressed={p.theme === t.id} onClick={() => setTheme(t.id)}>
+                <span className="sw" aria-hidden="true">অ</span>{t.label}
+              </button>
+            ))}
+          </div>
+
+          <p className="rs-h">লেখার মাপ</p>
+          <div className="rs-size">
+            <button type="button" onClick={() => setSize(p.size - 1)} disabled={p.size === 0} aria-label="লেখা ছোট করো"><span style={{ fontSize: 14 }}>অ</span></button>
+            <span className="rs-steps" role="meter" aria-label="লেখার মাপ" aria-valuemin={1} aria-valuemax={SIZES} aria-valuenow={p.size + 1}>
+              {Array.from({ length: SIZES }, (_, i) => <i key={i} className={i <= p.size ? "on" : undefined} />)}
+            </span>
+            <button type="button" onClick={() => setSize(p.size + 1)} disabled={p.size === SIZES - 1} aria-label="লেখা বড় করো"><span style={{ fontSize: 22 }}>অ</span></button>
+          </div>
+
+          <p className="rs-h">ফন্ট</p>
+          <div className="rs-fonts">
+            <button type="button" className="f-sans" aria-pressed={p.font === "sans"} onClick={() => setFont("sans")}>সাধারণ</button>
+            <button type="button" className="f-serif" aria-pressed={p.font === "serif"} onClick={() => setFont("serif")}>বইয়ের মতো</button>
+          </div>
+        </div>
+      </>, document.body,
+      )}
+    </div>
+  );
+}
