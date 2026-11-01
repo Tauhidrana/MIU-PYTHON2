@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Hind_Siliguri, IBM_Plex_Mono } from "next/font/google";
 import { Guard } from "@/components/chrome/Guard";
+import { PwaSetup } from "@/components/chrome/Pwa";
 import { OG_SITE_NAME, SITE_DESC, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -11,7 +12,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: `${SITE_NAME} — অনলাইন বই`, template: "%s — Python বই" },
   description: SITE_DESC,
-  icons: { icon: "/img/favicon.png" },
+  icons: { icon: "/img/favicon.png", apple: "/icons/apple-touch-icon.png" },
+  applicationName: "Python বই",
+  appleWebApp: { capable: true, title: "Python বই", statusBarStyle: "default" },
   robots: { index: true, follow: true, noarchive: true },
   formatDetection: { telephone: false },
   openGraph: {
@@ -30,12 +33,13 @@ const THEME_JS = `try{var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="li
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="bn" className={`${hind.variable} ${plex.variable}`} suppressHydrationWarning>
+    <html lang="bn" className={`${hind.variable} ${plex.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head><script dangerouslySetInnerHTML={{ __html: THEME_JS }} /></head>
       <body>
         <a className="skip" href="#main">মূল লেখায় যাও</a>
         {children}
         <Guard />
+        <PwaSetup />
       </body>
     </html>
   );

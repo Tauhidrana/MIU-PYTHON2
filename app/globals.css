@@ -63,7 +63,7 @@
 }
 
 [hidden] { display: none !important; }
-html { scroll-padding-top: 76px; -webkit-text-size-adjust: 100%; }
+html { scroll-padding-top: 76px; scroll-behavior: smooth; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 body {
   background: var(--desk);
   color: var(--text);
@@ -459,3 +459,6 @@ kbd { font: 600 12.5px var(--font-mono); padding: 1px 6px; border: 1px solid var
 /* ব্লক কোডের ভেতরে inline-code style লাগবে না */
 .book pre code, .code pre code { background: none; padding: 0; border-radius: 0; color: inherit; font-size: inherit; }
 .lock-form input::placeholder { font-family: var(--font-sans); letter-spacing: 0; }
+
+/* app হিসেবে install করার সাহায্য (iPhone) */
+.install-help { flex-basis: 100%; margin: 0; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); font-size: 15px; line-height: 1.6; }

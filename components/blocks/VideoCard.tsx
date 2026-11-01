@@ -25,7 +25,8 @@ export function VideoCard({ v, big }: { v: Video; big?: boolean }) {
       ) : (
         <button type="button" className="yt-play" aria-label={`ভিডিও চালাও: ${v.title}`} onClick={() => setPlaying(true)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`} alt="" loading="lazy" decoding="async" width={320} height={180} />
+          <img src={`https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`} alt="" loading="lazy" decoding="async" width={320} height={180}
+            onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} /* অফলাইনে ভাঙা ছবির চিহ্ন না দেখিয়ে খালি কালো বাক্স */ />
           <span className="icon" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z" /></svg>
           </span>

@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/chrome/BottomNav";
 import { TocDrawer } from "@/components/chrome/TocDrawer";
 import { BookCover } from "@/components/home/BookCover";
 import { ResumeLink } from "@/components/home/ResumeLink";
+import { InstallButton } from "@/components/chrome/Pwa";
 import { CodeFigure } from "@/components/blocks/CodeFigure";
 import { chapterLabel, SITE_URL } from "@/lib/site";
 
@@ -36,6 +37,7 @@ export default function Home() {
               <ResumeLink />
               <Link className="btn" href="/runner">▶ কোড রানার</Link>
               <Link className="btn" href="/pdf">📘 PDF নিতে আগ্রহী?</Link>
+              <InstallButton />
             </div>
             <p className="author">লেখক: <strong>Kazi Tauhid Rana</strong> · Computer Science and Technology, Rajshahi Polytechnic Institute</p>
           </div>
