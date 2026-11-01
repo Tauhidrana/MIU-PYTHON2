@@ -10,6 +10,7 @@ import { BottomNav } from "@/components/chrome/BottomNav";
 import { TocDrawer } from "@/components/chrome/TocDrawer";
 import { ScrollProgress } from "@/components/reader/ScrollProgress";
 import { ChapterList, SectionNav } from "@/components/reader/SideNavs";
+import { BookMode } from "@/components/reader/BookMode";
 import { FeedbackForm, Rating } from "@/components/forms/FeedbackForm";
 import { SITE_URL } from "@/lib/site";
 
@@ -38,14 +39,16 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
   const all = getChapters();
   const links = all.map(({ n, slug, short }) => ({ n, slug, short }));
   const prev = all[ch.n - 2], next = all[ch.n];
+  const sids = ch.toc.map((t) => t.sid);
 
   return (
     <>
       <TopBar reader={<span className="reading-title" aria-hidden="true">{ch.num} · {ch.short}</span>} />
-      <ScrollProgress slug={ch.slug} sids={ch.toc.map((t) => t.sid)} />
+      <ScrollProgress slug={ch.slug} sids={sids} />
       <div className="reader-grid">
         <ChapterList chapters={links} current={ch.n} />
-        <main id="main" className="sheet paper">
+        <main id="main" className="sheet paper bookable">
+          <div className="flow">
           <LockProvider ch={ch.n} hasLocked={ch.locked}>
             <article className="book" lang="bn">
               <Blocks blocks={ch.blocks} ch={ch.n} />
@@ -67,6 +70,8 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
             {prev ? <Link className="pn prev" href={`/chapters/${prev.slug}`}><small>← আগের অধ্যায়</small>{prev.short}</Link> : <span />}
             {next ? <Link className="pn next" href={`/chapters/${next.slug}`}><small>পরের অধ্যায় →</small>{next.short}</Link> : <span />}
           </nav>
+          </div>
+          <BookMode slug={ch.slug} n={ch.n} head={`${ch.num} · ${ch.short}`} book="Application Development Using Python" sids={sids} chapters={all.map((c) => ({ slug: c.slug, weight: c.weight }))} prev={prev?.slug} next={next?.slug} />
         </main>
         <SectionNav toc={ch.toc} />
       </div>
