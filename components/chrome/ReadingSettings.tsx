@@ -4,6 +4,7 @@
 // পরের বার পাতা আঁকার আগেই app/layout.tsx-এর THEME_JS সেগুলো বসিয়ে দেয়।
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { getMode, setMode, type ReadMode } from "@/lib/readmode";
 
 const THEMES = [
   { id: "light", label: "দিন" },
@@ -12,11 +13,11 @@ const THEMES = [
 ] as const;
 const SIZES = 5, DEFAULT_SIZE = 2;
 
-type Prefs = { theme: string; size: number; font: "sans" | "serif" };
+type Prefs = { theme: string; size: number; font: "sans" | "serif"; mode: ReadMode };
 
 function read(): Prefs {
   const d = document.documentElement.dataset;
-  return { theme: d.theme || "light", size: d.rsize ? Number(d.rsize) : DEFAULT_SIZE, font: d.rfont === "serif" ? "serif" : "sans" };
+  return { theme: d.theme || "light", size: d.rsize ? Number(d.rsize) : DEFAULT_SIZE, font: d.rfont === "serif" ? "serif" : "sans", mode: getMode() };
 }
 function save(k: string, v: string | null) {
   try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch { /* private mode */ }
@@ -24,7 +25,7 @@ function save(k: string, v: string | null) {
 
 export function ReadingSettings() {
   const [open, setOpen] = useState(false);
-  const [p, setP] = useState<Prefs>({ theme: "light", size: DEFAULT_SIZE, font: "sans" });
+  const [p, setP] = useState<Prefs>({ theme: "light", size: DEFAULT_SIZE, font: "sans", mode: "scroll" });
   const panel = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
 
@@ -54,6 +55,8 @@ export function ReadingSettings() {
     setP((x) => ({ ...x, font: f }));
   };
 
+  const pickMode = (m: ReadMode) => { setMode(m); setP((x) => ({ ...x, mode: m })); };
+
   return (
     <div className="rs">
       <button ref={btn} type="button" className="icon-btn rs-btn" aria-expanded={open} aria-controls="rs-panel" aria-label="পড়ার সেটিং — রং, লেখার মাপ, ফন্ট" title="পড়ার সেটিং" onClick={() => setOpen((o) => !o)}>
@@ -64,6 +67,18 @@ export function ReadingSettings() {
         <div className="rs-scrim" aria-hidden="true" />
         <div ref={panel} id="rs-panel" className="rs-panel" role="dialog" aria-label="পড়ার সেটিং">
           <span className="rs-grab" aria-hidden="true" />
+          <p className="rs-h">পড়ার ধরন</p>
+          <div className="rs-modes">
+            <button type="button" aria-pressed={p.mode === "scroll"} onClick={() => pickMode("scroll")}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h4" /><path d="M21 9v6m0 0-1.5-1.5M21 15l1.5-1.5" /></svg>
+              স্ক্রল করে
+            </button>
+            <button type="button" aria-pressed={p.mode === "book"} onClick={() => pickMode("book")}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 6.5C10 5 7 4.5 3 5v14c4-.5 7 0 9 1.5 2-1.5 5-2 9-1.5V5c-4-.5-7 0-9 1.5zM12 6.5V20" /></svg>
+              পাতা উল্টে
+            </button>
+          </div>
+
           <p className="rs-h">রং</p>
           <div className="rs-themes">
             {THEMES.map((t) => (

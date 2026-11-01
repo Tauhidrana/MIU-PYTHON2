@@ -581,3 +581,129 @@ kbd { font: 600 12.5px var(--font-mono); padding: 1px 6px; border: 1px solid var
   .pn.next { text-align: left; }
 }
 @media (hover: none) { .contents a:hover, .btn.quiet:hover, .cta-more .btn:hover { background: transparent; } }
+
+/* ===== Book mode — পাতা উল্টে পড়া (components/reader/BookMode.tsx) =====
+   #main.bookable পর্দায় স্থির একটা পাতা হয়ে যায়; ভেতরের .flow CSS columns দিয়ে পাতার উচ্চতায় কাটা,
+   প্রতিটা column = একটা পাতা। JS শুধু .flow-কে পাশে সরায়। বড় পর্দায় দুটো column = খোলা বইয়ের দুই পাতা। */
+.bk-head, .bk-folio, .bk-arrow, .bk-bar { display: none; }
+:root[data-mode="book"]:has(.bookable) {
+  --bk-top: var(--safe-top);
+  --bk-bottom: env(safe-area-inset-bottom, 0px);
+  --bk-pt: 46px;            /* উপরে running head-এর জায়গা */
+  --bk-pb: 42px;            /* নিচে পাতা নম্বরের জায়গা */
+  --bk-px: clamp(20px, 5.5vw, 34px);
+  --bk-w: 100vw;
+  --bk-cols: 1;
+  --page-h: calc(100dvh - var(--bk-top) - var(--bk-bottom) - var(--bk-pt) - var(--bk-pb));
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+:root[data-mode="book"]:has(.bookable) body { overflow: hidden; }
+/* ট্যাবলেট (খাড়া): লাইন যেন খুব লম্বা না হয় */
+@media (min-width: 600px) and (max-width: 899px) {
+  :root[data-mode="book"]:has(.bookable) { --bk-px: max(40px, calc((100vw - 640px) / 2)); }
+}
+/* ফোন আড়াআড়ি: খোলা বইয়ের মতো দুই পাতা */
+@media (max-width: 899px) and (min-width: 600px) and (max-height: 540px) {
+  :root[data-mode="book"]:has(.bookable) { --bk-cols: 2; --bk-px: 28px; --bk-pt: 34px; --bk-pb: 30px; }
+}
+@media (min-width: 900px) {
+  :root[data-mode="book"]:has(.bookable) {
+    --bk-top: calc(var(--safe-top) + var(--bar-h) + 18px);
+    --bk-bottom: 88px;
+    --bk-pt: 48px; --bk-pb: 44px;
+    --bk-px: 56px;
+    --bk-w: min(760px, calc(100vw - 160px));
+  }
+}
+@media (min-width: 1200px) {
+  :root[data-mode="book"]:has(.bookable) { --bk-cols: 2; --bk-px: 52px; --bk-w: min(1320px, calc(100vw - 180px)); }
+}
+:root[data-mode="book"]:has(.bookable) :is(.foot, .bnav, .side, .mini, .progress) { display: none; }
+:root[data-mode="book"] .bookable {
+  position: fixed; z-index: 30; top: var(--bk-top); bottom: var(--bk-bottom); left: 0; right: 0;
+  width: var(--bk-w); max-width: none; margin: 0 auto; padding: var(--bk-pt) 0 var(--bk-pb);
+  overflow: hidden; border-radius: 0; box-shadow: none;
+  touch-action: pinch-zoom; -webkit-user-select: text; user-select: text;
+}
+@media (min-width: 900px) { :root[data-mode="book"] .bookable { border-radius: 6px; box-shadow: var(--shadow); } }
+:root[data-mode="book"] .bookable > .flow {
+  height: var(--page-h); margin: 0 var(--bk-px);
+  column-count: var(--bk-cols); column-gap: calc(2 * var(--bk-px)); column-fill: auto;
+  transform: translate3d(0, 0, 0); will-change: transform;
+  transition: transform .42s cubic-bezier(.22, .8, .24, 1);
+}
+.bk-end { display: block; height: 0; }
+/* দুই পাতার মাঝে বইয়ের ভাঁজ */
+@media (min-width: 1200px) {
+  :root[data-mode="book"] .bookable::after { content: ""; position: absolute; z-index: 1; top: 0; bottom: 0; left: calc(50% - 28px); width: 56px; pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgb(0 0 0 / .045) 42%, rgb(0 0 0 / .1) 50%, rgb(0 0 0 / .045) 58%, transparent); }
+  :root[data-theme="dark"][data-mode="book"] .bookable::after { background: linear-gradient(90deg, transparent, rgb(0 0 0 / .25) 50%, transparent); }
+}
+
+/* পাতার ভেতরের লেখা — পাতার চেয়ে লম্বা জিনিস নিজের ভেতরে scroll হয়, কাটা পড়ে না */
+:root[data-mode="book"] .bookable :is(h2, h3, .example, .ex-title, .q, .qsec) { break-after: avoid; }
+:root[data-mode="book"] .bookable :is(p, li) { orphans: 2; widows: 2; }
+:root[data-mode="book"] .bookable .book h2 { break-before: auto; }
+:root[data-mode="book"] .bookable .code pre { max-height: calc(var(--page-h) - 110px); overflow: auto; }
+:root[data-mode="book"] .bookable .output pre { max-height: calc(var(--page-h) - 80px); overflow: auto; }
+:root[data-mode="book"] .bookable .tbl { max-height: calc(var(--page-h) - 16px); overflow: auto; }
+:root[data-mode="book"] .bookable .run-out { max-height: min(360px, calc(var(--page-h) - 190px)); }
+:root[data-mode="book"] .bookable .pic img { max-height: calc(var(--page-h) - 90px); width: auto; }
+:root[data-mode="book"] .bookable .yt { max-width: 100%; }
+:root[data-mode="book"] .bookable .locked.first .lock-preview { min-height: min(560px, calc(var(--page-h) - 16px)); }
+:root[data-mode="book"] .bookable .chap-head { padding-top: 1.2em; }
+:root[data-mode="book"] .bookable .quick { margin-top: 0; break-before: column; }
+
+/* running head আর পাতা নম্বর — পাতার উপরে-নিচে, বইয়ের মতো */
+:root[data-mode="book"] .bookable .bk-head, :root[data-mode="book"] .bookable .bk-folio {
+  display: block; position: absolute; left: var(--bk-px); right: var(--bk-px); margin: 0; z-index: 2;
+  text-align: center; font-size: 12.5px; line-height: 1; color: var(--muted); pointer-events: none;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+:root[data-mode="book"] .bookable .bk-head { top: calc(var(--bk-pt) / 2 - 6px); letter-spacing: .01em; }
+:root[data-mode="book"] .bookable .bk-folio { bottom: calc(var(--bk-pb) / 2 - 6px); font-feature-settings: "lnum"; }
+:root[data-mode="book"] .bookable :is(.bk-head, .bk-folio).l { right: calc(50% + var(--bk-px)); }
+:root[data-mode="book"] .bookable :is(.bk-head, .bk-folio).r { left: calc(50% + var(--bk-px)); }
+@media (max-width: 899px) { :root[data-mode="book"][data-chrome="shown"] .bookable .bk-folio { visibility: hidden; } }
+
+/* পাশের তীর (mouse) */
+@media (min-width: 900px) {
+  :root[data-mode="book"] .bookable .bk-arrow {
+    display: grid; place-items: center; position: fixed; z-index: 31; top: calc(var(--bk-top) + (100dvh - var(--bk-top) - var(--bk-bottom)) / 2 - 28px);
+    width: 48px; height: 56px; border: 0; border-radius: 12px; background: transparent; color: var(--muted); cursor: pointer; transition: background .15s, color .15s;
+  }
+  :root[data-mode="book"] .bookable .bk-arrow.prev { left: calc((100vw - var(--bk-w)) / 2 - 64px); }
+  :root[data-mode="book"] .bookable .bk-arrow.next { right: calc((100vw - var(--bk-w)) / 2 - 64px); }
+  :root[data-mode="book"] .bookable .bk-arrow:hover:not(:disabled) { background: color-mix(in srgb, var(--ink) 7%, transparent); color: var(--ink); }
+  :root[data-mode="book"] .bookable .bk-arrow:disabled { opacity: .3; cursor: default; }
+}
+
+/* নিচের বার: কোন পাতা, আর slider দিয়ে যেকোনো পাতায় লাফ */
+:root[data-mode="book"] .bookable .bk-bar {
+  display: grid; gap: 2px; position: fixed; z-index: 45; left: 0; right: 0; bottom: 0;
+  padding: 8px max(20px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  background: color-mix(in srgb, var(--paper) 94%, transparent); backdrop-filter: saturate(1.4) blur(12px); -webkit-backdrop-filter: saturate(1.4) blur(12px);
+  border-top: 1px solid var(--line); transition: transform .3s cubic-bezier(.2, .8, .2, 1);
+}
+.bk-where { margin: 0; text-align: center; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.bk-where strong { color: var(--ink); font-weight: 600; }
+.bk-range { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; margin: 0; background: transparent; cursor: pointer; }
+.bk-range::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--accent) var(--p, 0%), var(--line) var(--p, 0%)); }
+.bk-range::-moz-range-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--accent) var(--p, 0%), var(--line) var(--p, 0%)); }
+.bk-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -7px; border-radius: 50%; background: var(--paper); border: 2px solid var(--accent); box-shadow: 0 1px 3px rgb(0 0 0 / .2); }
+.bk-range::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--paper); border: 2px solid var(--accent); }
+@media (min-width: 900px) {
+  :root[data-mode="book"] .bookable .bk-bar { left: 50%; right: auto; bottom: 14px; width: min(560px, calc(100vw - 48px)); translate: -50% 0; padding: 6px 20px 8px; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+}
+/* ফোনে: শুধু বই — মাঝখানে tap করলে উপরের মেনু আর নিচের বার আসে */
+@media (max-width: 899px) {
+  :root[data-mode="book"]:has(.bookable) .topbar { position: fixed; left: 0; right: 0; }
+  :root[data-mode="book"]:has(.bookable):not([data-chrome="shown"]) .topbar { transform: translateY(-100%); }
+  :root[data-mode="book"]:not([data-chrome="shown"]) .bookable .bk-bar { transform: translateY(105%); }
+}
+/* Aa → পড়ার ধরন */
+.rs-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.rs-modes button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--paper-2); color: var(--ink); font: 600 15px var(--font-sans); cursor: pointer; }
+.rs-modes button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1.5px var(--accent); color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { :root[data-mode="book"] .bookable > .flow { transition: none; } }

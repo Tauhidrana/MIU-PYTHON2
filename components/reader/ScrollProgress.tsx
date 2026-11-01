@@ -5,11 +5,18 @@
 // একটু উপরে scroll করলে বা অধ্যায়ের শেষে পৌঁছালে ফিরে আসে।
 import { useEffect, useRef } from "react";
 import { markDone, readLast, saveLast } from "@/lib/progress";
+import { useMode } from "@/lib/readmode";
 
 export function ScrollProgress({ slug, sids }: { slug: string; sids: string[] }) {
   const bar = useRef<HTMLSpanElement>(null);
+  const mode = useMode();
+  const was = useRef(mode);
 
   useEffect(() => {
+    // Book mode-এ পাতা উল্টানো components/reader/BookMode.tsx দেখে; এখানে কিছু না
+    const fromBook = was.current === "book";
+    was.current = mode;
+    if (mode !== "scroll") return;
     let saveAt = 0, lastY = scrollY, hidden = false;
     const root = document.documentElement;
     const chrome = (hide: boolean) => {
@@ -35,7 +42,8 @@ export function ScrollProgress({ slug, sids }: { slug: string; sids: string[] })
     // আগের বার যেখানে থেমেছিল — একই tab-এ একবারই, আর #section link দিয়ে এলে না
     try {
       const last = readLast();
-      if (last?.page === slug && !location.hash && sessionStorage.getItem("restored") !== slug) {
+      // book mode থেকে স্ক্রলে এলে সবসময় সেই জায়গায়
+      if (last?.page === slug && (fromBook || (!location.hash && sessionStorage.getItem("restored") !== slug))) {
         sessionStorage.setItem("restored", slug);
         // শেষ জায়গায় এক লাফে — smooth scroll দিয়ে পুরো অধ্যায় গড়িয়ে যাওয়া না
         const top = last.frac != null ? last.frac * (document.documentElement.scrollHeight - innerHeight) : last.y;
@@ -54,8 +62,14 @@ export function ScrollProgress({ slug, sids }: { slug: string; sids: string[] })
     // সূচিপত্র খুললে bar ফিরে আসে
     const onFocus = () => chrome(false);
     window.addEventListener("miu:toc", onFocus);
-    return () => { removeEventListener("scroll", onScroll); window.removeEventListener("miu:toc", onFocus); io.disconnect(); delete root.dataset.chrome; };
-  }, [slug, sids]);
+    // book mode-এ যাওয়ার ঠিক আগে এই জায়গাটা লিখে রাখা, যাতে সেই পাতাটাই খোলে
+    const saveNow = () => { saveAt = 0; onScroll(); };
+    window.addEventListener("miu:mode-will", saveNow);
+    return () => {
+      removeEventListener("scroll", onScroll); window.removeEventListener("miu:toc", onFocus); window.removeEventListener("miu:mode-will", saveNow);
+      io.disconnect(); delete root.dataset.chrome;
+    };
+  }, [slug, sids, mode]);
 
   return <div className="progress" aria-hidden="true"><span ref={bar} /></div>;
 }

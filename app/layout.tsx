@@ -32,7 +32,7 @@ export const viewport: Viewport = {
 
 // রং/লেখার মাপ/ফন্ট বদলানোর আগেই পাতা আঁকা হলে ঝলক দেখা যায় — তাই <head>-এই বসে। রং পছন্দ না থাকলে system-এর রং।
 // মান লেখে components/chrome/ReadingSettings.tsx
-const THEME_JS = `try{var d=document.documentElement,s=localStorage,t=s.getItem("theme");if(t!=="dark"&&t!=="light"&&t!=="sepia")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.dataset.theme=t;var z=s.getItem("rsize");if(z&&/^[0-4]$/.test(z))d.dataset.rsize=z;if(s.getItem("rfont")==="serif")d.dataset.rfont="serif"}catch(e){}`;
+const THEME_JS = `try{var d=document.documentElement,s=localStorage,t=s.getItem("theme");if(t!=="dark"&&t!=="light"&&t!=="sepia")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.dataset.theme=t;var z=s.getItem("rsize");if(z&&/^[0-4]$/.test(z))d.dataset.rsize=z;if(s.getItem("rfont")==="serif")d.dataset.rfont="serif";if(s.getItem("rmode")==="book")d.dataset.mode="book"}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
