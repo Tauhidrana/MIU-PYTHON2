@@ -25,8 +25,9 @@ export function ScrollProgress({ slug, sids }: { slug: string; sids: string[] })
       const last = readLast();
       if (last?.page === slug && !location.hash && sessionStorage.getItem("restored") !== slug) {
         sessionStorage.setItem("restored", slug);
-        if (last.frac != null) scrollTo(0, last.frac * (document.documentElement.scrollHeight - innerHeight));
-        else if (last.y) scrollTo(0, last.y);
+        // শেষ জায়গায় এক লাফে — smooth scroll দিয়ে পুরো অধ্যায় গড়িয়ে যাওয়া না
+        const top = last.frac != null ? last.frac * (document.documentElement.scrollHeight - innerHeight) : last.y;
+        if (top) scrollTo({ top, behavior: "instant" });
       }
     } catch { /* storage বন্ধ */ }
     addEventListener("scroll", onScroll, { passive: true });

@@ -13,3 +13,5 @@ content/generated/
 .next/
 next-env.d.ts
 *.tsbuildinfo
+# service worker — scripts/make-sw.ts প্রতিটা build-এ বানায়
+public/sw.js
