@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ThemeToggle } from "./ThemeToggle";
+import { ReadingSettings } from "./ReadingSettings";
 import { TocButton } from "./TocDrawer";
 
 export function TopBar({ reader }: { reader?: React.ReactNode }) {
@@ -17,7 +17,7 @@ export function TopBar({ reader }: { reader?: React.ReactNode }) {
           <Link href="/#chapters" className="hide-sm">অধ্যায়</Link>
           <Link href="/runner" className="hide-sm">কোড রানার</Link>
           <Link href="/feedback" className="hide-sm">রিভিউ ও মতামত</Link>
-          <ThemeToggle />
+          <ReadingSettings />
         </nav>
       </div>
     </header>

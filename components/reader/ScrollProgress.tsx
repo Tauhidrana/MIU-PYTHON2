@@ -1,6 +1,8 @@
 "use client";
 // Scroll মোড: উপরের progress bar, শেষ পড়া জায়গা মনে রাখা ও ফিরিয়ে আনা, অধ্যায় শেষ হলে ✓,
-// আর এখন কোন section পড়া হচ্ছে সেটা সূচিপত্রকে জানানো ("miu:section")
+// আর এখন কোন section পড়া হচ্ছে সেটা সূচিপত্রকে জানানো ("miu:section")।
+// Immersive পড়া: নিচে scroll করলে উপরের bar আর মোবাইলের নিচের মেনু সরে যায় (html[data-chrome="hidden"]),
+// একটু উপরে scroll করলে বা অধ্যায়ের শেষে পৌঁছালে ফিরে আসে।
 import { useEffect, useRef } from "react";
 import { markDone, readLast, saveLast } from "@/lib/progress";
 
@@ -8,11 +10,21 @@ export function ScrollProgress({ slug, sids }: { slug: string; sids: string[] })
   const bar = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    let saveAt = 0;
+    let saveAt = 0, lastY = scrollY, hidden = false;
+    const root = document.documentElement;
+    const chrome = (hide: boolean) => {
+      if (hide === hidden) return;
+      hidden = hide;
+      if (hide) root.dataset.chrome = "hidden"; else delete root.dataset.chrome;
+    };
     const onScroll = () => {
-      const h = document.documentElement.scrollHeight - innerHeight;
+      const h = root.scrollHeight - innerHeight;
       const p = h > 0 ? Math.min(1, scrollY / h) : 0;
       if (bar.current) bar.current.style.transform = `scaleX(${p})`;
+      const dy = scrollY - lastY;
+      if (scrollY < 120 || p > 0.985) { chrome(false); lastY = scrollY; }
+      else if (dy > 12) { if (!root.classList.contains("no-scroll") && !document.getElementById("rs-panel")) chrome(true); lastY = scrollY; }
+      else if (dy < -24) { chrome(false); lastY = scrollY; }
       const now = Date.now();
       if (now - saveAt > 800) {
         saveAt = now;
@@ -30,6 +42,7 @@ export function ScrollProgress({ slug, sids }: { slug: string; sids: string[] })
         if (top) scrollTo({ top, behavior: "instant" });
       }
     } catch { /* storage বন্ধ */ }
+    lastY = scrollY; // শেষ জায়গায় ফেরার লাফটা "নিচে scroll" ধরা হবে না — bar দেখা যাবে
     addEventListener("scroll", onScroll, { passive: true });
     onScroll();
 
@@ -38,7 +51,10 @@ export function ScrollProgress({ slug, sids }: { slug: string; sids: string[] })
       es.forEach((e) => { if (e.isIntersecting) window.dispatchEvent(new CustomEvent("miu:section", { detail: e.target.id })); });
     }, { rootMargin: "-80px 0px -70% 0px" });
     els.forEach((el) => io.observe(el));
-    return () => { removeEventListener("scroll", onScroll); io.disconnect(); };
+    // সূচিপত্র খুললে bar ফিরে আসে
+    const onFocus = () => chrome(false);
+    window.addEventListener("miu:toc", onFocus);
+    return () => { removeEventListener("scroll", onScroll); window.removeEventListener("miu:toc", onFocus); io.disconnect(); delete root.dataset.chrome; };
   }, [slug, sids]);
 
   return <div className="progress" aria-hidden="true"><span ref={bar} /></div>;
